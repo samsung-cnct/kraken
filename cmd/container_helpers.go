@@ -173,7 +173,6 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig) {
 		reflectedString := fmt.Sprintf("%s", deployment)
 		if _, err := os.Stat(os.ExpandEnv(reflectedString)); err == nil {
 			if filepath.IsAbs(os.ExpandEnv(reflectedString)) {
-				fmt.Println(reflectedString)
 				hostConfig.Binds = append(hostConfig.Binds, os.ExpandEnv(reflectedString)+":"+os.ExpandEnv(reflectedString))
 			}
 		}
