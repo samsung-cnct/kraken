@@ -16,6 +16,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -116,7 +117,9 @@ func containerEnvironment() []string {
 	return envs
 }
 
-func makeMounts(clusterConfigPath string) *container.HostConfig {
+func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
+	config_envs := []string{}
+
 	// cluster configuration is always mounted
 	var hostConfig *container.HostConfig
 	if len(strings.TrimSpace(clusterConfigPath)) > 0 {
@@ -127,7 +130,8 @@ func makeMounts(clusterConfigPath string) *container.HostConfig {
 		}
 
 		deployment := reflect.ValueOf(clusterConfig.Sub("deployment"))
-		parseMounts(deployment, hostConfig)
+		parseMounts(deployment, hostConfig, &config_envs)
+
 	} else {
 		hostConfig = &container.HostConfig{
 			Binds: []string{
@@ -135,10 +139,10 @@ func makeMounts(clusterConfigPath string) *container.HostConfig {
 		}
 	}
 
-	return hostConfig
+	return hostConfig, config_envs
 }
 
-func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig) {
+func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, config_envs *[]string) {
 	switch deployment.Kind() {
 	case reflect.Ptr:
 		deploymentValue := deployment.Elem()
@@ -148,29 +152,37 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig) {
 			return
 		}
 
-		parseMounts(deploymentValue, hostConfig)
+		parseMounts(deploymentValue, hostConfig, config_envs)
 
 	case reflect.Interface:
 		deploymentValue := deployment.Elem()
-		parseMounts(deploymentValue, hostConfig)
+		parseMounts(deploymentValue, hostConfig, config_envs)
 
 	case reflect.Struct:
 		for i := 0; i < deployment.NumField(); i += 1 {
-			parseMounts(deployment.Field(i), hostConfig)
+			parseMounts(deployment.Field(i), hostConfig, config_envs)
 		}
 
 	case reflect.Slice:
 		for i := 0; i < deployment.Len(); i += 1 {
-			parseMounts(deployment.Index(i), hostConfig)
+			parseMounts(deployment.Index(i), hostConfig, config_envs)
 		}
 
 	case reflect.Map:
 		for _, key := range deployment.MapKeys() {
 			originalValue := deployment.MapIndex(key)
-			parseMounts(originalValue, hostConfig)
+			parseMounts(originalValue, hostConfig, config_envs)
 		}
 	case reflect.String:
 		reflectedString := fmt.Sprintf("%s", deployment)
+
+		// if the string was an environment variable we need to add it to the config_envs
+		regex := regexp.MustCompile(`\$[A-Za-z0-9_]+`)
+		matches := regex.FindAllString(reflectedString, -1)
+		for _, value := range matches {
+			*config_envs = append(*config_envs, strings.Replace(value, "$", "", -1)+"="+os.ExpandEnv(value))
+		}
+
 		if _, err := os.Stat(os.ExpandEnv(reflectedString)); err == nil {
 			if filepath.IsAbs(os.ExpandEnv(reflectedString)) {
 				hostConfig.Binds = append(hostConfig.Binds, os.ExpandEnv(reflectedString)+":"+os.ExpandEnv(reflectedString))
@@ -257,15 +269,16 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) {
 }
 
 func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int) {
+
+	hostConfig, config_envs := makeMounts(k2config)
 	containerConfig := &container.Config{
 		Image:        containerImage,
-		Env:          containerEnvironment(),
+		Env:          append(containerEnvironment(), config_envs...),
 		Cmd:          command,
 		AttachStdout: true,
 		Tty:          true,
 	}
 
-	hostConfig := makeMounts(k2config)
 	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2-"+namesgenerator.GetRandomName(1))
 	if err != nil {
 		fmt.Println(err)
