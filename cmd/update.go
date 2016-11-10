@@ -38,7 +38,7 @@ var updateCmd = &cobra.Command{
 		terminalSpinner.Stop()
 		fmt.Println("")
 
-		fmt.Printf("Bringing up cluster '" + clusterConfig.GetString("deployment.cluster") + "' ")
+		fmt.Printf("Updating ssh inventory for '" + clusterConfig.GetString("deployment.cluster") + "' ")
 		terminalSpinner.Start()
 
 		command := []string{
