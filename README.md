@@ -47,3 +47,47 @@ Generate sensible AWS defaults config at ~/myconfig/
 ./k2cli generate ~/myconfig/
 ```
 
+## Note on using environment variables in yaml configuration
+
+k2cli will automatically attempt to expand all ```$VARIABLE_NAME``` strings in your configuration file, pass the variable and value to the k2 docker container, and mount the path (if it's a path to an existing file or folder) into the k2 docker container.
+
+For example:
+
+```
+deployment:
+  cluster: production-cluster
+  keypair:
+    -
+      name: key
+      publickeyFile: 
+      privatekeyFile: 
+      providerConfig: 
+        username: 
+        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
+        serviceAccountKeyFile: "$K2_SERVICE_ACCOUNT_KEYFILE"
+        
+...
+```
+
+given that ```export K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json```
+
+Will expand to:
+
+```
+deployment:
+  cluster: production-cluster
+  keypair:
+    -
+      name: key
+      publickeyFile: 
+      privatekeyFile: 
+      providerConfig: 
+        username: 
+        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
+        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
+        
+...
+
+```
+
+and the k2 container would get a /Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json mount and K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json environment variable
