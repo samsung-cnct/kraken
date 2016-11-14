@@ -26,7 +26,7 @@ var generatePath string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:          "generate [path to save the k2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/krakenCluster.yaml"),
+	Use:          "generate [path to save the k2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
 	Short:        "Generate a k2 config file",
 	SilenceUsage: true,
 	Long:         `Generate a k2 configuration file at the specified location`,
@@ -34,7 +34,7 @@ var generateCmd = &cobra.Command{
 		if len(args) > 0 {
 			generatePath = os.ExpandEnv(args[0])
 		} else {
-			generatePath = os.ExpandEnv("$HOME/.kraken/krakenCluster.yaml")
+			generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		}
 
 		err := os.MkdirAll(filepath.Dir(generatePath), 0777)

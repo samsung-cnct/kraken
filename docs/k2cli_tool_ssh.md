@@ -14,7 +14,7 @@ k2cli tool ssh
 ### Options inherited from parent commands
 
 ```
-  -c, --config string        Location of the k2config (default "/Users/marat/.kraken/krakenCluster.yaml")
+  -c, --config string        Location of the k2config (default "/Users/marat/.kraken/config.yaml")
   -d, --docker-host string   docker host address (default "unix:///var/run/docker.sock")
   -i, --image string         k2 container image (default "quay.io/samsung_cnct/k2:latest")
   -k, --k2config string      config file for k2cli (default "/Users/marat/.k2cli.yaml)"

@@ -8,7 +8,7 @@ Generate a k2 config file
 Generate a k2 configuration file at the specified location
 
 ```
-k2cli generate [path to save the k2 config file at] (default ) /Users/marat/.kraken/krakenCluster.yaml
+k2cli generate [path to save the k2 config file at] (default ) /Users/marat/.kraken/config.yaml
 ```
 
 ### Options inherited from parent commands
