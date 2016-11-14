@@ -71,7 +71,7 @@ var generateCmd = &cobra.Command{
 		if statusCode != 0 {
 			fmt.Println("Error generating config at " + generatePath)
 		} else {
-			fmt.Println("Done.")
+			fmt.Println("Generated config at " + generatePath)
 		}
 
 		ExitCode = statusCode
