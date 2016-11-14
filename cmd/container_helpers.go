@@ -8,7 +8,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/namesgenerator"
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
@@ -279,7 +278,8 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		Tty:          true,
 	}
 
-	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2-"+namesgenerator.GetRandomName(1))
+	clusterName := clusterConfig.GetString("deployment.cluster")
+	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2-"+clusterName)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
