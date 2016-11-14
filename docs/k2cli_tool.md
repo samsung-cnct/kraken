@@ -15,7 +15,7 @@ k2cli tool
 ### Options
 
 ```
-  -c, --config string   Location of the k2config (default "/Users/marat/.kraken/krakenCluster.yaml")
+  -c, --config string   Location of the k2config (default "/Users/marat/.kraken/config.yaml")
 ```
 
 ### Options inherited from parent commands

@@ -29,7 +29,7 @@ var infoCmd = &cobra.Command{
 	Long: `Output some basic information on the current 
 	cluster state configured by the specified k2 yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/krakenCluster.yaml")
+		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 
 		if len(args) > 0 {
 			k2ConfigPath = os.ExpandEnv(args[0])

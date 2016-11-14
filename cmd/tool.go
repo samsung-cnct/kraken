@@ -39,6 +39,6 @@ func init() {
 		&k2Config,
 		"config",
 		"c",
-		os.ExpandEnv("$HOME/.kraken/krakenCluster.yaml"),
+		os.ExpandEnv("$HOME/.kraken/config.yaml"),
 		"Location of the k2config")
 }
