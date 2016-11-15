@@ -73,7 +73,8 @@ var downCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode := containerAction(cli, ctx, command, k2ConfigPath)
+		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
+		defer timeout()
 
 		terminalSpinner.Stop()
 		fmt.Println("")

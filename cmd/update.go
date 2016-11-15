@@ -54,7 +54,8 @@ var updateCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode := containerAction(cli, ctx, command, args[0])
+		resp, statusCode, timeout := containerAction(cli, ctx, command, args[0])
+		defer timeout()
 
 		terminalSpinner.Stop()
 		fmt.Println("")
