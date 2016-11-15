@@ -267,7 +267,7 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) {
 	}
 }
 
-func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int) {
+func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int, func()) {
 
 	hostConfig, config_envs := makeMounts(k2config)
 	containerConfig := &container.Config{
@@ -295,14 +295,27 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		select {
 		case <-ctx.Done():
 			fmt.Println("Action timed out!")
-			return resp, 1
+			return resp, 1, func() {
+				// make sure container is killed
+				removeErr := cli.ContainerRemove(
+					getContext(),
+					resp.ID,
+					types.ContainerRemoveOptions{
+						RemoveVolumes: false,
+						RemoveLinks:   false,
+						Force:         true,
+					})
+				if removeErr != nil {
+					panic(removeErr)
+				}
+			}
 		default:
 			fmt.Println(err)
 			panic(err)
 		}
 	}
 
-	return resp, statusCode
+	return resp, statusCode, func() {}
 }
 
 func getContext() (ctx context.Context) {

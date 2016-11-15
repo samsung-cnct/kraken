@@ -46,7 +46,8 @@ var helmCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode := containerAction(cli, ctx, command, k2Config)
+		resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+		defer timeout()
 
 		out, err := printContainerLogs(
 			cli,
