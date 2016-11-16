@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/namesgenerator"
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
@@ -79,7 +80,7 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 			fmt.Println(" export KUBECONFIG=" + path.Join(
 				outputLocation,
 				clusterConfig.GetString("deployment.cluster"), "admin.kubeconfig"))
-			fmt.Println(" helm [helm command] --home" + path.Join(
+			fmt.Println(" helm [helm command] --home " + path.Join(
 				outputLocation,
 				clusterConfig.GetString("deployment.cluster"), ".helm"))
 			fmt.Println(" or use 'k2cli tool helm --config " + clusterConfigFile + " [helm commands]'")
@@ -297,14 +298,32 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 			fmt.Println("Action timed out!")
 			return resp, 1, func() {
 				// make sure container is killed
-				removeErr := cli.ContainerRemove(
-					getContext(),
-					resp.ID,
-					types.ContainerRemoveOptions{
-						RemoveVolumes: false,
-						RemoveLinks:   false,
-						Force:         true,
-					})
+				var removeErr error
+				if keepAlive {
+					removeErr = cli.ContainerKill(
+						getContext(),
+						resp.ID,
+						"KILL")
+					if removeErr != nil {
+						panic(removeErr)
+					}
+
+					newContainerName := "k2-" + namesgenerator.GetRandomName(1)
+					removeErr = cli.ContainerRename(
+						getContext(),
+						resp.ID,
+						newContainerName)
+					fmt.Println("Renamed k2-" + clusterName + " to " + newContainerName)
+				} else {
+					removeErr = cli.ContainerRemove(
+						getContext(),
+						resp.ID,
+						types.ContainerRemoveOptions{
+							RemoveVolumes: false,
+							RemoveLinks:   false,
+							Force:         true,
+						})
+				}
 				if removeErr != nil {
 					panic(removeErr)
 				}
@@ -315,7 +334,29 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		}
 	}
 
-	return resp, statusCode, func() {}
+	return resp, statusCode, func() {
+		var removeErr error
+		if keepAlive {
+			newContainerName := "k2-" + namesgenerator.GetRandomName(1)
+			removeErr = cli.ContainerRename(
+				getContext(),
+				resp.ID,
+				newContainerName)
+			fmt.Println("Renamed k2-" + clusterName + " to " + newContainerName)
+		} else {
+			removeErr = cli.ContainerRemove(
+				getContext(),
+				resp.ID,
+				types.ContainerRemoveOptions{
+					RemoveVolumes: false,
+					RemoveLinks:   false,
+					Force:         false,
+				})
+		}
+		if removeErr != nil {
+			panic(removeErr)
+		}
+	}
 }
 
 func getContext() (ctx context.Context) {
