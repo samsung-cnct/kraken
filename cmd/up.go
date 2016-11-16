@@ -40,7 +40,9 @@ var upCmd = &cobra.Command{
 		_, err := os.Stat(k2ConfigPath)
 		if os.IsNotExist(err) {
 			return errors.New("File " + k2ConfigPath + " does not exist!")
-		} else {
+		} 
+
+		if err != nil {
 			fmt.Println(err)
 			panic(err)
 		}
