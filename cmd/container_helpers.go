@@ -315,7 +315,20 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		}
 	}
 
-	return resp, statusCode, func() {}
+	return resp, statusCode, func() {
+		// make sure container is killed
+		removeErr := cli.ContainerRemove(
+			getContext(),
+			resp.ID,
+			types.ContainerRemoveOptions{
+				RemoveVolumes: false,
+				RemoveLinks:   false,
+				Force:         false,
+			})
+		if removeErr != nil {
+			panic(removeErr)
+		}
+	}
 }
 
 func getContext() (ctx context.Context) {
