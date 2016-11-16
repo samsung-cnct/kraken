@@ -43,9 +43,9 @@ var helmCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		var command []string
+		command := []string{"helm"}
 		for _, element := range args {
-			command = append([]string{"helm"}, strings.Split(element, " ")...)
+			command = append(command, strings.Split(element, " ")...)
 		}
 
 		ctx, cancel := getTimedContext()
