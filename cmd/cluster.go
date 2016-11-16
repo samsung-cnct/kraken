@@ -20,8 +20,6 @@ import (
 
 var userName string
 var password string
-var logPath string
-var logSuccess bool
 var k2ConfigPath string
 
 // clusterCmd represents the cluster command
@@ -49,17 +47,4 @@ func init() {
 		"p",
 		"",
 		"registry password")
-	clusterCmd.PersistentFlags().StringVarP(
-		&logPath,
-		"log-path",
-		"w",
-		"",
-		"Save output output of container action to path")
-	clusterCmd.PersistentFlags().BoolVarP(
-		&logSuccess,
-		"log-success",
-		"x",
-		false,
-		"Display full action logs on success")
-
 }

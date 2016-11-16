@@ -66,13 +66,27 @@ var generateCmd = &cobra.Command{
 		defer cancel()
 
 		outputLocation = filepath.Dir(generatePath)
-		_, statusCode, timeout := containerAction(cli, ctx, command, "")
+		resp, statusCode, timeout := containerAction(cli, ctx, command, "")
 		defer timeout()
+
+		out, err := printContainerLogs(
+			cli,
+			resp,
+			backgroundCtx,
+		)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
 
 		if statusCode != 0 {
 			fmt.Println("Error generating config at " + generatePath)
+			fmt.Printf("%s", out)
 		} else {
 			fmt.Println("Generated config at " + generatePath)
+			if logSuccess {
+				fmt.Printf("%s", out)
+			}
 		}
 
 		ExitCode = statusCode

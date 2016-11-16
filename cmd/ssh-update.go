@@ -71,11 +71,14 @@ var sshUpdateCmd = &cobra.Command{
 		}
 
 		if statusCode != 0 {
-			fmt.Println("ERROR bringing up " + clusterConfig.GetString("deployment.cluster"))
+			fmt.Println("ERROR updating ssh inventory for " + clusterConfig.GetString("deployment.cluster"))
 			fmt.Printf("%s", out)
 			clusterHelpError(Created, args[0])
 		} else {
 			fmt.Println("Done.")
+			if logSuccess {
+				fmt.Printf("%s", out)
+			}
 			clusterHelp(Created, args[0])
 		}
 

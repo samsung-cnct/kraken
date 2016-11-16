@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
 
 // kubectlCmd represents the kubectl command
@@ -42,7 +43,11 @@ var kubectlCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		command := append([]string{"kubectl"}, args...)
+		var command []string
+		for _, element := range args {
+			command = append([]string{"helm"}, strings.Split(element, " ")...)
+		}
+
 		ctx, cancel := getTimedContext()
 		defer cancel()
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)

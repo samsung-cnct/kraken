@@ -37,8 +37,12 @@ var downCmd = &cobra.Command{
 			k2ConfigPath = os.ExpandEnv(args[0])
 		}
 
-		if _, err := os.Stat(k2ConfigPath); os.IsNotExist(err) {
+		_, err := os.Stat(k2ConfigPath)
+		if os.IsNotExist(err) {
 			return errors.New("File " + k2ConfigPath + " does not exist!")
+		} else {
+			fmt.Println(err)
+			panic(err)
 		}
 
 		initK2Config(k2ConfigPath)

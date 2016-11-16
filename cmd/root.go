@@ -29,6 +29,9 @@ var outputLocation string
 var dockerHost string
 var actionTimeout int
 var ExitCode int
+var keepAlive bool
+var logPath string
+var logSuccess bool
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
@@ -98,6 +101,24 @@ func init() {
 		"t",
 		1200,
 		"timeout (in seconds) for container actions")
+	RootCmd.PersistentFlags().BoolVarP(
+		&keepAlive,
+		"keep-alive",
+		"v",
+		false,
+		"keep stopped containers.")
+	RootCmd.PersistentFlags().StringVarP(
+		&logPath,
+		"log-path",
+		"w",
+		"",
+		"Save output output of container action to path")
+	RootCmd.PersistentFlags().BoolVarP(
+		&logSuccess,
+		"log-success",
+		"x",
+		false,
+		"Display full action logs on success")
 }
 
 // initConfig reads in config file and ENV variables if set.
