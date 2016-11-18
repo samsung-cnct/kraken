@@ -14,6 +14,11 @@
 			"Rev": "3ec0642a7fb6488f65b06f9040adc67e3990296a"
 		},
 		{
+			"ImportPath": "github.com/blang/semver",
+			"Comment": "v3.3.0",
+			"Rev": "60ec3488bfea7cca02b021d106d9911120d25fe9"
+		},
+		{
 			"ImportPath": "github.com/briandowns/spinner",
 			"Rev": "f62babe8722a6a3b79201883ce5b70f73b3d46be"
 		},
