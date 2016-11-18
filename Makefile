@@ -6,13 +6,13 @@ godep=GOPATH=$(shell godep path):${GOPATH}
 
 build:
 	@godep go build -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-		-X github.com/samsung-cnct/k2cli/cmd.k2CliType=$(TYPE) \
+		-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
 		-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT)"
 
 compile:
 	@rm -rf build/
 	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.k2CliType=$(TYPE) \
+									-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
 									-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT)" \
 	-osarch="linux/386" \
 	-osarch="linux/amd64" \
@@ -22,7 +22,7 @@ compile:
 
 install:
 	@godep go install -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.k2CliType=$(TYPE) \
+									-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
 									-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT)"
 
 deps:
