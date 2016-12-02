@@ -91,3 +91,10 @@ deployment:
 ```
 
 and the k2 container would get a /Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json mount and K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json environment variable
+
+## Cutting a release
+
+* Install github-release from https://github.com/c4milo/github-release
+* Create a github personal access token with repo read/write permissions and export it as GITHUB_TOKEN
+* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed
+* Run ```make release```
