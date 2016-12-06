@@ -38,7 +38,7 @@ var sshUpdateCmd = &cobra.Command{
 		terminalSpinner.Stop()
 		fmt.Println("")
 
-		fmt.Printf("Updating ssh inventory for '" + clusterConfig.GetString("deployment.cluster") + "' ")
+		fmt.Printf("Updating ssh inventory for '" + getContainerName() + "' ")
 		terminalSpinner.Start()
 
 		command := []string{
@@ -71,7 +71,7 @@ var sshUpdateCmd = &cobra.Command{
 		}
 
 		if statusCode != 0 {
-			fmt.Println("ERROR updating ssh inventory for " + clusterConfig.GetString("deployment.cluster"))
+			fmt.Println("ERROR updating ssh inventory for " + getContainerName())
 			fmt.Printf("%s", out)
 			clusterHelpError(Created, args[0])
 		} else {

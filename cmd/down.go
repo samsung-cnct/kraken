@@ -40,7 +40,7 @@ var downCmd = &cobra.Command{
 		_, err := os.Stat(k2ConfigPath)
 		if os.IsNotExist(err) {
 			return errors.New("File " + k2ConfigPath + " does not exist!")
-		}  
+		}
 
 		if err != nil {
 			fmt.Println(err)
@@ -63,7 +63,7 @@ var downCmd = &cobra.Command{
 		terminalSpinner.Stop()
 		fmt.Println("")
 
-		fmt.Printf("Bringing down cluster '" + clusterConfig.GetString("deployment.cluster") + "' ")
+		fmt.Printf("Bringing down cluster '" + getContainerName() + "' ")
 		terminalSpinner.Start()
 
 		command := []string{
@@ -100,7 +100,7 @@ var downCmd = &cobra.Command{
 		}
 
 		if statusCode != 0 {
-			fmt.Println("ERROR bringing down " + clusterConfig.GetString("deployment.cluster"))
+			fmt.Println("ERROR bringing down " + getContainerName())
 			fmt.Printf("%s", out)
 		} else {
 			if logSuccess {
