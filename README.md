@@ -64,12 +64,12 @@ deployment:
       providerConfig: 
         username: 
         serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
-        serviceAccountKeyFile: "$K2_SERVICE_ACCOUNT_KEYFILE"
+        serviceAccountKeyFile: "$MY_SERVICE_ACCOUNT_KEYFILE"
         
 ...
 ```
 
-given that ```export K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json```
+given that ```export MY_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json```
 
 Will expand to:
 
@@ -90,7 +90,46 @@ deployment:
 
 ```
 
-and the k2 container would get a /Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json mount and K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json environment variable
+and the k2 container would get a ```/Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json``` mount and ```K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json``` environment variable
+
+
+Environment variables with 'K2' prefix can also bind automatically to config values. For example, given that ```export K2_DEPLOYMENT_CLUSTER=production-cluster```
+
+```
+deployment:
+  cluster: changeme
+  keypair:
+    -
+      name: key
+      publickeyFile: 
+      privatekeyFile: 
+      providerConfig: 
+        username: 
+        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
+        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
+        
+...
+
+```
+
+will evaluate to 
+
+```
+deployment:
+  cluster: production-cluster
+  keypair:
+    -
+      name: key
+      publickeyFile: 
+      privatekeyFile: 
+      providerConfig: 
+        username: 
+        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
+        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
+        
+...
+
+```
 
 ## Cutting a release
 

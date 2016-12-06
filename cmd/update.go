@@ -40,7 +40,7 @@ var updateCmd = &cobra.Command{
 		_, err := os.Stat(k2ConfigPath)
 		if os.IsNotExist(err) {
 			return errors.New("File " + k2ConfigPath + " does not exist!")
-		} 
+		}
 
 		if err != nil {
 			fmt.Println(err)
@@ -64,7 +64,7 @@ var updateCmd = &cobra.Command{
 		terminalSpinner.Stop()
 		fmt.Println("")
 
-		fmt.Printf("Updating cluster '" + clusterConfig.GetString("deployment.cluster") + "' ")
+		fmt.Printf("Updating cluster '" + getContainerName() + "' ")
 		terminalSpinner.Start()
 
 		command := []string{
@@ -101,7 +101,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		if statusCode != 0 {
-			fmt.Println("ERROR updating " + clusterConfig.GetString("deployment.cluster"))
+			fmt.Println("ERROR updating " + getContainerName())
 			fmt.Printf("%s", out)
 			clusterHelpError(Created, k2ConfigPath)
 		} else {

@@ -21,14 +21,14 @@ import (
 )
 
 var K2CliMajorMinorPatch string
-var K2CliType = "alpha" 
+var K2CliType = "alpha"
 var K2CliGitCommit string
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Display cli version",
-	Long: `Display cli version information`,
+	Long:  `Display cli version information`,
 	Run: func(cmd *cobra.Command, args []string) {
 		semVer, err := semver.Make(K2CliMajorMinorPatch + "-" + K2CliType + "+git.sha." + K2CliGitCommit)
 		if err != nil {

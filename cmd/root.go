@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -129,7 +130,9 @@ func initK2CliConfig() {
 
 	k2cliConfig.SetConfigName(".k2cli") // name of config file (without extension)
 	k2cliConfig.AddConfigPath("$HOME")  // adding home directory as first search path
-	k2cliConfig.AutomaticEnv()          // read in environment variables that match
+	k2cliConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	k2cliConfig.SetEnvPrefix("k2cli") // prefix for env vars to configure client itself
+	k2cliConfig.AutomaticEnv()        // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := k2cliConfig.ReadInConfig(); err == nil {
@@ -139,7 +142,9 @@ func initK2CliConfig() {
 
 func initK2Config(k2config string) {
 	clusterConfig.SetConfigFile(k2config)
-	clusterConfig.AutomaticEnv() // read in environment variables that match
+	clusterConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	clusterConfig.SetEnvPrefix("k2") // prefix for env vars to configure cluster
+	clusterConfig.AutomaticEnv()     // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := clusterConfig.ReadInConfig(); err == nil {

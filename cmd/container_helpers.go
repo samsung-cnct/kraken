@@ -67,32 +67,32 @@ func clusterHelpError(help helptype, clusterConfigFile string) {
 
 func clusterHelp(help helptype, clusterConfigFile string) {
 	if _, err := os.Stat(path.Join(outputLocation,
-		clusterConfig.GetString("deployment.cluster"), "admin.kubeconfig")); err == nil {
+		getContainerName(), "admin.kubeconfig")); err == nil {
 		fmt.Println("To use kubectl: ")
 		fmt.Println(" kubectl --kubeconfig=" + path.Join(
 			outputLocation,
-			clusterConfig.GetString("deployment.cluster"), "admin.kubeconfig") + " [kubectl commands]")
+			getContainerName(), "admin.kubeconfig") + " [kubectl commands]")
 		fmt.Println(" or use 'k2cli tool kubectl --config " + clusterConfigFile + " [kubectl commands]'")
 
 		if _, err := os.Stat(path.Join(outputLocation,
-			clusterConfig.GetString("deployment.cluster"), "admin.kubeconfig")); err == nil {
+			getContainerName(), "admin.kubeconfig")); err == nil {
 			fmt.Println("To use helm: ")
 			fmt.Println(" export KUBECONFIG=" + path.Join(
 				outputLocation,
-				clusterConfig.GetString("deployment.cluster"), "admin.kubeconfig"))
+				getContainerName(), "admin.kubeconfig"))
 			fmt.Println(" helm [helm command] --home " + path.Join(
 				outputLocation,
-				clusterConfig.GetString("deployment.cluster"), ".helm"))
+				getContainerName(), ".helm"))
 			fmt.Println(" or use 'k2cli tool helm --config " + clusterConfigFile + " [helm commands]'")
 		}
 	}
 
 	if _, err := os.Stat(path.Join(outputLocation,
-		clusterConfig.GetString("deployment.cluster"), "ssh_config")); err == nil {
+		getContainerName(), "ssh_config")); err == nil {
 		fmt.Println("To use ssh: ")
 		fmt.Println(" ssh <node pool name>-<number> -F " + path.Join(
 			outputLocation,
-			clusterConfig.GetString("deployment.cluster"), "ssh_config"))
+			getContainerName(), "ssh_config"))
 		fmt.Println(" or use 'k2cli tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
 	}
 }
@@ -107,10 +107,10 @@ func containerEnvironment() []string {
 		"CLOUDSDK_COMPUTE_ZONE=" + os.Getenv("CLOUDSDK_COMPUTE_ZONE"),
 		"CLOUDSDK_COMPUTE_REGION=" + os.Getenv("CLOUDSDK_COMPUTE_REGION"),
 		"KUBECONFIG=" + path.Join(outputLocation,
-			clusterConfig.GetString("deployment.cluster"),
+			getContainerName(),
 			"admin.kubeconfig"),
 		"HELM_HOME=" + path.Join(outputLocation,
-			clusterConfig.GetString("deployment.cluster"),
+			getContainerName(),
 			".helm"),
 	}
 
@@ -279,7 +279,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		Tty:          true,
 	}
 
-	clusterName := clusterConfig.GetString("deployment.cluster")
+	clusterName := getContainerName()
 	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2-"+clusterName)
 	if err != nil {
 		fmt.Println(err)
@@ -407,4 +407,8 @@ func writeLog(logFilePath string, out []byte) {
 		fmt.Println(err)
 		panic(err)
 	}
+}
+
+func getContainerName() string {
+	return os.ExpandEnv(clusterConfig.GetString("deployment.cluster"))
 }
