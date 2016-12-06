@@ -90,7 +90,9 @@ deployment:
 
 ```
 
-and the k2 container would get a /Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json mount and K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json environment variable  
+and the k2 container would get a ```/Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json``` mount and ```K2_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json``` environment variable
+
+
 Environment variables with 'K2' prefix can also bind automatically to config values. For example, given that ```export K2_DEPLOYMENT_CLUSTER=production-cluster```
 
 ```
