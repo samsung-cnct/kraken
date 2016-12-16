@@ -11,7 +11,7 @@ the default.
 The latest official build can be found here:  https://github.com/samsung-cnct/k2cli/releases  If not doing development, 
 you should use the latest version.
 
-### Building a configurtion file
+### Building a configuration file
 K2 uses a yaml configuration file for all aspects of the both the kubernetes cluster and the infrastructure that is
 running it.  To build a generic aws config that has a large number of sensible defaults, you can run: 
 ```
@@ -77,12 +77,12 @@ To see all installed application accross all namespaces
 #### Example usage - k2cli tool helm
 To list all installed charts
 ```
-./k2cli tool helm --config ~/k2configs/config.yaml helm list
+./k2cli tool helm --config ~/k2configs/config.yaml list
 ```
 
 To install the samsung_cnct maintainted kafka chart
 ```
-./k2cli tool helm --config ~/k2configs/config.yaml helm install atlas/kafka
+./k2cli tool helm --config ~/k2configs/config.yaml install atlas/kafka
 ```
 
 Note:  there is currently a bug in the tool subcommand that requires manual removal of the container due to a naming collision.
