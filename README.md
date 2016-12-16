@@ -85,10 +85,6 @@ To install the samsung_cnct maintainted kafka chart
 ./k2cli tool helm --config ~/k2configs/config.yaml install atlas/kafka
 ```
 
-Note:  there is currently a bug in the tool subcommand that requires manual removal of the container due to a naming collision.
-This is a high priority issue we expect to be addressed soon:  https://github.com/samsung-cnct/k2cli/issues/22
-
-
 ### Working with your cluster (using host installed tools)
 The file that is required for both helm and kubectl to connect to and interact with your kubernetes install is saved to your
 local machine in the output directory.  By default, this directory is ~/.kraken/<cluster name>/.  The file is 'admin.kubeconfig'.
