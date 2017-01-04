@@ -71,7 +71,7 @@ To see all nodes in your kuberentes cluster
 
 To see all installed application accross all namespaces
 ```
-./k2cli tool kubectl --config ~/k2configs/config.yaml get pods --all-namespaces
+./k2cli tool kubectl --config ~/k2configs/config.yaml -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
