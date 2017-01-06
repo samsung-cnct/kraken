@@ -7,6 +7,9 @@ Generated [docs](docs/k2cli.md)
 This getting started guide will assume a deployment to AWS.  K2 currently also supports deploys to GKE but that is not
 the default.
 
+### Requirements
+Docker must be installed and your user must have rights.
+
 ### Fetching the official build
 The latest official build can be found here:  https://github.com/samsung-cnct/k2cli/releases  If not doing development, 
 you should use the latest version.
