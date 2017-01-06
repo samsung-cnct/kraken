@@ -23,7 +23,7 @@ running it.  To build a generic aws config that has a large number of sensible d
 which will create a file at ~/k2configs/config.yaml.  There are three fields that need to be set before this file can
 be used.
 1. cluster name.  All k2 clusters should have a unique name so their assets can be easily identified by humans in the
-aws console.  The cluster name is set at field 'deployment.cluster'.  This dotted notation refers to the hierarchical 
+aws console (no more than 13 characters).  The cluster name is set at field 'deployment.cluster'.  This dotted notation refers to the hierarchical 
 structure of a yaml file where cluster is a sub field of deployment.  This is also the third line in the generated file.
 2. aws access key.  This is your aws access key used for programatic access to AWS.  The field is named
 'deployment.providerConfig.authentication.accessKey'.  This can be either set to the actual value or a environment
