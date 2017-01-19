@@ -31,7 +31,7 @@ variable that K2 will use.
 `deployment.providerConfig.authentication.secretKey`. This can be either set to the actual value or a environment
 variable and K2 will perform the replacement.This can be either set to the literal value, or to an environment
 variable that K2 will use.
-*  **node**  The `deployment.providerConfig.authentication.credentialsFile` field is present but is not yet fully implemented.
+*  **Note**  The `deployment.providerConfig.authentication.credentialsFile` field is present but is not yet fully implemented.
 For more information see:  https://github.com/samsung-cnct/k2/issues/128
 
 When the required fields are set your configuration file is ready to go! The default file will create a production-ready
