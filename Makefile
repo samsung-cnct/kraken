@@ -1,5 +1,5 @@
 NAME      := k2cli
-VERSION   := 1.0.1
+VERSION   := 1.0.3
 TYPE      := alpha
 COMMIT    := $(shell git rev-parse HEAD)
 godep=GOPATH=$(shell godep path):${GOPATH}
