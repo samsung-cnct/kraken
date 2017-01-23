@@ -284,8 +284,11 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		Tty:          true,
 	}
 
+	// ^[\\w]+[\\w-. ]*[\\w]+$ is the name requirement for docker containers as of 1.13.0
+	//  clusterName can be empty as a valid thing when a user is generating a config so the
+	//  hardcoded base portion of the name must satisfy the above regex.  
 	clusterName := getContainerName()
-	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2-"+clusterName)
+	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2"+clusterName)  
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
