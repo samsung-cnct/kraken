@@ -27,9 +27,8 @@ structure of a yaml file where cluster is a sub field of deployment. This is als
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
 `deployment.providerConfig.authentication.accessKey`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
-*  **AWS secret key**  This is your AWS secret key that is paired to the above access key. This field is named
-`deployment.providerConfig.authentication.secretKey`. This can be either set to the actual value or a environment
-variable and K2 will perform the replacement.This can be either set to the literal value, or to an environment
+*  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
+`deployment.providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
 *  **Note**  The `deployment.providerConfig.authentication.credentialsFile` field is present but is not yet fully implemented.
 For more information see:  https://github.com/samsung-cnct/k2/issues/128
@@ -66,7 +65,7 @@ using the correct version of the relevant CLI for your cluster.
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/) is a CLI for working with a Kubernetes cluster. It is
 used for deploying application, checking system status and more. See the linked documentation for more details.
 
-`helm` (http://kubernetes.io/docs/user-guide/kubectl-overview/) is a CLI for deploying and packaging applications to deploy
+`helm` (https://github.com/kubernetes/helm) is a CLI for deploying and packaging applications to deploy
 to Kubernetes. See the linked documentation for more details.
 
 #### Example usage - k2cli tool kubectl
