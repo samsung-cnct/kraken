@@ -30,7 +30,7 @@ variable that K2 will use.
 *  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
 `deployment.providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
-*  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named 
+*  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named
 `deployment.providerConfig.authentication.credentialsFile`. This file and path must exist bind mounted to /root
 inside the container, ie. ${HOME}/.aws/credentials.
 *  **AWS credentials profile** This is the AWS credentials profile name used to select the credentials set from the credentials
@@ -40,11 +40,11 @@ When the required fields are set your configuration file is ready to go! The def
 cluster with the following configuration:
 
 Role | # | Type
---- | ---  | ---  
-Primary etcd cluster | 5 | t2.small  
-Events etcd cluster | 5 | t2.small  
-Master nodes | 3 | m3.medium  
-Cluster nodes | 3 | c4.large  
+--- | ---  | ---
+Primary etcd cluster | 5 | t2.small
+Events etcd cluster | 5 | t2.small
+Master nodes | 3 | m3.medium
+Cluster nodes | 3 | c4.large
 Special nodes | 2 | m3.medium
 
 We have chosen this configuration based on our own, and other's, publicly available research. It creates an underpowered cluster
@@ -58,7 +58,7 @@ To create your first cluster, run the following command. (This assumes you have 
 ```
 This will take anywhere from five to twenty minutes depending on how AWS is feeling when you execute this command. When
 complete the cluster will exist in its own VPC and will be accesible via the `tool` subcommands. The output artifacts
-will be stored in the default location: `${HOME}/.kraken/<cluster name>`.  
+will be stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ### Working with your cluster (using k2cli)
 k2cli uses the K2 image (github.com/samsung_cnct/k2) for all of its operations. The K2 image ships with `kubectl` and `helm`
