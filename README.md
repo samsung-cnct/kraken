@@ -30,8 +30,11 @@ variable that K2 will use.
 *  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
 `deployment.providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
-*  **Note**  The `deployment.providerConfig.authentication.credentialsFile` field is present but is not yet fully implemented.
-For more information see:  https://github.com/samsung-cnct/k2/issues/128
+*  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named 
+`deployment.providerConfig.authentication.credentialsFile`. This file and path must exist bind mounted to /root
+inside the container, ie. ${HOME}/.aws/credentials.
+*  **AWS credentials profile** This is the AWS credentials profile name used to select the credentials set from the credentials
+file above.
 
 When the required fields are set your configuration file is ready to go! The default file will create a production-ready
 cluster with the following configuration:
