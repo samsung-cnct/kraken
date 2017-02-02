@@ -93,7 +93,8 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 		fmt.Println(" ssh <node pool name>-<number> -F " + path.Join(
 			outputLocation,
 			getContainerName(), "ssh_config"))
-		fmt.Println(" or use 'k2cli tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
+		// This is usage has not been implemented. See issue #49
+		//fmt.Println(" or use 'k2cli tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
 	}
 }
 
@@ -286,9 +287,9 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 
 	// ^[\\w]+[\\w-. ]*[\\w]+$ is the name requirement for docker containers as of 1.13.0
 	//  clusterName can be empty as a valid thing when a user is generating a config so the
-	//  hardcoded base portion of the name must satisfy the above regex.  
+	//  hardcoded base portion of the name must satisfy the above regex.
 	clusterName := getContainerName()
-	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2"+clusterName)  
+	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2"+clusterName)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
