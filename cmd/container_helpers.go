@@ -101,11 +101,6 @@ func containerEnvironment() []string {
 	envs := []string{
 		"ANSIBLE_NOCOLOR=True",
 		"DISPLAY_SKIPPED_HOSTS=0",
-		"AWS_ACCESS_KEY_ID=" + os.Getenv("AWS_ACCESS_KEY_ID"),
-		"AWS_SECRET_ACCESS_KEY=" + os.Getenv("AWS_SECRET_ACCESS_KEY"),
-		"AWS_DEFAULT_REGION=" + os.Getenv("AWS_DEFAULT_REGION"),
-		"CLOUDSDK_COMPUTE_ZONE=" + os.Getenv("CLOUDSDK_COMPUTE_ZONE"),
-		"CLOUDSDK_COMPUTE_REGION=" + os.Getenv("CLOUDSDK_COMPUTE_REGION"),
 		"KUBECONFIG=" + path.Join(outputLocation,
 			getContainerName(),
 			"admin.kubeconfig"),
@@ -113,7 +108,21 @@ func containerEnvironment() []string {
 			getContainerName(),
 			".helm"),
 	}
-
+    if env := os.Getenv("AWS_ACCESS_KEY_ID"); len(env) > 0 {
+		envs = append(envs, "AWS_ACCESS_KEY_ID=" + env)
+	}
+    if env := os.Getenv("AWS_SECRET_ACCESS_KEY"); len(env) > 0 {
+		envs = append(envs, "AWS_SECRET_ACCESS_KEY=" + env)
+	}
+    if env := os.Getenv("AWS_DEFAULT_REGION"); len(env) > 0 {
+		envs = append(envs, "AWS_DEFAULT_REGION=" + env)
+	}
+    if env := os.Getenv("CLOUDSDK_COMPUTE_ZONE"); len(env) > 0 {
+		envs = append(envs, "CLOUDSDK_COMPUTE_ZONE=" + env)
+	}
+    if env := os.Getenv("CLOUDSDK_COMPUTE_REGION"); len(env) > 0 {
+		envs = append(envs, "CLOUDSDK_COMPUTE_REGION=" + env)
+	}
 	return envs
 }
 
