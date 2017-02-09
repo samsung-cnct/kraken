@@ -26,3 +26,5 @@ _testmain.go
 k2cli
 build/**
 dist/**
+
+.idea/
