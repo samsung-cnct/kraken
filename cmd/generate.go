@@ -45,7 +45,7 @@ var generateCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Pulling image '" + containerImage + "' ")
+		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
 		terminalSpinner.Start()
 
 		cli := getClient()
@@ -54,7 +54,6 @@ var generateCmd = &cobra.Command{
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
 		terminalSpinner.Stop()
-		fmt.Println("")
 
 		command := []string{
 			"bash",

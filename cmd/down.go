@@ -52,7 +52,7 @@ var downCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Pulling image '" + containerImage + "' ")
+		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
 		terminalSpinner.Start()
 
 		cli := getClient()
@@ -61,9 +61,8 @@ var downCmd = &cobra.Command{
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
 		terminalSpinner.Stop()
-		fmt.Println("")
 
-		fmt.Printf("Bringing down cluster '" + getContainerName() + "' ")
+		terminalSpinner.Prefix = "Bringing down cluster '" + getContainerName() + "' "
 		terminalSpinner.Start()
 
 		command := []string{
@@ -83,7 +82,6 @@ var downCmd = &cobra.Command{
 		defer timeout()
 
 		terminalSpinner.Stop()
-		fmt.Println("")
 
 		out, err := printContainerLogs(
 			cli,
