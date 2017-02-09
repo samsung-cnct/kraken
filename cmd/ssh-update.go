@@ -27,7 +27,7 @@ var sshUpdateCmd = &cobra.Command{
 	Long: `Update a list of SSH hosts for the k2 
 	cluster configured by the specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Pulling image '" + containerImage + "' ")
+		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
 		terminalSpinner.Start()
 
 		cli := getClient()
@@ -36,9 +36,8 @@ var sshUpdateCmd = &cobra.Command{
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
 		terminalSpinner.Stop()
-		fmt.Println("")
 
-		fmt.Printf("Updating ssh inventory for '" + getContainerName() + "' ")
+		terminalSpinner.Prefix = "Updating ssh inventory for '" + getContainerName() + "' "
 		terminalSpinner.Start()
 
 		command := []string{
@@ -58,7 +57,6 @@ var sshUpdateCmd = &cobra.Command{
 		defer timeout()
 
 		terminalSpinner.Stop()
-		fmt.Println("")
 
 		out, err := printContainerLogs(
 			cli,

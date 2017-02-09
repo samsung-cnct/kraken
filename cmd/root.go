@@ -68,6 +68,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initK2CliConfig)
+    terminalSpinner.FinalMSG = "Complete\n"
 
 	RootCmd.SetHelpCommand(helpCmd)
 
