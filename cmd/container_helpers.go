@@ -99,33 +99,29 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 }
 
 func containerEnvironment() []string {
-	envs := []string{
-		"ANSIBLE_NOCOLOR=True",
+	envs := []string{"ANSIBLE_NOCOLOR=True",
 		"DISPLAY_SKIPPED_HOSTS=0",
-		"KUBECONFIG=" + path.Join(outputLocation,
-			getContainerName(),
-			"admin.kubeconfig"),
-		"HELM_HOME=" + path.Join(outputLocation,
-			getContainerName(),
-			".helm"),
-	}
-    if env := os.Getenv("AWS_ACCESS_KEY_ID"); len(env) > 0 {
-		envs = append(envs, "AWS_ACCESS_KEY_ID=" + env)
-	}
-    if env := os.Getenv("AWS_SECRET_ACCESS_KEY"); len(env) > 0 {
-		envs = append(envs, "AWS_SECRET_ACCESS_KEY=" + env)
-	}
-    if env := os.Getenv("AWS_DEFAULT_REGION"); len(env) > 0 {
-		envs = append(envs, "AWS_DEFAULT_REGION=" + env)
-	}
-    if env := os.Getenv("CLOUDSDK_COMPUTE_ZONE"); len(env) > 0 {
-		envs = append(envs, "CLOUDSDK_COMPUTE_ZONE=" + env)
-	}
-    if env := os.Getenv("CLOUDSDK_COMPUTE_REGION"); len(env) > 0 {
-		envs = append(envs, "CLOUDSDK_COMPUTE_REGION=" + env)
-	}
+		"KUBECONFIG=" + path.Join(outputLocation, getContainerName(), "admin.kubeconfig"),
+		"HELM_HOME=" + path.Join(outputLocation, getContainerName(), ".helm")}
+
+	envs = appendIfValueNotEmpty(envs, "AWS_ACCESS_KEY_ID")
+	envs = appendIfValueNotEmpty(envs, "AWS_SECRET_ACCESS_KEY")
+	envs = appendIfValueNotEmpty(envs, "AWS_DEFAULT_REGION")
+	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_ZONE")
+	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_REGION")
+
 	return envs
 }
+
+// append to slice if environment variable (key) has a non-empty value.
+func appendIfValueNotEmpty(envs []string, envKey string ) ([]string){
+	if env := os.Getenv(envKey); len(env) > 0 {
+		return append(envs, envKey+"=" + env)
+	}
+
+	return envs
+}
+
 
 func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 	config_envs := []string{}
