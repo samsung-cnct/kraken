@@ -77,7 +77,7 @@ func init() {
 		"k2config",
 		"k",
 		"",
-		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")"
+		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")")
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
