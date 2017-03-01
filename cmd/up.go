@@ -26,11 +26,11 @@ var upStagesList string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:           "up [path to k2 config file]",
-	Short:         "create a k2 cluster",
+	Use:           "up [path to K2 config file]",
+	Short:         "create a K2 cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Creates a k2 cluster described in the specified configuration yaml`,
+	Long:          `Creates a K2 cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
@@ -123,5 +123,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of k2 stages to run. Run 'k2cli help topic stages' for more info.")
+		"comma-separated list of K2 stages to run. Run 'k2cli help topic stages' for more info.")
 }

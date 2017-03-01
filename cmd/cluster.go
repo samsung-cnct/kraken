@@ -1,4 +1,4 @@
-// Copyright © 2016 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2016 Samsung CNCT
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ var k2ConfigPath string
 // clusterCmd represents the cluster command
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
-	Short: "k2 cluster actions",
-	Long:  `Commands that perform actions on a k2 cluster described by provided yaml config`,
+	Short: "K2 cluster actions",
+	Long:  `Commands that perform actions on a K2 cluster described by a provided yaml config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		ExitCode = 1

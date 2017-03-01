@@ -25,8 +25,8 @@ import (
 // kubectlCmd represents the kubectl command
 var kubectlCmd = &cobra.Command{
 	Use:   "kubectl",
-	Short: "Use Kubernetes kubectl with k2 cluster",
-	Long: `Use Kubernetes kubectl with the  k2 
+	Short: "Use Kubernetes kubectl with K2 cluster",
+	Long: `Use Kubernetes kubectl with the K2 
 	cluster configured by the specified yaml file`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if _, err := os.Stat(k2Config); os.IsNotExist(err) {

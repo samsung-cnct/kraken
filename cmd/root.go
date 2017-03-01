@@ -37,18 +37,18 @@ var logSuccess bool
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
 
-// init the k2 config viper instance
+// init the K2 config viper instance
 var clusterConfig = viper.New()
 
-// init the k2cli config viper instance
+// init the K2cli config viper instance
 var k2cliConfig = viper.New()
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "k2cli",
-	Short: "CLI for k2 Kubernetes cluster provisioner",
-	Long: `k2 cli is a command line interface for k2 
-	kubernetes cluster provisioner. k2 documentation is available at:
+	Short: "CLI for K2 Kubernetes cluster provisioner",
+	Long: `k2cli is a command line interface for K2 
+	kubernetes cluster provisioner. K2 documentation is available at:
 	https://github.com/samsung-cnct/k2`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := os.Stat(outputLocation); os.IsNotExist(err) {
@@ -77,7 +77,7 @@ func init() {
 		"k2config",
 		"k",
 		"",
-		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml)\"")
+		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")"
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
@@ -89,7 +89,7 @@ func init() {
 		"output",
 		"o",
 		os.Getenv("HOME")+"/.kraken",
-		"k2 output folder")
+		"K2 output folder")
 	RootCmd.PersistentFlags().StringVarP(
 		&dockerHost,
 		"docker-host",
@@ -148,6 +148,6 @@ func initK2Config(k2config string) {
 
 	// If a config file is found, read it in.
 	if err := clusterConfig.ReadInConfig(); err == nil {
-		fmt.Println("Using k2 config file:", clusterConfig.ConfigFileUsed())
+		fmt.Println("Using K2 config file:", clusterConfig.ConfigFileUsed())
 	}
 }

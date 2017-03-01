@@ -24,9 +24,9 @@ var k2Config string
 // toolCmd represents the tool command
 var toolCmd = &cobra.Command{
 	Use:   "tool",
-	Short: "Use tools with k2 cluster",
+	Short: "Use tools with K2 cluster",
 	Long: `Use various third-party tools with a 
-	k2 cluster configured by specified yaml`,
+	K2 cluster configured by specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		ExitCode = 1

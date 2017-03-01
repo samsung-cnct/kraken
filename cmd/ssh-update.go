@@ -24,7 +24,7 @@ import (
 var sshUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Refresh ssh host list",
-	Long: `Update a list of SSH hosts for the k2 
+	Long: `Update a list of SSH hosts for the K2 
 	cluster configured by the specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Pulling image '" + containerImage + "' ")
