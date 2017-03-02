@@ -29,7 +29,7 @@ var stagesCmd = &cobra.Command{
 Following stages are available:
 
 'all'             - do everything
-'dryrun'          - only run stages that do local template generation (no infrasructure modification)
+'dryrun'          - only run stages that do local template generation (no infrastructure modification)
 'config'          - configuration loader and dependencies
 'common'          - template generation for cloud config common to all node types and dependencies
 'fabric'          - template generation for network fabric cloud config and dependencies

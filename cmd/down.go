@@ -26,11 +26,11 @@ var downStagesList string
 
 // downCmd represents the down command
 var downCmd = &cobra.Command{
-	Use:           "down [path to k2 config file]",
-	Short:         "destroy a k2 cluster",
+	Use:           "down [path to K2 config file]",
+	Short:         "destroy a K2 cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Destroys a k2 cluter described in the specified configuration yaml`,
+	Long:          `Destroys a K2 cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
@@ -118,5 +118,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of k2 stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]")
+		"comma-separated list of K2 stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]")
 }

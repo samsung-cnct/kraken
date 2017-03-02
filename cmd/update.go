@@ -26,11 +26,11 @@ var updateStagesList string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
-	Use:           "update [path to k2 config file]",
-	Short:         "update a k2 cluster",
+	Use:           "update [path to K2 config file]",
+	Short:         "update a K2 cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Updates a k2 cluster described in the specified configuration yaml`,
+	Long:          `Updates a K2 cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
@@ -121,5 +121,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of k2 stages to run. Run 'k2cli help topic stages' for more info.")
+		"comma-separated list of K2 stages to run. Run 'k2cli help topic stages' for more info.")
 }

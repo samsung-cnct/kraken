@@ -26,10 +26,10 @@ var generatePath string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:          "generate [path to save the k2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
-	Short:        "Generate a k2 config file",
+	Use:          "generate [path to save the K2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
+	Short:        "Generate a K2 config file",
 	SilenceUsage: true,
-	Long:         `Generate a k2 configuration file at the specified location`,
+	Long:         `Generate a K2 configuration file at the specified location`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			generatePath = os.ExpandEnv(args[0])

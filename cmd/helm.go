@@ -25,8 +25,8 @@ import (
 // helmCmd represents the helm command
 var helmCmd = &cobra.Command{
 	Use:   "helm",
-	Short: "Use Kubernetes Helm with k2 cluster",
-	Long: `Use Kubernetes Helm with the  k2 
+	Short: "Use Kubernetes Helm with K2 cluster",
+	Long: `Use Kubernetes Helm with the  K2 
 	cluster configured by the specified yaml file`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if _, err := os.Stat(k2Config); os.IsNotExist(err) {
