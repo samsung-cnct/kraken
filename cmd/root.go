@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/briandowns/spinner"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/briandowns/spinner"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -40,7 +41,7 @@ var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
 // init the K2 config viper instance
 var clusterConfig = viper.New()
 
-// init the K2cli config viper instance
+// init the k2cli config viper instance
 var k2cliConfig = viper.New()
 
 // RootCmd represents the base command when called without any subcommands
