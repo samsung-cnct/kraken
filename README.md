@@ -17,6 +17,12 @@ The latest official build can be found here: https://github.com/samsung-cnct/k2c
 K2 uses a yaml configuration file for all aspects of the both the Kubernetes cluster and the infrastructure that is
 running it. To build a generic AWS configuration file that has a large number of sensible defaults, you can run:
 ```
+./k2cli generate
+```
+which will create a file at `${HOME}/.kraken/config.yaml`
+
+Or you may specify a path for the file with:
+```
 ./k2cli generate ${HOME}/k2configs/
 ```
 which will create a file at `${HOME}/k2configs/config.yaml`. There are three fields that need to be set before this file can
