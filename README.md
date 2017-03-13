@@ -17,6 +17,12 @@ The latest official build can be found here: https://github.com/samsung-cnct/k2c
 K2 uses a yaml configuration file for all aspects of the both the Kubernetes cluster and the infrastructure that is
 running it. To build a generic AWS configuration file that has a large number of sensible defaults, you can run:
 ```
+./k2cli generate
+```
+which will create a file at `${HOME}/.kraken/config.yaml`
+
+Or you may specify a path with:
+```
 ./k2cli generate ${HOME}/k2configs/
 ```
 which will create a file at `${HOME}/k2configs/config.yaml`. There are three fields that need to be set before this file can
@@ -53,6 +59,11 @@ production quality.
 
 ### Creating your first cluster
 To create your first cluster, run the following command. (This assumes you have a configuration built as described above.)
+If you have used the default config location:
+```
+./k2cli cluster up
+```
+Or you may specify the location of the config file:
 ```
 ./k2cli cluster up ${HOME}/k2configs/config.yaml
 ```
@@ -72,25 +83,29 @@ used for deploying application, checking system status and more. See the linked 
 to Kubernetes. See the linked documentation for more details.
 
 #### Example usage - k2cli tool kubectl
-To see all nodes in your Kubernetes cluster
+
+If you have specified a path for your config.yaml, then you will need to include the `--config ${HOME}/path_to_config/config.yaml` option when running the following commands. Otherwise it will assume your config lives at `${HOME}/.kraken/config.yaml`
+
+To see all nodes in your Kubernetes cluster (and specify path to config file):
+
 ```
 ./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
 ```
 
-To see all installed application across all namespaces
+To see all installed applications across all namespaces:
 ```
-./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
+./k2cli tool kubectl -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
-To list all installed charts
+To list all installed charts with default config.yaml location:
 ```
-./k2cli tool helm --config ${HOME}/k2configs/config.yaml list
+./k2cli tool helm list
 ```
 
 To install the Kafka chart maintained by Samsung CNCT.
 ```
-./k2cli tool helm --config ${HOME}/k2configs/config.yaml install atlas/kafka
+./k2cli tool helm install atlas/kafka
 ```
 
 ### Working with your cluster (using host installed tools)
