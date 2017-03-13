@@ -21,7 +21,7 @@ running it. To build a generic AWS configuration file that has a large number of
 ```
 which will create a file at `${HOME}/.kraken/config.yaml`
 
-Or you may specify a path for the file with:
+Or you may specify a path with:
 ```
 ./k2cli generate ${HOME}/k2configs/
 ```
@@ -84,11 +84,9 @@ to Kubernetes. See the linked documentation for more details.
 
 #### Example usage - k2cli tool kubectl
 
-If you have stored your config.yaml in the default location (`${HOME}/.kraken/config.yaml`) then it is not necessary to include the
-`--config ${HOME}/k2configs/config.yaml` option when running the following commands.
-ex- To see all services in your Kubernetes cluster: `./k2cli tool kubectl get svc`
+If you have specified a path for your config.yaml, then you will need to include the `--config ${HOME}/path_to_config/config.yaml` option when running the following commands. Otherwise it will assume your config lives at `${HOME}/.kraken/config.yaml`
 
-To see all nodes in your Kubernetes cluster:
+To see all nodes in your Kubernetes cluster (and specify path to config file):
 
 ```
 ./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
@@ -96,7 +94,7 @@ To see all nodes in your Kubernetes cluster:
 
 To see all installed applications across all namespaces:
 ```
-./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
+./k2cli tool kubectl -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
@@ -104,15 +102,10 @@ To list all installed charts with default config.yaml location:
 ```
 ./k2cli tool helm list
 ```
-Or if you have specified the location of the config.yaml elsewhere:
-
-```
-./k2cli tool helm --config ${HOME}/k2configs/config.yaml list
-```
 
 To install the Kafka chart maintained by Samsung CNCT.
 ```
-./k2cli tool helm --config ${HOME}/k2configs/config.yaml install atlas/kafka
+./k2cli tool helm install atlas/kafka
 ```
 
 ### Working with your cluster (using host installed tools)
