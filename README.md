@@ -59,6 +59,11 @@ production quality.
 
 ### Creating your first cluster
 To create your first cluster, run the following command. (This assumes you have a configuration built as described above.)
+If you have used the default config location:
+```
+./k2cli cluster up
+```
+Or you may specify the location of the config file:
 ```
 ./k2cli cluster up ${HOME}/k2configs/config.yaml
 ```
@@ -78,18 +83,29 @@ used for deploying application, checking system status and more. See the linked 
 to Kubernetes. See the linked documentation for more details.
 
 #### Example usage - k2cli tool kubectl
-To see all nodes in your Kubernetes cluster
+
+If you have stored your config.yaml in the default location (`${HOME}/.kraken/config.yaml`) then it is not necessary to include the
+`--config ${HOME}/k2configs/config.yaml` option when running the following commands.
+ex- To see all services in your Kubernetes cluster: `./k2cli tool kubectl get svc`
+
+To see all nodes in your Kubernetes cluster:
+
 ```
 ./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
 ```
 
-To see all installed application across all namespaces
+To see all installed applications across all namespaces:
 ```
 ./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
-To list all installed charts
+To list all installed charts with default config.yaml location:
+```
+./k2cli tool helm list
+```
+Or if you have specified the location of the config.yaml elsewhere:
+
 ```
 ./k2cli tool helm --config ${HOME}/k2configs/config.yaml list
 ```
