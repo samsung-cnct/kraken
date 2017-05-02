@@ -16,13 +16,14 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 )
 
 var generatePath string
+var provider string
+var configPath string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -35,6 +36,12 @@ var generateCmd = &cobra.Command{
 			generatePath = os.ExpandEnv(args[0])
 		} else {
 			generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+		}
+
+		if provider == "gke" {
+			configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
+		} else {
+			configPath = "ansible/roles/kraken.config/files/config.yaml "
 		}
 
 		err := os.MkdirAll(filepath.Dir(generatePath), 0777)
@@ -58,7 +65,7 @@ var generateCmd = &cobra.Command{
 		command := []string{
 			"bash",
 			"-c",
-			"cp ansible/roles/kraken.config/files/config.yaml " + generatePath,
+			"cp " + configPath  + generatePath,
 		}
 
 		ctx, cancel := getTimedContext()
@@ -77,12 +84,11 @@ var generateCmd = &cobra.Command{
 			fmt.Println(err)
 			panic(err)
 		}
-
 		if statusCode != 0 {
 			fmt.Println("Error generating config at " + generatePath)
 			fmt.Printf("%s", out)
 		} else {
-			fmt.Println("Generated config at " + generatePath)
+			fmt.Println("Generated " + provider + " config at " + generatePath)
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
@@ -94,4 +100,10 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(generateCmd)
+	generateCmd.PersistentFlags().StringVarP(
+		&provider,
+		"provider",
+		"p",
+		"aws",
+		"specify a provider for config defaults")
 }
