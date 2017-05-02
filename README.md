@@ -25,19 +25,29 @@ Or you may specify a path with:
 ```
 ./k2cli generate ${HOME}/k2configs/
 ```
-which will create a file at `${HOME}/k2configs/config.yaml`. There are three fields that need to be set before this file can
+which will create a file at `${HOME}/k2configs/config.yaml`.
+
+For a GKE configuration file, run:
+```
+./k2cli generate --provider gke
+```
+
+For an AWS cluster there are several fields that need to be set before this file can
 be used:
 *  **Cluster name**  All K2 clusters should have a unique name so their assets can be easily identified by humans in the
-AWS console (no more than 13 characters). The cluster name is set in the `deployment.cluster` field.  This dotted notation refers to the hierarchical
-structure of a yaml file where cluster is a sub field of deployment. This is also the third line in the generated file.
+AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical
+structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
+
+The following fields are in the `definitions` section of the configuration file. 
+In lieu of specifying all of the following, you may just put your credentials file and K2 will grab the authentication specs from there.
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
-`deployment.providerConfig.authentication.accessKey`. This can be either set to the literal value, or to an environment
+`providerConfig.authentication.accessKey`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
 *  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
-`deployment.providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
+`providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
 *  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named
-`deployment.providerConfig.authentication.credentialsFile`. This file and path must exist bind mounted to /root
+`providerConfig.authentication.credentialsFile`. This file and path must exist bind mounted to /root
 inside the container, ie. ${HOME}/.aws/credentials.
 *  **AWS credentials profile** This is the AWS credentials profile name used to select the credentials set from the credentials
 file above.
