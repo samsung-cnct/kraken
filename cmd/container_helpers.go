@@ -438,5 +438,5 @@ func writeLog(logFilePath string, out []byte) {
 }
 
 func getContainerName() string {
-	return os.ExpandEnv(clusterConfig.GetString("deployment.cluster"))
+	return os.ExpandEnv(clusterConfig.GetString("deployment.clusters[0].name"))
 }
