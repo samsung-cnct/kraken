@@ -438,5 +438,7 @@ func writeLog(logFilePath string, out []byte) {
 }
 
 func getContainerName() string {
-	return os.ExpandEnv(clusterConfig.GetString("deployment.clusters[0].name"))
+	// only supports first cluster name right now
+	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}] interface{})
+	return os.ExpandEnv(firstCluster["name"].(string))
 }
