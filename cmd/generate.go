@@ -45,7 +45,9 @@ func preRunEFunc(cmd *cobra.Command, args []string)  error {
 		configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
 	} else {
 		configPath = "ansible/roles/kraken.config/files/config.yaml "
+		provider = "aws"
 	}
+
 
 	err := os.MkdirAll(filepath.Dir(generatePath), 0777)
 	if err != nil {
