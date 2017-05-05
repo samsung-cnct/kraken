@@ -25,33 +25,35 @@ var generatePath string
 var provider string
 var configPath string
 
-// generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:          "generate [path to save the K2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
 	Short:        "Generate a K2 config file",
 	SilenceUsage: true,
 	Long:         `Generate a K2 configuration file at the specified location`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 0 {
-			generatePath = os.ExpandEnv(args[0])
-		} else {
-			generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
-		}
+  PreRunE: preRunEFunc,
+  Run: runFunc,
+}
+func preRunEFunc(cmd *cobra.Command, args []string)  error {
+	if len(args) > 0 {
+		generatePath = os.ExpandEnv(args[0])
+	} else {
+		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+	}
 
-		if provider == "gke" {
-			configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
-		} else {
-			configPath = "ansible/roles/kraken.config/files/config.yaml "
-		}
+	if provider == "gke" {
+		configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
+	} else {
+		configPath = "ansible/roles/kraken.config/files/config.yaml "
+	}
 
-		err := os.MkdirAll(filepath.Dir(generatePath), 0777)
-		if err != nil {
-			return err
-		}
+	err := os.MkdirAll(filepath.Dir(generatePath), 0777)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
+func runFunc(cmd *cobra.Command, args []string) {
 		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
 		terminalSpinner.Start()
 
@@ -95,7 +97,6 @@ var generateCmd = &cobra.Command{
 		}
 
 		ExitCode = statusCode
-	},
 }
 
 func init() {
