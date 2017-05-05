@@ -33,6 +33,7 @@ var generateCmd = &cobra.Command{
   PreRunE: preRunEFunc,
   Run: runFunc,
 }
+
 func preRunEFunc(cmd *cobra.Command, args []string)  error {
 	if len(args) > 0 {
 		generatePath = os.ExpandEnv(args[0])
