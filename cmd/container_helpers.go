@@ -128,14 +128,13 @@ func containerEnvironment() []string {
 }
 
 // append to slice if environment variable (key) has a non-empty value.
-func appendIfValueNotEmpty(envs []string, envKey string ) ([]string){
+func appendIfValueNotEmpty(envs []string, envKey string) []string {
 	if env := os.Getenv(envKey); len(env) > 0 {
-		return append(envs, envKey+"=" + env)
+		return append(envs, envKey+"="+env)
 	}
 
 	return envs
 }
-
 
 func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 	config_envs := []string{}
@@ -439,6 +438,6 @@ func writeLog(logFilePath string, out []byte) {
 
 func getContainerName() string {
 	// only supports first cluster name right now
-	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}] interface{})
+	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}]interface{})
 	return os.ExpandEnv(firstCluster["name"].(string))
 }

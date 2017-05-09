@@ -30,11 +30,11 @@ var generateCmd = &cobra.Command{
 	Short:        "Generate a K2 config file",
 	SilenceUsage: true,
 	Long:         `Generate a K2 configuration file at the specified location`,
-  PreRunE: preRunEFunc,
-  Run: runFunc,
+	PreRunE:      preRunEFunc,
+	Run:          runFunc,
 }
 
-func preRunEFunc(cmd *cobra.Command, args []string)  error {
+func preRunEFunc(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		generatePath = os.ExpandEnv(args[0])
 	} else {
@@ -48,7 +48,6 @@ func preRunEFunc(cmd *cobra.Command, args []string)  error {
 		provider = "aws"
 	}
 
-
 	err := os.MkdirAll(filepath.Dir(generatePath), 0777)
 	if err != nil {
 		return err
@@ -57,49 +56,49 @@ func preRunEFunc(cmd *cobra.Command, args []string)  error {
 }
 
 func runFunc(cmd *cobra.Command, args []string) {
-		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		terminalSpinner.Start()
+	terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
+	terminalSpinner.Start()
 
-		cli := getClient()
+	cli := getClient()
 
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
+	backgroundCtx := getContext()
+	pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		terminalSpinner.Stop()
+	terminalSpinner.Stop()
 
-		command := []string{
-			"bash",
-			"-c",
-			"cp " + configPath  + generatePath,
-		}
+	command := []string{
+		"bash",
+		"-c",
+		"cp " + configPath + generatePath,
+	}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
+	ctx, cancel := getTimedContext()
+	defer cancel()
 
-		outputLocation = filepath.Dir(generatePath)
-		resp, statusCode, timeout := containerAction(cli, ctx, command, "")
-		defer timeout()
+	outputLocation = filepath.Dir(generatePath)
+	resp, statusCode, timeout := containerAction(cli, ctx, command, "")
+	defer timeout()
 
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-		if statusCode != 0 {
-			fmt.Println("Error generating config at " + generatePath)
+	out, err := printContainerLogs(
+		cli,
+		resp,
+		backgroundCtx,
+	)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	if statusCode != 0 {
+		fmt.Println("Error generating config at " + generatePath)
+		fmt.Printf("%s", out)
+	} else {
+		fmt.Println("Generated " + provider + " config at " + generatePath)
+		if logSuccess {
 			fmt.Printf("%s", out)
-		} else {
-			fmt.Println("Generated " + provider + " config at " + generatePath)
-			if logSuccess {
-				fmt.Printf("%s", out)
-			}
 		}
+	}
 
-		ExitCode = statusCode
+	ExitCode = statusCode
 }
 
 func init() {
