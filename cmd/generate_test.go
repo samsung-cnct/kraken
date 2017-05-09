@@ -21,9 +21,10 @@ func TestPreRunSetsVariables(t *testing.T) {
 }
 
 func TestAWSProviderCreatesAWSconfig(t *testing.T) {
-	if configPath != "ansible/roles/kraken.config/files/config.yaml " {
-		t.Error("Expected generated config to be config.yaml")
-	}
+	  preRunEFunc(nil, nil)
+	  if configPath != "ansible/roles/kraken.config/files/config.yaml " {
+		  t.Error("Expected generated config to be config.yaml")
+	  }
 }
 
 func TestGKEProviderCreatesGKEConfig(t *testing.T) {
