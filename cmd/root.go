@@ -34,6 +34,7 @@ var ExitCode int
 var keepAlive bool
 var logPath string
 var logSuccess bool
+var verbosity string
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
@@ -48,7 +49,7 @@ var k2cliConfig = viper.New()
 var RootCmd = &cobra.Command{
 	Use:   "k2cli",
 	Short: "CLI for K2 Kubernetes cluster provisioner",
-	Long: `k2cli is a command line interface for K2 
+	Long: `k2cli is a command line interface for K2
 	kubernetes cluster provisioner. K2 documentation is available at:
 	https://github.com/samsung-cnct/k2`,
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -122,6 +123,12 @@ func init() {
 		"x",
 		false,
 		"Display full action logs on success")
+	RootCmd.PersistentFlags().StringVarP(
+		&verbosity,
+		"verbosity",
+		"b",
+		"-vvv",
+		"Verbose output")
 }
 
 // initConfig reads in config file and ENV variables if set.
