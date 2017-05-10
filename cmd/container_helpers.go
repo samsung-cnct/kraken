@@ -45,26 +45,26 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 }
 
 func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-    defer cancel()
+  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+  defer cancel()
 
-    reader, err := cli.ContainerLogs(
-			ctx,
-			resp.ID,
-			types.ContainerLogsOptions{
-				ShowStdout: true,
-				Follow: true,
-			})
-    if err != nil {
-        log.Fatal(err)
-    }
+  reader, err := cli.ContainerLogs(
+		ctx,
+		resp.ID,
+		types.ContainerLogsOptions{
+			ShowStdout: true,
+			Follow: true,
+		})
+  if err != nil {
+      log.Fatal(err)
+  }
 
-		defer reader.Close()
+	defer reader.Close()
 
-    _, err = io.Copy(os.Stdout, reader)
-    if err != nil && err != io.EOF {
-        log.Fatal(err)
-    }
+  _, err = io.Copy(os.Stdout, reader)
+  if err != nil && err != io.EOF {
+      log.Fatal(err)
+  }
 }
 
 func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) ([]byte, error) {
