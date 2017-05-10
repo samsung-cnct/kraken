@@ -108,7 +108,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(
 		&keepAlive,
 		"keep-alive",
-		"v",
+		"a",
 		false,
 		"keep stopped containers.")
 	RootCmd.PersistentFlags().StringVarP(
@@ -126,7 +126,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(
 		&verbosity,
 		"verbosity",
-		"b",
+		"v",
 		false,
 		"Verbose output")
 }
