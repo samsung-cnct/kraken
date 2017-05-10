@@ -28,8 +28,8 @@ var upStagesList string
 var upCmd = &cobra.Command{
 	Use:           "up [path to K2 config file]",
 	Short:         "create a K2 cluster",
-	SilenceErrors: false,
-	SilenceUsage:  false,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	Long:          `Creates a K2 cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")

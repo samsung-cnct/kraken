@@ -59,6 +59,8 @@ func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx cont
         log.Fatal(err)
     }
 
+		defer reader.Close()
+
     _, err = io.Copy(os.Stdout, reader)
     if err != nil && err != io.EOF {
         log.Fatal(err)
