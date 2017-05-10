@@ -16,82 +16,97 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 )
 
 var generatePath string
+var provider string
+var configPath string
 
-// generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:          "generate [path to save the K2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
 	Short:        "Generate a K2 config file",
 	SilenceUsage: true,
 	Long:         `Generate a K2 configuration file at the specified location`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 0 {
-			generatePath = os.ExpandEnv(args[0])
-		} else {
-			generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
-		}
+	PreRunE:      preRunEFunc,
+	Run:          runFunc,
+}
 
-		err := os.MkdirAll(filepath.Dir(generatePath), 0777)
-		if err != nil {
-			return err
-		}
+func preRunEFunc(cmd *cobra.Command, args []string) error {
+	if len(args) > 0 {
+		generatePath = os.ExpandEnv(args[0])
+	} else {
+		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+	}
 
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		terminalSpinner.Start()
+	if provider == "gke" {
+		configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
+	} else {
+		configPath = "ansible/roles/kraken.config/files/config.yaml "
+		provider = "aws"
+	}
 
-		cli := getClient()
+	err := os.MkdirAll(filepath.Dir(generatePath), 0777)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
+func runFunc(cmd *cobra.Command, args []string) {
+	terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
+	terminalSpinner.Start()
 
-		terminalSpinner.Stop()
+	cli := getClient()
 
-		command := []string{
-			"bash",
-			"-c",
-			"cp ansible/roles/kraken.config/files/config.yaml " + generatePath,
-		}
+	backgroundCtx := getContext()
+	pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
+	terminalSpinner.Stop()
 
-		outputLocation = filepath.Dir(generatePath)
-		resp, statusCode, timeout := containerAction(cli, ctx, command, "")
-		defer timeout()
+	command := []string{
+		"bash",
+		"-c",
+		"cp " + configPath + generatePath,
+	}
 
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
+	ctx, cancel := getTimedContext()
+	defer cancel()
 
-		if statusCode != 0 {
-			fmt.Println("Error generating config at " + generatePath)
+	outputLocation = filepath.Dir(generatePath)
+	resp, statusCode, timeout := containerAction(cli, ctx, command, "")
+	defer timeout()
+
+	out, err := printContainerLogs(
+		cli,
+		resp,
+		backgroundCtx,
+	)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	if statusCode != 0 {
+		fmt.Println("Error generating config at " + generatePath)
+		fmt.Printf("%s", out)
+	} else {
+		fmt.Println("Generated " + provider + " config at " + generatePath)
+		if logSuccess {
 			fmt.Printf("%s", out)
-		} else {
-			fmt.Println("Generated config at " + generatePath)
-			if logSuccess {
-				fmt.Printf("%s", out)
-			}
 		}
+	}
 
-		ExitCode = statusCode
-	},
+	ExitCode = statusCode
 }
 
 func init() {
 	RootCmd.AddCommand(generateCmd)
+	generateCmd.PersistentFlags().StringVarP(
+		&provider,
+		"provider",
+		"p",
+		"aws",
+		"specify a provider for config defaults")
 }

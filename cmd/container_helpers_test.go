@@ -1,15 +1,9 @@
 package cmd
 
-
-
-
-import(
-	"testing"
+import (
 	"os"
+	"testing"
 )
-
-
-
 
 func TestAddEnvironmentVarIfNotEmpty(t *testing.T) {
 	// consider random generator in the future for testing.
@@ -35,14 +29,14 @@ func TestAddEnvironmentVarIfNotEmpty(t *testing.T) {
 		t.Error("For", envs, "expetected length to be", 4, "got", len(envs))
 	}
 
-	badEnvVar := keyThree+"="
+	badEnvVar := keyThree + "="
 	for _, s := range envs {
 		if s == badEnvVar {
 			t.Error("For", envs, "did not expect to find key", badEnvVar, "but found it.")
 		}
 	}
 
-	goodEnvVar := keyTwo+"="+valTwo
+	goodEnvVar := keyTwo + "=" + valTwo
 	goodEnvRes := false
 	for _, s := range envs {
 		if s == goodEnvVar {
