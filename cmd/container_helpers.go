@@ -26,6 +26,7 @@ import (
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,7 +34,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"log"
 )
 
 func base64EncodeAuth(auth types.AuthConfig) (string, error) {
@@ -45,26 +45,26 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 }
 
 func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
-  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-  reader, err := cli.ContainerLogs(
+	reader, err := cli.ContainerLogs(
 		ctx,
 		resp.ID,
 		types.ContainerLogsOptions{
 			ShowStdout: true,
-			Follow: true,
+			Follow:     true,
 		})
-  if err != nil {
-      log.Fatal(err)
-  }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	defer reader.Close()
 
-  _, err = io.Copy(os.Stdout, reader)
-  if err != nil && err != io.EOF {
-      log.Fatal(err)
-  }
+	_, err = io.Copy(os.Stdout, reader)
+	if err != nil && err != io.EOF {
+		log.Fatal(err)
+	}
 }
 
 func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) ([]byte, error) {
@@ -152,14 +152,13 @@ func containerEnvironment() []string {
 }
 
 // append to slice if environment variable (key) has a non-empty value.
-func appendIfValueNotEmpty(envs []string, envKey string ) ([]string){
+func appendIfValueNotEmpty(envs []string, envKey string) []string {
 	if env := os.Getenv(envKey); len(env) > 0 {
-		return append(envs, envKey+"=" + env)
+		return append(envs, envKey+"="+env)
 	}
 
 	return envs
 }
-
 
 func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 	config_envs := []string{}
@@ -345,8 +344,8 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 
 	if verbosity == true {
 		backgroundCtx := getContext()
-		streamLogs(cli,resp,backgroundCtx,)
- }
+		streamLogs(cli, resp, backgroundCtx)
+	}
 
 	statusCode, err := cli.ContainerWait(ctx, resp.ID)
 	if err != nil {
@@ -468,6 +467,6 @@ func writeLog(logFilePath string, out []byte) {
 
 func getContainerName() string {
 	// only supports first cluster name right now
-	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}] interface{})
+	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}]interface{})
 	return os.ExpandEnv(firstCluster["name"].(string))
 }
