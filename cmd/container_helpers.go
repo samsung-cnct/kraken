@@ -44,7 +44,7 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 	return base64.URLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func streamAllTheLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
+func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
@@ -53,6 +53,7 @@ func streamAllTheLogs(cli *client.Client, resp types.ContainerCreateResponse, ct
 			resp.ID,
 			types.ContainerLogsOptions{
 				ShowStdout: true,
+				Follow: true,
 			})
     if err != nil {
         log.Fatal(err)
@@ -339,6 +340,11 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		fmt.Println(err)
 		panic(err)
 	}
+
+	if verbosity == true {
+		backgroundCtx := getContext()
+		streamLogs(cli,resp,backgroundCtx,)
+ }
 
 	statusCode, err := cli.ContainerWait(ctx, resp.ID)
 	if err != nil {

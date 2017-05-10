@@ -53,41 +53,23 @@ var upCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		// terminalSpinner.Start()
+		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
+		terminalSpinner.Start()
 
 		cli := getClient()
 
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
+		terminalSpinner.Stop()
 
-///////////////////////////////
-		// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer cancel()
-
-		// client, _ := NewEnvClient()
-		// reader, err := cli.ContainerLogs(ctx, "container_id", types.ContainerLogsOptions{})
-		// if err != nil {
-		//     log.Fatal(err)
-		// }
-		//
-		// _, err = io.Copy(os.Stdout, reader)
-		// if err != nil && err != io.EOF {
-		//     log.Fatal(err)
-		// }
-
-//////////////////////////////////////
-
-
-		// terminalSpinner.Stop()
-
-		// terminalSpinner.Prefix = "Bringing up cluster '" + getContainerName() + "' "
-		// terminalSpinner.Start()
+		if verbosity == false {
+			terminalSpinner.Prefix = "Bringing up cluster '" + getContainerName() + "' "
+			terminalSpinner.Start()
+		}
 
 		command := []string{
 			"ansible-playbook",
-			// verbosity,
 			"-i",
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
@@ -97,40 +79,21 @@ var upCmd = &cobra.Command{
 			upStagesList,
 		}
 
-		fmt.Println(command)
-
 		ctx, cancel := getTimedContext()
 		defer cancel()
 
-		// reader, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout:true})
-		// if err != nil {
-		//     log.Fatal(err)
-		// }
-		//
-		// _, err = io.Copy(os.Stdout, reader)
-		// if err != nil && err != io.EOF {
-		//     log.Fatal(err)
-		// }
-
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
 		defer timeout()
-		streamAllTheLogs(
-		cli,
-		resp,
-		backgroundCtx,
-	  )
 
-		// terminalSpinner.Stop()
+		if verbosity == false {
+			terminalSpinner.Stop()
+		}
+
 		out, err := printContainerLogs(
 			cli,
 			resp,
 			backgroundCtx,
 		)
-		// fmt.Println("now printing out: ")
-		// fmt.Println(string(out[:len(out)]))   this is working, it just spits out everything at the end
-		// fmt.Println("now printing err: ")
-		// fmt.Println(err)
-
 
 		if err != nil {
 			fmt.Println(err)

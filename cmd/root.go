@@ -34,7 +34,7 @@ var ExitCode int
 var keepAlive bool
 var logPath string
 var logSuccess bool
-var verbosity string
+var verbosity bool
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
@@ -123,11 +123,11 @@ func init() {
 		"x",
 		false,
 		"Display full action logs on success")
-	RootCmd.PersistentFlags().StringVarP(
+	RootCmd.PersistentFlags().BoolVarP(
 		&verbosity,
 		"verbosity",
 		"b",
-		"-vvv",
+		false,
 		"Verbose output")
 }
 
