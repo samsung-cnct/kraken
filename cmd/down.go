@@ -62,8 +62,10 @@ var downCmd = &cobra.Command{
 
 		terminalSpinner.Stop()
 
-		terminalSpinner.Prefix = "Bringing down cluster '" + getContainerName() + "' "
-		terminalSpinner.Start()
+		if verbosity == false {
+			terminalSpinner.Prefix = "Bringing down cluster '" + getContainerName() + "' "
+			terminalSpinner.Start()
+		}
 
 		command := []string{
 			"ansible-playbook",
@@ -81,7 +83,9 @@ var downCmd = &cobra.Command{
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
 		defer timeout()
 
-		terminalSpinner.Stop()
+		if verbosity == false {
+			terminalSpinner.Stop()
+		}
 
 		out, err := printContainerLogs(
 			cli,

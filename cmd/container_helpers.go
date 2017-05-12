@@ -26,6 +26,7 @@ import (
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -41,6 +42,29 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	reader, err := cli.ContainerLogs(
+		ctx,
+		resp.ID,
+		types.ContainerLogsOptions{
+			ShowStdout: true,
+			Follow:     true,
+		})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer reader.Close()
+
+	_, err = io.Copy(os.Stdout, reader)
+	if err != nil && err != io.EOF {
+		log.Fatal(err)
+	}
 }
 
 func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) ([]byte, error) {
@@ -316,6 +340,11 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		fmt.Println(err)
 		panic(err)
+	}
+
+	if verbosity == true {
+		backgroundCtx := getContext()
+		streamLogs(cli, resp, backgroundCtx)
 	}
 
 	statusCode, err := cli.ContainerWait(ctx, resp.ID)

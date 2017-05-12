@@ -63,8 +63,10 @@ var upCmd = &cobra.Command{
 
 		terminalSpinner.Stop()
 
-		terminalSpinner.Prefix = "Bringing up cluster '" + getContainerName() + "' "
-		terminalSpinner.Start()
+		if verbosity == false {
+			terminalSpinner.Prefix = "Bringing up cluster '" + getContainerName() + "' "
+			terminalSpinner.Start()
+		}
 
 		command := []string{
 			"ansible-playbook",
@@ -79,16 +81,20 @@ var upCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
+
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
 		defer timeout()
 
-		terminalSpinner.Stop()
+		if verbosity == false {
+			terminalSpinner.Stop()
+		}
 
 		out, err := printContainerLogs(
 			cli,
 			resp,
 			backgroundCtx,
 		)
+
 		if err != nil {
 			fmt.Println(err)
 			panic(err)
