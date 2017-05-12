@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -74,7 +75,7 @@ var upCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=up ",
+			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
 			"--tags",
 			upStagesList,
 		}

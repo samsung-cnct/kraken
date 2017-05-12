@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -73,7 +74,7 @@ var downCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/down.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=down ",
+			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=down ",
 			"--tags",
 			downStagesList,
 		}

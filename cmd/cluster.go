@@ -21,6 +21,7 @@ import (
 var userName string
 var password string
 var k2ConfigPath string
+var configForced bool
 
 // clusterCmd represents the cluster command
 var clusterCmd = &cobra.Command{
@@ -47,4 +48,10 @@ func init() {
 		"p",
 		"",
 		"registry password")
+	clusterCmd.PersistentFlags().BoolVarP(
+		&configForced,
+		"force",
+		"f",
+		false,
+		"true if operation should be proceed even if config is depreciated (default false)")
 }
