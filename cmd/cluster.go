@@ -53,5 +53,5 @@ func init() {
 		"force",
 		"f",
 		false,
-		"true if operation should be proceed even if config is depreciated (default false)")
+		"true if operation should be proceed even if config is deprecated (default false)")
 }
