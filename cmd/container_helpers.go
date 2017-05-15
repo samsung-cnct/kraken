@@ -635,3 +635,15 @@ func getContainerName() string {
 		return "cluster-name-missing"
 	}
 }
+
+func getMinorMajorVersion() string {
+	//Currently hardcoded to use the master node and grab the version.
+	//This will be removed when Nathan's PR gets merged and will use his function to get the minorMajor version
+	OneCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}]interface{})
+	nodePool := OneCluster["nodePools"].([]interface{})[2].(map[interface{}]interface{})
+	kubeConfig := nodePool["kubeConfig"].(map[interface{}]interface{})
+	version := os.ExpandEnv(kubeConfig["version"].(string))
+	splitVersion := strings.SplitN(version, ".", 3)
+	minorVersion := strings.Join(splitVersion[0:2], ".")
+	return minorVersion
+}

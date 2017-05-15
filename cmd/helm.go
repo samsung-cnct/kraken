@@ -26,7 +26,7 @@ import (
 var helmCmd = &cobra.Command{
 	Use:   "helm",
 	Short: "Use Kubernetes Helm with K2 cluster",
-	Long: `Use Kubernetes Helm with the  K2 
+	Long: `Use Kubernetes Helm with the  K2
 	cluster configured by the specified yaml file`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if _, err := os.Stat(k2Config); os.IsNotExist(err) {
@@ -43,29 +43,58 @@ var helmCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		command := []string{"helm"}
-		for _, element := range args {
-			command = append(command, strings.Split(element, " ")...)
+		helmExists := func() int {
+			command := []string{"test", "-f", "/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"}
+			 ctx, cancel := getTimedContext()
+			 defer cancel()
+			 resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+			 defer timeout()
+
+			 out, err := printContainerLogs(
+				 cli,
+				 resp,
+				 backgroundCtx,
+			 )
+			 if err != nil {
+				 fmt.Println(err)
+				 panic(err)
+			 }
+
+			 fmt.Printf("%s", out)
+
+			 ExitCode = statusCode
+			 return ExitCode
+ 	 	}
+
+		if helmExists() == 0 {
+			command := []string{"/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"}
+			for _, element := range args {
+				command = append(command, strings.Split(element, " ")...)
+			}
+
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
+
+			out, err := printContainerLogs(
+				cli,
+				resp,
+				backgroundCtx,
+			)
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+
+			fmt.Printf("%s", out)
+
+			ExitCode = statusCode
+
+		} else {
+			fmt.Println("No helm version available for k8s version " + getMinorMajorVersion())
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
-		defer timeout()
-
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-
-		fmt.Printf("%s", out)
-
-		ExitCode = statusCode
 	},
 }
 
