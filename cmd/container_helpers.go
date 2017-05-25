@@ -467,6 +467,11 @@ func writeLog(logFilePath string, out []byte) {
 
 func getContainerName() string {
 	// only supports first cluster name right now
-	firstCluster := clusterConfig.Get("deployment.clusters").([]interface{})[0].(map[interface{}]interface{})
-	return os.ExpandEnv(firstCluster["name"].(string))
+	clusters := clusterConfig.Get("deployment.clusters")
+	if clusters != nil {
+		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
+		return os.ExpandEnv(firstCluster["name"].(string))
+	} else {
+		return "cluster-name-missing"
+	}
 }
