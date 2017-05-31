@@ -10,8 +10,15 @@ by default.
 ### Requirements
 Docker must be installed on the machine where you run k2cli, and your user must have permissions to run it.
 
-### Fetching the official build
-The latest official build can be found here: https://github.com/samsung-cnct/k2cli/releases. You should use the latest version unless you have a specific reason to use a different version.
+### Installing/Fetching the official build
+Installation on OSX can happen via Brew by:
+
+```
+brew tap 'samsung-cnct/homebrew-k2cli'
+brew install k2cli
+```
+
+Otherwise, the latest official build can be found here: https://github.com/samsung-cnct/k2cli/releases. You should use the latest version unless you have a specific reason to use a different version.
 
 ### Building a configuration file
 K2 uses a yaml configuration file for all aspects of the both the Kubernetes cluster and the infrastructure that is
