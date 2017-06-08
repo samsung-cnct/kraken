@@ -19,8 +19,113 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"regexp"
 	"strings"
 )
+
+var kubernetesVersion string
+
+//  This is REALLY bad.  Do NOT do things like this unless compelled (and then be sure to complain)
+func fetchNodePools() ([]interface{}, error) {
+	clusters_i := clusterConfig.Get("deployment.clusters")
+	clusters, okay := clusters_i.([]interface{})
+	if !okay {
+		fmt.Println(clusters_i)
+		return nil, errors.New("Cluster conversion to array failed.")
+	}
+
+	c0_i := clusters[0]
+	c0, okay := c0_i.(map[interface{}]interface{})
+	if !okay {
+		fmt.Println(c0_i)
+		return nil, errors.New("Cluster 0 conversion to map failed.")
+	}
+
+	nodePools_i := c0["nodePools"]
+	if nodePools_i == nil {
+		fmt.Println(c0)
+		return nil, errors.New("nodePool not found for cluster 0")
+	}
+	nodePools, okay := nodePools_i.([]interface{})
+	if nodePools == nil {
+		fmt.Println(nodePools_i)
+		return nil, errors.New("nodePools conversion failed")
+	}
+	return nodePools, nil
+}
+
+func fetchMasterNodePool() (masterNodePool map[interface{}]interface{}, err error) {
+	nodePools, err := fetchNodePools()
+	if err != nil {
+		return nil, err
+	}
+
+	for idx, nodePool_i := range nodePools {
+		nodePool, okay := nodePool_i.(map[interface{}]interface{})
+		if !okay {
+			fmt.Println(nodePool_i)
+			return nil, errors.New("nodePool " + string(idx) + " in cluster 0 conversion to map failed.")
+		}
+		if nodePool["name"] == "master" {
+			masterNodePool = nodePool
+			break
+		}
+	}
+
+	if masterNodePool == nil {
+		fmt.Println(nodePools)
+		return nil, errors.New("Master node pool not found for cluster 0")
+	}
+
+	return masterNodePool, nil
+}
+
+func setMasterKubectlVersion() error {
+	masterNodePool, err := fetchMasterNodePool()
+	if err != nil {
+		return err
+	}
+
+	kubeConfig_i := masterNodePool["kubeConfig"]
+	if kubeConfig_i == nil {
+		fmt.Println(masterNodePool)
+		return errors.New("Master node pool for cluster 0 lacks kubeConfig")
+	}
+	kubeConfig, okay := kubeConfig_i.(map[interface{}]interface{})
+	if !okay {
+		fmt.Println(kubeConfig_i)
+		return errors.New("Cluster 0 master nodePool kubeConfig conversion to map failed.")
+	}
+
+	version_i := kubeConfig["version"]
+	if version_i == nil {
+		fmt.Println(kubeConfig)
+		return errors.New("Cluster 0 master nodePool kubeConfig lacks version")
+	}
+
+	version, okay := version_i.(string)
+	if !okay {
+		fmt.Println(kubeConfig)
+		return errors.New("Cluster 0 master nodePool kubeConfig version conversion to string failed.")
+	}
+
+	okay, _ = regexp.MatchString(`^v[0-9]+\.[0-9]+\.[0-9]+$`, version)
+	if !okay {
+		fmt.Println(version)
+		return errors.New("Cluster 0 master nodePool kubeConfig version string invalid.")
+	}
+
+	re := regexp.MustCompile(`^v[0-9]+\.[0-9]+`)
+	// Not checking for okay -- this was implied by validation
+	kubernetesVersion = re.FindString(version)
+
+	if kubernetesVersion == "" {
+		return errors.New("kubeConfig version empty or not found for first cluster master nodepool.")
+	}
+
+	return nil
+
+}
 
 // kubectlCmd represents the kubectl command
 var kubectlCmd = &cobra.Command{
@@ -35,7 +140,8 @@ var kubectlCmd = &cobra.Command{
 
 		initK2Config(k2Config)
 
-		return nil
+		err := setMasterKubectlVersion()
+		return err
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli := getClient()
@@ -43,7 +149,7 @@ var kubectlCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		command := []string{"kubectl"}
+		command := []string{"/opt/cnct/kubernetes/" + kubernetesVersion + "/bin/kubectl"}
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}
