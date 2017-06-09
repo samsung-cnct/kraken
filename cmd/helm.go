@@ -15,11 +15,14 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 // helmCmd represents the helm command
@@ -43,31 +46,52 @@ var helmCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		helmExists := func() int {
+		//check to see if path exists, else get latest
+		helmPath := func() string {
 			command := []string{"test", "-f", "/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"}
-			 ctx, cancel := getTimedContext()
-			 defer cancel()
-			 resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
-			 defer timeout()
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			_, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
 
-			 out, err := printContainerLogs(
-				 cli,
-				 resp,
-				 backgroundCtx,
-			 )
-			 if err != nil {
-				 fmt.Println(err)
-				 panic(err)
-			 }
+			// unless command return 0 (filepath exists), assign path to latest
+			path := "/opt/cnct/kubernetes/latest/bin/helm"
+			if statusCode == 0 {
+				path = "/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"
+			}
+			return path
+		}
 
-			 fmt.Printf("%s", out)
+		// Grab latest helm version to let user know which one it is
+		//this only happens when there is no valid version of helm for k8s
+		latestHelmVersion := func() string {
+			command := []string{"printenv", "K8S_HELM_VERSION_LATEST"}
+			for _, element := range args {
+				command = append(command, strings.Split(element, " ")...)
+			}
 
-			 ExitCode = statusCode
-			 return ExitCode
- 	 	}
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			resp, _, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
 
-		if helmExists() == 0 {
-			command := []string{"/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"}
+			out, err := printContainerLogs(
+				cli,
+				resp,
+				backgroundCtx,
+			)
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+
+			s := string(out)
+			return s
+		}
+
+		//Run helm if valid path or if user wants to run latest helm
+		runHelm := func() int {
+			command := []string{helmPath()}
 			for _, element := range args {
 				command = append(command, strings.Split(element, " ")...)
 			}
@@ -90,11 +114,30 @@ var helmCmd = &cobra.Command{
 			fmt.Printf("%s", out)
 
 			ExitCode = statusCode
+			return ExitCode
 
-		} else {
-			fmt.Println("No helm version available for k8s version " + getMinorMajorVersion())
 		}
 
+		// Get user input if no helm for k8s version
+		if strings.Contains(helmPath(), getMinorMajorVersion()) {
+			runHelm()
+		} else {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("No version of helm available for Kubernetes " + getMinorMajorVersion())
+			fmt.Printf("Would you like to run the latest version of helm %s? [Y/N]: ", latestHelmVersion())
+
+			response, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatal(err)
+			}
+			response = strings.ToLower(strings.TrimSpace(response))
+
+			if response == "y" {
+				runHelm()
+			} else if response == "n" {
+				fmt.Println("No version of Helm running")
+			}
+		}
 	},
 }
 
