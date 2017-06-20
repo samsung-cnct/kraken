@@ -32,6 +32,9 @@ explain why.
 
 
 **Environment**:
+
+Please be sure not to submit any confidential information (e.g. ssh keys, provider secrets, etc.) as issues are publicly accessible.
+
 - **Environment variables** (e.g. `env | grep 'KRAKEN_`):
 - **Configuration files (`~/.kraken/config.yaml` or the file passed to `k2cli --config`) **:
 - **Others**:
