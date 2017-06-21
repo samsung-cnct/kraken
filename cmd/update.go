@@ -18,13 +18,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
-
-var updateStagesList string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
@@ -49,6 +46,8 @@ var updateCmd = &cobra.Command{
 			panic(err)
 		}
 
+		// if args[1]
+
 		initK2Config(k2ConfigPath)
 
 		return nil
@@ -67,16 +66,15 @@ var updateCmd = &cobra.Command{
 		terminalSpinner.Prefix = "Updating cluster '" + getContainerName() + "' "
 		terminalSpinner.Start()
 
+		nodepools := args[1]
+
 		command := []string{
 			"ansible-playbook",
 			"-i",
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=update ",
-			"--tags",
-			// "--nodepools",
-			updateStagesList,
+			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + nodepools,
 		}
 
 		ctx, cancel := getTimedContext()
@@ -118,10 +116,4 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(updateCmd)
-	updateCmd.PersistentFlags().StringVarP(
-		&updateStagesList,
-		"stages",
-		"s",
-		"all",
-		"comma-separated list of K2 stages to run. Run 'k2cli help topic stages' for more info.")
 }
