@@ -45,7 +45,7 @@ be used:
 AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical
 structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
 
-The following fields are in the `definitions` section of the configuration file. 
+The following fields are in the `definitions` section of the configuration file.
 In lieu of specifying all of the following, you may just put your credentials file and K2 will grab the authentication specs from there.
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
 `providerConfig.authentication.accessKey`. This can be either set to the literal value, or to an environment
@@ -153,6 +153,17 @@ To install the Kafka chart maintained by Samsung CNCT.
 ```
 KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kraken/<cluster name>/.helm helm install atlas/kafka
 ```
+
+### Updating your cluster
+You may update your nodepools with k2cli. To do so, please make desired changes in your configuration file, and then run k2cli's cluster upgrade command, as described below, pointing to your configuration file.
+
+#### Running K2cli update
+You can specify different versions of Kubernetes in each nodepool. This may affect the compatibility of your cluster's K2-provided services. You can also update nodepool counts and instance types. Specify which nodepools you wish to update with a comma-separated list of the names of the nodepools. Please be patient; this process may take a while; about ten minutes per node.
+
+- Step 1: Make appropriate changes to configuration file
+- Step 2: Run
+```bash
+k2cli cluster update ${HOME}/k2configs/config.yaml <your,nodepools,here>
 
 ### Destroying the running cluster
 While not something to be done in production, during development when you are done with your cluster (or with a quickstart) it's

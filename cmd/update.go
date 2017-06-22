@@ -36,6 +36,10 @@ var updateCmd = &cobra.Command{
 			k2ConfigPath = os.ExpandEnv(args[0])
 		}
 
+		if len(args) == 1 {
+			return errors.New("You must add a comma-separated list of nodepools to this command, for example: \n k2cli cluster update masterNodes,clusterNodes,otherNodes")
+		}
+
 		_, err := os.Stat(k2ConfigPath)
 		if os.IsNotExist(err) {
 			return errors.New("File " + k2ConfigPath + " does not exist!")
@@ -45,8 +49,6 @@ var updateCmd = &cobra.Command{
 			fmt.Println(err)
 			panic(err)
 		}
-
-		// if args[1]
 
 		initK2Config(k2ConfigPath)
 
@@ -77,8 +79,8 @@ var updateCmd = &cobra.Command{
 			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + nodepools,
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
+		ctx := getContext()
+		// defer cancel()
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
 		defer timeout()
 
