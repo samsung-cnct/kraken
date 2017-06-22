@@ -155,15 +155,16 @@ KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kr
 ```
 
 ### Updating your cluster
-You may update your nodepools with k2cli. To do so, please make desired changes in your configuration file, and then run k2cli's cluster upgrade command, as described below, pointing to your configuration file.
+You may update your nodepools with k2cli, specifically the Kubernetes version, the nodepool counts and instance types. To do so, please make desired changes in your configuration file, and then run k2cli's cluster update command, as described below, pointing to your configuration file.
 
 #### Running K2cli update
-You can specify different versions of Kubernetes in each nodepool. This may affect the compatibility of your cluster's K2-provided services. You can also update nodepool counts and instance types. Specify which nodepools you wish to update with a comma-separated list of the names of the nodepools. Please be patient; this process may take a while; about ten minutes per node.
+You can specify different versions of Kubernetes in each nodepool. Note: this may affect the compatibility of your cluster's K2-provided services. Specify which nodepools you wish to update with a comma-separated list of the names of the nodepools. Please be patient; this process may take a while; about ten minutes per node.
 
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
 ```bash
 k2cli cluster update ${HOME}/k2configs/config.yaml <your,nodepools,here>
+```
 
 ### Destroying the running cluster
 While not something to be done in production, during development when you are done with your cluster (or with a quickstart) it's

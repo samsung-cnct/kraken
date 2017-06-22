@@ -37,7 +37,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		if len(args) == 1 {
-			return errors.New("You must add a comma-separated list of nodepools to this command, for example: \n k2cli cluster update masterNodes,clusterNodes,otherNodes")
+			return errors.New("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to this command, for example: \n k2cli cluster update masterNodes,clusterNodes,otherNodes")
 		}
 
 		_, err := os.Stat(k2ConfigPath)
