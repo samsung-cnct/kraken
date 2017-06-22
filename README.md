@@ -24,19 +24,19 @@ Otherwise, the latest official build can be found here: https://github.com/samsu
 K2 uses a yaml configuration file for all aspects of the both the Kubernetes cluster and the infrastructure that is
 running it. To build a generic AWS configuration file that has a large number of sensible defaults, you can run:
 ```
-./k2cli generate
+k2cli generate
 ```
 which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** The `generate` subcommand will overwrite this file if it currently exists.  
 
 Or you may specify a path with:
 ```
-./k2cli generate ${HOME}/k2configs/
+k2cli generate ${HOME}/k2configs/
 ```
 which will create a file at `${HOME}/k2configs/config.yaml`.
 
 For a GKE configuration file, run:
 ```
-./k2cli generate --provider gke
+k2cli generate --provider gke
 ```
 
 #### Required Configuration Changes
@@ -88,11 +88,11 @@ This setting effects the type and total number of nodes in your cluster that can
 To create your first cluster, run the following command. (This assumes you have a configuration built as described above.)
 If you have used the default config location:
 ```
-./k2cli cluster up
+k2cli cluster up
 ```
 Or you may specify the location of the config file:
 ```
-./k2cli cluster up ${HOME}/k2configs/config.yaml
+k2cli cluster up ${HOME}/k2configs/config.yaml
 ```
 This will take anywhere from five to twenty minutes depending on how AWS is feeling when you execute this command. When
 complete the cluster will exist in its own VPC and will be accesible via the `tool` subcommands. The output artifacts
@@ -116,23 +116,23 @@ If you have specified a path for your config.yaml, then you will need to include
 To see all nodes in your Kubernetes cluster (and specify path to config file):
 
 ```
-./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
+k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
 ```
 
 To see all installed applications across all namespaces:
 ```
-./k2cli tool kubectl -- get pods --all-namespaces
+k2cli tool kubectl -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
 To list all installed charts with default config.yaml location:
 ```
-./k2cli tool helm list
+k2cli tool helm list
 ```
 
 To install the Kafka chart maintained by Samsung CNCT.
 ```
-./k2cli tool helm install atlas/kafka
+k2cli tool helm install atlas/kafka
 ```
 
 ### Working with your cluster (using host installed tools)
@@ -168,7 +168,7 @@ KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kr
 While not something to be done in production, during development when you are done with your cluster (or with a quickstart) it's
 best to clean up your resources. To destroy the running cluster from this guide, simply run:
 ```
-./k2cli cluster down ${HOME}/k2configs/config.yaml
+k2cli cluster down ${HOME}/k2configs/config.yaml
 ```
 
 **Note:** if you have specified an '--output' directory during the creation command, make sure you specify it here or the cluster
