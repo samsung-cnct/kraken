@@ -12,7 +12,7 @@ podTemplate(label: 'k2cli', containers: [
                 stage('checkout'){
                     checkout scm
                     sh 'go version'
-                    git url: 'https://github.com/samsung-cnct/k2cli'
+                    // git url: 'https://github.com/samsung-cnct/k2cli'
                 }
 
                 stage('build'){
