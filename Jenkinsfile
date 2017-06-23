@@ -5,14 +5,23 @@ podTemplate(label: 'k2cli', containers: [
         node('k2cli') {
             container('golang'){
 
-              stage('hello!') {
-                  echo 'hello world!'
-              }
+                stage('hello!') {
+                    echo 'hello world!'
+                }
 
-              stage('checkout'){
-                  checkout scm
-                  sh 'go version'            
-              }
+                stage('checkout'){
+                    checkout scm
+                    sh 'go version'
+                    git url: 'https://github.com/samsung-cnct/k2cli'
+                }
+
+                stage('build'){
+                    sh 'go build -v'
+                }
+
+                stage('test') {
+                    sh 'go test -v'
+                }
 
             }
         }
