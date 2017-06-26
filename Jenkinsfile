@@ -1,6 +1,6 @@
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'golang:1.7.5', ttyEnabled: true, command: 'cat')
+    containerTemplate(name: 'golang', image: 'golang:latest   ', ttyEnabled: true, command: 'cat')
     ]) {
         node('k2cli') {
             container('golang'){
@@ -12,17 +12,19 @@ podTemplate(label: 'k2cli', containers: [
                 stage('checkout'){
                     checkout scm
                     sh 'go version'
-                    // git url: 'https://github.com/samsung-cnct/k2cli'
+
                 }
 
                 stage('build'){
-                    sh 'go build -v'
+                    sh 'go get -v -d -t ./... || true'
+                    sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v'
                 }
 
-                stage('test') {
-                    sh 'go test -v'
-                }
+                // stage('test') {
+                //     sh 'go test -v'
+                // }
 
             }
+
         }
     }
