@@ -6,7 +6,7 @@ podTemplate(label: 'k2cli', containers: [
             container('golang'){
 
                 stage('hello!') {
-                    echo 'hello world!'
+                    echo 'hello beautiful world!'
                 }
 
                 stage('checkout'){
