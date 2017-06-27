@@ -4,25 +4,40 @@ podTemplate(label: 'k2cli', containers: [
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]) {
         node('k2cli') {
-            container('golang'){
+            container('golang') {
 
                 stage('hello!') {
                     echo 'hello world!'
                 }
 
-                stage('checkout'){
+                stage('checkout') {
                     checkout scm
                     sh 'go version'
-
-
                 }
 
-                stage('build'){
+                stage('build') {
                     sh 'go get -v -d -t ./... || true'
                     sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
+
+                stage('fetch credentials') {
+                    sh 'build-scripts/fetch-credentials.sh'
+                }
+
                 stage('aws config generation') {
                     sh './k2cli generate'
+                }
+
+                stage('cat config file') {
+                    sh 'cat cluster/aws/config.yaml'
+                }
+
+                stage('update generated aws config') {
+                    sh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                }
+
+                stage("read config file again") {
+                    sh 'cat cluster/aws/config.yaml'
                 }
 
             }
