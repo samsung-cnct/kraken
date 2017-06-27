@@ -31,10 +31,16 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('aws config generation') {
                     echo WORKSPACE
-                    sh 'cd env.WORKSPACE && k2cli generate'
+                    sh 'cd WORKSPACE && k2cli generate'
 
                 }
             }
 
         }
     }
+
+// def customContainer(String name, Closure body) {
+//   withEnv(["CONTAINER_NAME=$name"]) {
+//     body()
+//   }
+// }
