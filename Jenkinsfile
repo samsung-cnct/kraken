@@ -30,8 +30,9 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('aws config generation') {
+                    echo WORKSPACE
                     sh 'k2cli generate'
-                    sh 'cat ${HOME}/.kraken/config.yaml'
+
                 }
             }
 
