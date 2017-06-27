@@ -22,8 +22,8 @@ podTemplate(label: 'k2cli', containers: [
                     sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v'
                 }
                 stage('aws config generation') {
-                    echo WORKSPACE
-                    sh "cd ${env.WORKSPACE} && k2cli generate"
+                    sh 'ls -R'
+                    sh './k2cli generate'
 
                 }
 
