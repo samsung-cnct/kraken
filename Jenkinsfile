@@ -21,20 +21,25 @@ podTemplate(label: 'k2cli', containers: [
                     sh 'go get -v -d -t ./... || true'
                     sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v'
                 }
-
-            }
-            container('k2-tools'){
-
-                stage('checkout') {
-                    checkout scm
-                }
-
                 stage('aws config generation') {
                     echo WORKSPACE
                     sh "cd ${env.WORKSPACE} && ./k2cli generate"
 
                 }
+
             }
+            // container('k2-tools'){
+            //
+            //     stage('checkout') {
+            //         checkout scm
+            //     }
+            //
+            //     stage('aws config generation') {
+            //         echo WORKSPACE
+            //         sh "cd ${env.WORKSPACE} && ./k2cli generate"
+            //
+            //     }
+            // }
 
         }
     }
