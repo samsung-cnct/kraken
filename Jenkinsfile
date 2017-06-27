@@ -31,7 +31,7 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('aws config generation') {
                     echo WORKSPACE
-                    sh 'k2cli generate'
+                    sh 'cd ${env.WORKSPACE} && k2cli generate'
 
                 }
             }
