@@ -1,7 +1,7 @@
 podTemplate(label: 'k2cli', containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
+    // containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}'),
+    containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat')
+    // containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ]) {
         node('k2cli') {
             container('golang'){
