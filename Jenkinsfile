@@ -21,9 +21,10 @@ podTemplate(label: 'k2cli', containers: [
                     sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v'
                 }
 
-                // stage('test') {
-                //     sh 'go test -v'
-                // }
+                stage('aws config generation') {
+                    sh './k2cli generate'
+                    sh 'cat ${HOME}/.kraken/config.yaml'
+                }
 
             }
 
