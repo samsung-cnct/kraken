@@ -26,7 +26,9 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('fetch credentials') {
                     sh 'build-scripts/fetch-credentials.sh'
+                    sh 'ls -R'
                 }
+
 
                 stage('aws config generation') {
                     sh './k2cli generate'
