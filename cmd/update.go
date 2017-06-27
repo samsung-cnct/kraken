@@ -17,13 +17,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
-	"strconv"
 	"strings"
-)
 
-var updateStagesList string
+	"github.com/spf13/cobra"
+)
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
@@ -36,6 +34,10 @@ var updateCmd = &cobra.Command{
 		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
 			k2ConfigPath = os.ExpandEnv(args[0])
+		}
+
+		if len(args) == 1 {
+			return errors.New("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to this command, for example: \n k2cli cluster update masterNodes,clusterNodes,otherNodes")
 		}
 
 		_, err := os.Stat(k2ConfigPath)
@@ -53,7 +55,6 @@ var updateCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-
 		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
 		terminalSpinner.Start()
 
@@ -67,19 +68,19 @@ var updateCmd = &cobra.Command{
 		terminalSpinner.Prefix = "Updating cluster '" + getContainerName() + "' "
 		terminalSpinner.Start()
 
+		nodepools := args[1]
+
 		command := []string{
 			"ansible-playbook",
 			"-i",
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
-			"--tags",
-			updateStagesList,
+			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + nodepools,
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
+		ctx := getContext()
+		// defer cancel()
 		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
 		defer timeout()
 
@@ -117,10 +118,4 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(updateCmd)
-	updateCmd.PersistentFlags().StringVarP(
-		&updateStagesList,
-		"stages",
-		"s",
-		"all",
-		"comma-separated list of K2 stages to run. Run 'k2cli help topic stages' for more info.")
 }
