@@ -1,8 +1,8 @@
 podTemplate(label: 'k2cli', containers: [
-    // containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat')
-    // containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
-    ]) {
+    containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
+    ], volumes: [
+      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]) {
         node('k2cli') {
             container('golang'){
 
@@ -22,9 +22,7 @@ podTemplate(label: 'k2cli', containers: [
                     sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
                 stage('aws config generation') {
-                    sh 'ls -R'
                     sh './k2cli generate'
-
                 }
 
             }
@@ -43,9 +41,3 @@ podTemplate(label: 'k2cli', containers: [
 
         }
     }
-
-// def customContainer(String name, Closure body) {
-//   withEnv(["CONTAINER_NAME=$name"]) {
-//     body()
-//   }
-// }
