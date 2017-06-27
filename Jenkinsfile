@@ -19,7 +19,7 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('build'){
                     sh 'go get -v -d -t ./... || true'
-                    sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v'
+                    sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
                 stage('aws config generation') {
                     sh 'ls -R'
