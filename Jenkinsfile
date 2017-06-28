@@ -48,13 +48,36 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
             }
-            container('k2-tools'){
+            customContainer('k2-tools'){
 
                 stage('checkout') {
                     checkout scm
                 }
-            
+
             }
 
         }
     }
+def kubesh(command) {
+  if (env.CONTAINER_NAME) {
+    if ((command instanceof String) || (command instanceof GString)) {
+      command = kubectl(command)
+    }
+
+    if (command instanceof LinkedHashMap) {
+      command["script"] = kubectl(command["script"])
+    }
+  }
+
+  sh(command)
+}
+
+def kubectl(command) {
+  "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && ${command}'"
+}
+
+def customContainer(String name, Closure body) {
+  withEnv(["CONTAINER_NAME=$name"]) {
+    body()
+  }
+}
