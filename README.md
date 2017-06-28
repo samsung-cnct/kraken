@@ -111,7 +111,7 @@ To see all nodes in your Kubernetes cluster (and specify path to config file):
 
 To see all installed applications across all namespaces:
 ```
-./k2cli tool kubectl -- get pods --all-namespaces
+./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
