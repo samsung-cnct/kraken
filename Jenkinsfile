@@ -26,7 +26,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('fetch credentials') {
-                    sh 'build-scripts/fetch-credentials.sh'
+                    kubesh 'build-scripts/fetch-credentials.sh'
                     sh 'ls -R'
                 }
 
