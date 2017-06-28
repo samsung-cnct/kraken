@@ -21,8 +21,8 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('build') {
-                    sh 'go get -v -d -t ./... || true'
-                    sh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
+                    kubesh 'go get -v -d -t ./... || true'
+                    kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
 
                 stage('fetch credentials') {
