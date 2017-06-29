@@ -1,5 +1,5 @@
 # k2cli
-k2cli is a command-line interface for K2.
+k2cli is a command-line interface for [K2](https://github.com/samsung-cnct/k2).
 
 Auto-generated reference documentation can be found [here](docs/k2cli.md).
 
@@ -10,7 +10,7 @@ by default.
 ### Requirements
 Docker must be installed on the machine where you run k2cli, and your user must have permissions to run it.
 
-### Installing/Fetching the official build
+### Installing/Fetching the Official Build
 Installation on OSX can happen via Brew by:
 
 ```
@@ -20,41 +20,40 @@ brew install k2cli
 
 Otherwise, the latest official build can be found here: https://github.com/samsung-cnct/k2cli/releases. You should use the latest version unless you have a specific reason to use a different version.
 
-### Building a configuration file
+### Building a Configuration File
 K2 uses a yaml configuration file for all aspects of the both the Kubernetes cluster and the infrastructure that is
 running it. To build a generic AWS configuration file that has a large number of sensible defaults, you can run:
 ```
-./k2cli generate
+k2cli generate
 ```
-which will create a file at `${HOME}/.kraken/config.yaml`
+which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** The `generate` subcommand will overwrite this file if it currently exists.  
 
 Or you may specify a path with:
 ```
-./k2cli generate ${HOME}/k2configs/
+k2cli generate ${HOME}/k2configs/
 ```
 which will create a file at `${HOME}/k2configs/config.yaml`.
 
 For a GKE configuration file, run:
 ```
-./k2cli generate --provider gke
+k2cli generate --provider gke
 ```
 
-For an AWS cluster there are several fields that need to be set before this file can
-be used:
+#### Required Configuration Changes
+For an AWS cluster there are several fields that need to be set before this file can be used:
 *  **Cluster name**  All K2 clusters should have a unique name so their assets can be easily identified by humans in the
-AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical
-structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
+AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
 
 The following fields are in the `definitions` section of the configuration file.
 In lieu of specifying all of the following, you may just put your credentials file and K2 will grab the authentication specs from there.
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
-`providerConfig.authentication.accessKey`. This can be either set to the literal value, or to an environment
+`providerConfigs.authentication.accessKey`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
 *  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
-`providerConfig.authentication.accessSecret`. This can be either set to the literal value, or to an environment
+`providerConfigs.authentication.accessSecret`. This can be either set to the literal value, or to an environment
 variable that K2 will use.
 *  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named
-`providerConfig.authentication.credentialsFile`. This file and path must exist bind mounted to /root
+`providerConfigs.authentication.credentialsFile`. This file and path must exist bind mounted to /root
 inside the container, ie. ${HOME}/.aws/credentials.
 *  **AWS credentials profile** This is the AWS credentials profile name used to select the credentials set from the credentials
 file above.
@@ -66,29 +65,40 @@ Role | # | Type
 --- | ---  | ---
 Primary etcd cluster | 5 | t2.small
 Events etcd cluster | 5 | t2.small
-Master nodes | 3 | m3.medium
-Cluster nodes | 3 | c4.large
-Special nodes | 2 | m3.medium
+Master nodes | 3 | m4.large
+Cluster nodes | 10 | c4.large
+Special nodes | 2 | m4.large
 
 We have chosen this configuration based on our own, and other's, publicly available research. It creates an underpowered cluster
-in terms of cluster nodes, but that's an easy setting to change. The important point is to ensure that the control plane is
+in terms of cluster nodes, but that's an easy setting to change (see below). The important point is to ensure that the control plane is
 production quality.
 
-### Creating your first cluster
+#### Optional Configuration Changes (More Advanced)
+First time users looking to setup a simple evaluation cluster can skip this section and go directly to [Creating Your First Cluster](#creating-your-first-cluster).  
+
+There are a great many options that you can modify to control the deployment of your Kubernetes cluster.  Here we introduce only a couple options that may be of interest to you before starting your first cluster.  
+
+*  **Deployment Region and Availability Zones**  
+In the default generated configuration file, all clusters begin their lives in the AWS Region US East. This can be modified to locate the cluster in a region or to modify the availability zones to a value that maybe more suitable to individual use cases.  For reference, the [Global AWS Infrastructre](https://aws.amazon.com/about-aws/global-infrastructure/) provides a complete list of Regions and Availability Zones.  These fields are named `definitions.providerConfigs.region`, and `definitions.providerConfigs.subnet.az` respectively.  Note that there are actually three total `.subnet.az` values defined so that the cluster can be spread across multiple failure domains.  You should update all three to avaiability zones that are within the region selected.  
+
+*  **Cluster Node Size and Count**  
+This setting effects the type and total number of nodes in your cluster that can be used to schedule workloads on.  The default EC2 Instance type is `c4.large` and the default cluster inclues 10 of these instanes.  These fields are named  `definitions.nodeConfigs.defaultAwsClusterNode.providerConfig.type` for the instance type, and `deployment.clusters.nodePools.name: clusterNodes`, `.count: 10`, for the total number of worker nodes.  Keep in mind when setting the total number of nodes that these nodes will be spread across all the avaiability zones in your cluster.
+
+### Creating Your First Cluster
 To create your first cluster, run the following command. (This assumes you have a configuration built as described above.)
 If you have used the default config location:
 ```
-./k2cli cluster up
+k2cli cluster up
 ```
 Or you may specify the location of the config file:
 ```
-./k2cli cluster up ${HOME}/k2configs/config.yaml
+k2cli cluster up ${HOME}/k2configs/config.yaml
 ```
 This will take anywhere from five to twenty minutes depending on how AWS is feeling when you execute this command. When
 complete the cluster will exist in its own VPC and will be accesible via the `tool` subcommands. The output artifacts
 will be stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
-### Working with your cluster (using k2cli)
+### Working with Your Cluster (using k2cli)
 k2cli uses the K2 image (github.com/samsung_cnct/k2) for all of its operations. The K2 image ships with `kubectl` and `helm`
 installed and through the `k2cli tool` subcommand you can access these tools. Using the `k2cli tool` subcommand helps ensure you are
 using the correct version of the relevant CLI for your cluster.
@@ -99,30 +109,30 @@ used for deploying application, checking system status and more. See the linked 
 `helm` (https://github.com/kubernetes/helm) is a CLI for deploying and packaging applications to deploy
 to Kubernetes. See the linked documentation for more details.
 
-#### Example usage - k2cli tool kubectl
+#### Example Usage - k2cli tool kubectl
 
 If you have specified a path for your config.yaml, then you will need to include the `--config ${HOME}/path_to_config/config.yaml` option when running the following commands. Otherwise it will assume your config lives at `${HOME}/.kraken/config.yaml`
 
 To see all nodes in your Kubernetes cluster (and specify path to config file):
 
 ```
-./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
+k2cli tool kubectl --config ${HOME}/k2configs/config.yaml get nodes
 ```
 
 To see all installed applications across all namespaces:
 ```
-./k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
+k2cli tool kubectl --config ${HOME}/k2configs/config.yaml -- get pods --all-namespaces
 ```
 
 #### Example usage - k2cli tool helm
 To list all installed charts with default config.yaml location:
 ```
-./k2cli tool helm list
+k2cli tool helm list
 ```
 
 To install the Kafka chart maintained by Samsung CNCT.
 ```
-./k2cli tool helm install atlas/kafka
+k2cli tool helm install atlas/kafka
 ```
 
 ### Working with your cluster (using host installed tools)
@@ -170,7 +180,7 @@ k2cli cluster update ${HOME}/k2configs/config.yaml <your,nodepools,here>
 While not something to be done in production, during development when you are done with your cluster (or with a quickstart) it's
 best to clean up your resources. To destroy the running cluster from this guide, simply run:
 ```
-./k2cli cluster down ${HOME}/k2configs/config.yaml
+k2cli cluster down ${HOME}/k2configs/config.yaml
 ```
 
 **Note:** if you have specified an '--output' directory during the creation command, make sure you specify it here or the cluster
