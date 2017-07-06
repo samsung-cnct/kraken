@@ -9,7 +9,7 @@ podTemplate(label: 'k2cli', containers: [
       // secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
     ]) {
         node('k2cli') {
-            customcontainer('golang') {
+            customContainer('golang') {
 
                 stage('hello!') {
                     echo 'hello world!'
