@@ -19,14 +19,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/namesgenerator"
-	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,7 +30,27 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/namesgenerator"
+	"github.com/docker/docker/pkg/tlsconfig"
+	"golang.org/x/net/context"
 )
+
+var DockerAPIVersion = client.DefaultVersion
+
+// DockerClientConfig provides a simple encapsulation of parameters to construct the Docker API client
+type DockerClientConfig struct {
+	DockerHost       string
+	DockerAPIVersion string
+	TLSEnabled       bool
+	TLSVerify        bool
+	TLSCACertificate string
+	TLSCertificate   string
+	TLSKey           string
+}
 
 func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 	var buf bytes.Buffer
@@ -240,16 +256,163 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, con
 	}
 }
 
+// GetDefaultHost produces either the environment-provided host, or a sensible default.
+func (conf *DockerClientConfig) GetDefaultHost() string {
+	env := os.Getenv("DOCKER_HOST")
+	if env == "" {
+		return client.DefaultDockerHost
+	}
+	return env
+}
+
+// GetDefaultTLSVerify indicates whether TLS is enabled by the current environment.
+func (conf *DockerClientConfig) GetDefaultTLSVerify() bool {
+	env := os.Getenv("DOCKER_TLS_VERIFY")
+	if (env == "") || (env == "0") {
+		return false
+	}
+	return true
+}
+
+// GetDefaultDockerAPIVersion produces either the environment-provided Docker API version, or a sensible default.
+func (conf *DockerClientConfig) GetDefaultDockerAPIVersion() string {
+	env := os.Getenv("DOCKER_API_VERSION")
+	if env == "" {
+		return client.DefaultVersion
+	}
+	return env
+}
+
+// GetDefaultTLSCertificatePath produces either the environment-provided path to TLS certificates, or a sensible default.
+func (conf *DockerClientConfig) GetDefaultTLSCertificatePath() string {
+	env := os.Getenv("DOCKER_CERT_PATH")
+	if env == "" {
+		return os.ExpandEnv("${HOME}/.docker/")
+	}
+	return env
+}
+
+// GetDefaultTLSCACertificate produces the path to the environment-configured CA certificate for TLS verification.
+func (conf *DockerClientConfig) GetDefaultTLSCACertificate() string {
+	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "ca.pem")
+}
+
+// GetDefaultTLSCertificate produces the path to the environment-configured TLS certificate.
+func (conf *DockerClientConfig) GetDefaultTLSCertificate() string {
+	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "cert.pem")
+}
+
+// GetDefaultTLSKey produces the path to the environment-configured TLS key.
+func (conf *DockerClientConfig) GetDefaultTLSKey() string {
+	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "key.pem")
+}
+
+// Was this config derived solely by OS environment?
+// The properties of `conf` will be overridden only by command line args,
+// otherwise they're given the values of the associated Default methods.
+func (conf *DockerClientConfig) isInheritedFromEnviron() bool {
+
+	boolstr := func(val bool) string {
+		if val {
+			return "true"
+		}
+		return "false"
+	}
+
+	// This is structured like a table-test, to improve readability. Huzzah!
+	compare := map[string][]string{
+		"version": []string{conf.DockerAPIVersion, conf.GetDefaultDockerAPIVersion()},
+		"host":    []string{conf.DockerHost, conf.GetDefaultHost()},
+		"verify":  []string{boolstr(conf.TLSVerify), boolstr(conf.GetDefaultTLSVerify())},
+		"cacert":  []string{conf.TLSCACertificate, conf.GetDefaultTLSCACertificate()},
+		"cert":    []string{conf.TLSCertificate, conf.GetDefaultTLSCertificate()},
+		"key":     []string{conf.TLSKey, conf.GetDefaultTLSKey()},
+	}
+
+	// log.Printf("Evaluating config environ: %v", compare)
+
+	for _, vals := range compare {
+		if vals[0] != vals[1] {
+			return false
+		}
+	}
+
+	return true
+
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return os.IsExist(err)
+}
+
+func (conf *DockerClientConfig) isTLSActivated() bool {
+
+	components := []bool{ // all of these must be true.
+		(conf.TLSEnabled || conf.TLSVerify),
+		fileExists(conf.TLSCACertificate),
+		fileExists(conf.TLSCertificate),
+		fileExists(conf.TLSKey),
+	}
+
+	for _, val := range components {
+		if !val {
+			return false
+		}
+	}
+
+	return true
+}
+
 func getClient() *client.Client {
 
-	// This wraps the previously used client.NewClient(), with support for
-	// configuration via environment variables.
-	cli, err := client.NewEnvClient()
+	var httpClient *http.Client
+	var cli *client.Client
+	var err error
+	config := dockerClient // global
+
+	if config.isInheritedFromEnviron() {
+		// Rely on Docker's own standard environment handling.
+		cli, err = client.NewEnvClient()
+	} else {
+		// Set up an optionally TLS-enabled client, based on non-environment flags.
+		// This replicates logic of Docker's `NewEnvClient`, but allows for our
+		// command-line argument overrides.
+		if config.isTLSActivated() {
+
+			tlsClient, err := tlsconfig.Client(tlsconfig.Options{
+				CAFile:             config.TLSCACertificate,
+				CertFile:           config.TLSCertificate,
+				KeyFile:            config.TLSKey,
+				InsecureSkipVerify: !(config.TLSVerify),
+			})
+
+			if err != nil {
+				panic(err)
+			}
+			httpClient = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: tlsClient,
+				},
+			}
+
+		}
+
+		headers := map[string]string{
+			"User-Agent": fmt.Sprintf("engine-api-cli-%s", config.DockerAPIVersion),
+		}
+
+		// log.Printf("Configuring Docker client with %#v", config)
+
+		cli, err = client.NewClient(config.DockerHost, config.DockerAPIVersion, httpClient, headers)
+	}
 
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
+
+	// log.Printf("Prepared client: %#v", cli)
 
 	return cli
 }

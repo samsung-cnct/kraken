@@ -28,8 +28,8 @@ import (
 var cfgFile string
 var containerImage string
 var outputLocation string
-var dockerHost string
 var actionTimeout int
+var dockerClient DockerClientConfig
 var ExitCode int
 var keepAlive bool
 var logPath string
@@ -74,6 +74,17 @@ func init() {
 
 	RootCmd.SetHelpCommand(helpCmd)
 
+	// Populate the global with a "vanilla" Docker configuration
+	dockerClient = DockerClientConfig{
+		DockerHost:       "",
+		DockerAPIVersion: DockerAPIVersion,
+		TLSEnabled:       false,
+		TLSVerify:        false,
+		TLSCACertificate: "",
+		TLSCertificate:   "",
+		TLSKey:           "",
+	}
+
 	// Global flags
 	RootCmd.PersistentFlags().StringVarP(
 		&cfgFile,
@@ -93,12 +104,50 @@ func init() {
 		"o",
 		os.Getenv("HOME")+"/.kraken",
 		"K2 output folder")
+
+	// Specify the docker host string; typically unix:///var/run/docker.sock
 	RootCmd.PersistentFlags().StringVarP(
-		&dockerHost,
+		&dockerClient.DockerHost,
 		"docker-host",
 		"d",
-		"unix:///var/run/docker.sock",
-		"docker host address")
+		dockerClient.GetDefaultHost(),
+		"Docker host address")
+
+	// Is TLS supported on the API connection?
+	RootCmd.PersistentFlags().BoolVar(
+		&dockerClient.TLSEnabled,
+		"tls",
+		dockerClient.GetDefaultTLSVerify(),
+		"Use TLS with the remote API")
+
+	// Should TLS attempt to verify the API connection?
+	RootCmd.PersistentFlags().BoolVar(
+		&dockerClient.TLSVerify,
+		"tlsverify",
+		dockerClient.GetDefaultTLSVerify(),
+		"Use TLS and verify the remote API")
+
+	// Specify trusted CA for TLS certificates
+	RootCmd.PersistentFlags().StringVar(
+		&dockerClient.TLSCACertificate,
+		"tlscacert",
+		dockerClient.GetDefaultTLSCACertificate(),
+		"Trust certs signed only by this CA")
+
+	// Specify TLS certificate file
+	RootCmd.PersistentFlags().StringVar(
+		&dockerClient.TLSCertificate,
+		"tlscert",
+		dockerClient.GetDefaultTLSCertificate(),
+		"Path to the TLS certificate file")
+
+	// Specify TLS Key file
+	RootCmd.PersistentFlags().StringVar(
+		&dockerClient.TLSKey,
+		"tlskey",
+		dockerClient.GetDefaultTLSKey(),
+		"Path to the TLS key file")
+
 	RootCmd.PersistentFlags().IntVarP(
 		&actionTimeout,
 		"timeout",
