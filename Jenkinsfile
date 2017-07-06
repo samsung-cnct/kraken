@@ -1,16 +1,15 @@
 podTemplate(label: 'k2cli', containers: [
-    containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
+    // containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ], volumes: [
-      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
-      secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
+      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')//,
+      // hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
+      // secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
     ]) {
         node('k2cli') {
-            
-            customContainer('golang') {
+            customcontainer('golang') {
 
                 stage('hello!') {
                     echo 'hello world!'
@@ -28,28 +27,34 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('fetch credentials') {
                     kubesh 'build-scripts/fetch-credentials.sh'
-                    sh 'ls -R'
+                    kubesh 'ls -R'
                 }
 
 
                 stage('aws config generation') {
-                    sh './k2cli generate'
+                    kubesh './k2cli generate'
                 }
 
                 stage('cat config file') {
-                    sh 'cat cluster/aws/config.yaml'
+                    kubesh 'cat cluster/aws/config.yaml'
                 }
 
                 stage('update generated aws config') {
-                    sh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
 
                 stage("read config file again") {
-                    sh 'cat cluster/aws/config.yaml'
+                    kubesh 'cat cluster/aws/config.yaml'
                 }
 
             }
+            customContainer('k2-tools'){
 
+                stage('checkout') {
+                    checkout scm
+                }
+
+            }
 
         }
     }
