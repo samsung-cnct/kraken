@@ -241,8 +241,11 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, con
 }
 
 func getClient() *client.Client {
-	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-	cli, err := client.NewClient(dockerHost, "", nil, defaultHeaders)
+
+	// This wraps the previously used client.NewClient(), with support for
+	// configuration via environment variables.
+	cli, err := client.NewEnvClient()
+
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
