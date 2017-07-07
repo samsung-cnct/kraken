@@ -329,8 +329,6 @@ func (conf *DockerClientConfig) isInheritedFromEnviron() bool {
 		"key":     []string{conf.TLSKey, conf.GetDefaultTLSKey()},
 	}
 
-	// log.Printf("Evaluating config environ: %v", compare)
-
 	for _, vals := range compare {
 		if vals[0] != vals[1] {
 			return false
@@ -402,8 +400,6 @@ func getClient() *client.Client {
 			"User-Agent": fmt.Sprintf("engine-api-cli-%s", config.DockerAPIVersion),
 		}
 
-		// log.Printf("Configuring Docker client with %#v", config)
-
 		cli, err = client.NewClient(config.DockerHost, config.DockerAPIVersion, httpClient, headers)
 	}
 
@@ -411,8 +407,6 @@ func getClient() *client.Client {
 		fmt.Println(err)
 		panic(err)
 	}
-
-	// log.Printf("Prepared client: %#v", cli)
 
 	return cli
 }
