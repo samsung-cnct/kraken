@@ -4,7 +4,7 @@ podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')//,
-      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
+      // hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
       // secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
     ]) {
         node('k2cli') {
