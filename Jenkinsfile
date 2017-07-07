@@ -41,7 +41,7 @@ podTemplate(label: 'k2cli', containers: [
 
 
                 stage('aws config generation') {
-                    kubesh './k2cli generate'
+                    kubesh './k2cli generate ${HOME}/.kraken/'
                 }
 
                 stage('cat config file') {
