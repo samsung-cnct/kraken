@@ -44,17 +44,17 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh './k2cli generate ${HOME}/.kraken/'
                 }
 
-                stage('cat config file') {
-                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
-                }
+                // stage('cat config file') {
+                //     kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                // }
 
                 stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
 
-                stage("read config file again") {
-                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
-                }
+                // stage("read config file again") {
+                //     kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                // }
 
             }
 
