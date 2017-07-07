@@ -26,7 +26,7 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
 
-                
+
 
             }
             customContainer('k2-tools'){
@@ -41,7 +41,7 @@ podTemplate(label: 'k2cli', containers: [
 
 
                 stage('aws config generation') {
-                    kubesh './k2cli generate'
+                    kubesh './k2cli generate cluster/aws/config.yaml'
                 }
 
                 stage('cat config file') {
