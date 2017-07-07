@@ -26,6 +26,22 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
 
+                stage('aws config generation') {
+                    kubesh './k2cli generate ${HOME}/.kraken/'
+                }
+
+                stage('cat config file') {
+                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                }
+
+                stage('update generated aws config') {
+                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                }
+
+                stage("read config file again") {
+                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                }
+
 
 
             }
@@ -40,21 +56,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
 
-                stage('aws config generation') {
-                    kubesh './k2cli generate ${HOME}/.kraken/'
-                }
 
-                // stage('cat config file') {
-                //     kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
-                // }
-
-                stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                }
-
-                // stage("read config file again") {
-                //     kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
-                // }
 
             }
 
