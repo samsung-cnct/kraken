@@ -2,7 +2,6 @@ podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'e2e-tester', image: 'quay.io/samsung_cnct/e2etester:0.2', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')//,
@@ -76,22 +75,6 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh 'cat cluster/aws/config.yaml'
                 }
 
-            }
-            customContainer('docker') {
-                // add a docker rmi/docker purge/etc.
-                stage('docker build') {
-                    kubesh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
-                }
-
-                //only push from master.   assume we are on samsung-cnct fork
-                //  ToDo:  check for correct fork
-                stage('docker push') {
-                    if (env.BRANCH_NAME == "master") {
-                        kubesh 'docker push quay.io/samsung_cnct/k2:latest'
-                    } else {
-                        echo 'not master branch, not pushing to docker repo'
-                    }
-                }
             }
 
         }
