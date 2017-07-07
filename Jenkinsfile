@@ -31,7 +31,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('cat config file') {
-                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                    kubesh 'cat ${HOME}/.kraken/config.yaml'
                 }
 
                 stage('update generated aws config') {
@@ -39,7 +39,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage("read config file again") {
-                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
+                    kubesh 'cat ${HOME}/.kraken/config.yaml'
                 }
 
 
