@@ -32,7 +32,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage ('find home') {
-                    kubesh 'find ${HOME}/.kubernetes'
+                    kubesh 'find ${HOME}/.kraken'
                 }
 
                 stage('cat config file') {
