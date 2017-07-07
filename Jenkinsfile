@@ -53,6 +53,27 @@ podTemplate(label: 'k2cli', containers: [
                 stage('checkout') {
                     checkout scm
                 }
+                stage('fetch credentials') {
+                    kubesh 'build-scripts/fetch-credentials.sh'
+                    kubesh 'ls -R'
+                }
+
+
+                stage('aws config generation') {
+                    kubesh './k2cli generate'
+                }
+
+                stage('cat config file') {
+                    kubesh 'cat cluster/aws/config.yaml'
+                }
+
+                stage('update generated aws config') {
+                    kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                }
+
+                stage("read config file again") {
+                    kubesh 'cat cluster/aws/config.yaml'
+                }
 
             }
 
