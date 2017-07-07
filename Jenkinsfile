@@ -45,15 +45,15 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('cat config file') {
-                    kubesh 'ls ${HOME}/.kraken'
+                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
                 }
 
                 stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
 
                 stage("read config file again") {
-                    kubesh 'cat cluster/aws/config.yaml'
+                    kubesh 'cat ${HOME}/.kraken/aws/config.yaml'
                 }
 
             }
