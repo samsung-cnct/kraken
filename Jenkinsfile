@@ -26,6 +26,15 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
 
+                stage('anything') {
+                    kubesh 'touch ${HOME}/poop && ls ${HOME}'
+
+
+                }
+                stage ('unicorns') {
+                    kubesh 'ls ${HOME}'
+                }
+
                 stage('aws config generation') {
                     kubesh './k2cli generate ${HOME}/.kraken/config.yaml'
                 }
