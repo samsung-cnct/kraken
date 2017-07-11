@@ -1,10 +1,9 @@
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/configs/')
+      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/')
     ]) {
         node('k2cli') {
             customContainer('golang') {
@@ -24,43 +23,28 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('anything') {
-                    kubesh 'touch /configs/poop && ls /configs'
+                    kubesh 'touch /var/lib/docker/scratch/poop && ls /var/lib/docker/scratch'
                 }
 
                 stage('aws config generation') {
-                    kubesh './k2cli generate /configs/config.yaml'
+                    kubesh './k2cli generate /var/lib/docker/scratch/config.yaml'
                 }
 
                 stage('cat config file') {
-                    kubesh 'cat /configs/config.yaml'
+                    kubesh 'cat /var/lib/docker/scratch/config.yaml'
                 }
 
                 stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh /configs/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
 
                 stage("read config file again") {
-                    kubesh 'cat /configs/config.yaml'
+                    kubesh 'cat /var/lib/docker/scratch/config.yaml'
                 }
 
 
 
             }
-            customContainer('k2-tools'){
-
-                stage('checkout') {
-                    checkout scm
-                }
-                stage('fetch credentials') {
-                    kubesh 'build-scripts/fetch-credentials.sh'
-                    kubesh 'ls -R'
-                }
-
-
-
-
-            }
-
 
         }
     }
