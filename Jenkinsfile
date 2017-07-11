@@ -22,27 +22,13 @@ podTemplate(label: 'k2cli', containers: [
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
 
-                stage('anything') {
-                    kubesh 'touch /var/lib/docker/scratch/poop && ls /var/lib/docker/scratch'
-                }
-
                 stage('aws config generation') {
                     kubesh './k2cli generate /var/lib/docker/scratch/config.yaml'
-                }
-
-                stage('cat config file') {
-                    kubesh 'cat /var/lib/docker/scratch/config.yaml'
                 }
 
                 stage('update generated aws config') {
                     kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
-
-                stage("read config file again") {
-                    kubesh 'cat /var/lib/docker/scratch/config.yaml'
-                }
-
-
 
             }
 
