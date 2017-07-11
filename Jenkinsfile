@@ -1,13 +1,10 @@
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
-    // containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-    // containerTemplate(name: 'e2e-tester', image: 'quay.io/samsung_cnct/e2etester:0.2', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi')
     ], volumes: [
-      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')//,
-      // hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
-      // secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
+      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/configs/')
     ]) {
         node('k2cli') {
             customContainer('golang') {
@@ -27,33 +24,23 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('anything') {
-                    kubesh 'touch ${HOME}/poop && ls ${HOME}'
-
-
-                }
-                stage ('unicorns') {
-                    kubesh 'ls ${HOME}'
+                    kubesh 'touch /configs/poop && ls /configs'
                 }
 
                 stage('aws config generation') {
-                    kubesh './k2cli generate ${HOME}/.kraken/config.yaml'
-                    kubesh 'find ${HOME}'
-                }
-
-                stage ('find home') {
-                    kubesh 'find ${HOME}'
+                    kubesh './k2cli generate /configs/config.yaml'
                 }
 
                 stage('cat config file') {
-                    kubesh 'cat ${HOME}/.kraken/config.yaml'
+                    kubesh 'cat /configs/config.yaml'
                 }
 
                 stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh ${HOME}/.kraken/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh /configs/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 }
 
                 stage("read config file again") {
-                    kubesh 'cat ${HOME}/.kraken/config.yaml'
+                    kubesh 'cat /configs/config.yaml'
                 }
 
 
