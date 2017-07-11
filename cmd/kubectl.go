@@ -43,7 +43,7 @@ var kubectlCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		command := []string{"kubectl"}
+		command := []string{"./computed_kubectl.sh", k2Config}
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}
