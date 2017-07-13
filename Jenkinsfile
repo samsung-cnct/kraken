@@ -12,9 +12,19 @@ podTemplate(label: 'k2cli', containers: [
                     checkout scm
                 }
 
+                stage('test') {
+                    kubesh 'go vet'
+                    //not yet - kubesh 'go fmt -w -s .'
+                    kubesh 'go test -v'
+                }
+
                 stage('build') {
                     kubesh 'go get -v -d -t ./... || true'
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
+                }
+
+                stage('fetch credentials') {
+                    kubesh 'build-scripts/fetch-credentials.sh /var/lib/docker/scratch'
                 }
 
                 stage('aws config generation') {
@@ -22,7 +32,17 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('update generated aws config') {
-                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch"
+                }
+
+                try {
+                    stage('k2cli up') {
+                       kubesh "./k2cli cluster up --config /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                    }
+                } finally {
+                    stage('k2cli down') {
+                        kubesh "./k2cli cluster down --config /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                    }
                 }
 
             }
