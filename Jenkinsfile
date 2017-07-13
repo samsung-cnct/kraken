@@ -18,6 +18,7 @@ podTemplate(label: 'k2cli', containers: [
                     //not yet - kubesh 'go fmt -w -s .'
                     kubesh 'go get -u github.com/jstemmer/go-junit-report'
                     //kubesh 'go test -v cmd 2>&1 | go-junit-report > report.xml'
+                    //junit "report.xml"
                 }
 
                 stage('build') {

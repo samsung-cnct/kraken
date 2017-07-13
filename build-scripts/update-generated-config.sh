@@ -20,4 +20,4 @@ sed -i -e "s/- name:[[:space:]]*$/- name: ${cluster_name}/" ${FILE_PATH}
 sed -i -e "s/us-east-1/us-east-2/g" ${FILE_PATH}
 
 # all secrets paths use $HOME, so replace that
-sed -i -e "s/\$HOME/${SECRETS_ROOT}" ${FILE_PATH}
+sed -i -e "s#\$HOME#${SECRETS_ROOT}#" ${FILE_PATH}
