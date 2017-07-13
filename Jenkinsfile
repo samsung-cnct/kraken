@@ -45,11 +45,11 @@ podTemplate(label: 'k2cli', containers: [
 
                         try {
                             stage('k2cli up') {
-                               kubesh "./k2cli cluster up --config /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                               kubesh "./k2cli cluster up /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
                             }
                         } finally {
                             stage('k2cli down') {
-                                kubesh "./k2cli cluster down --config /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                                kubesh "./k2cli cluster down /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
                             }
                         }
                     }
