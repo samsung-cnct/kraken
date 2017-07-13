@@ -8,13 +8,8 @@ podTemplate(label: 'k2cli', containers: [
         node('k2cli') {
             customContainer('golang') {
 
-                stage('hello!') {
-                    echo 'hello world!'
-                }
-
                 stage('checkout') {
                     checkout scm
-                    kubesh 'go version'
                 }
 
                 stage('build') {
@@ -23,7 +18,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('aws config generation') {
-                    kubesh './k2cli generate /var/lib/docker/scratch/config.yaml'
+                    kubesh './k2cli generate /var/lib/docker/scratch/aws/config.yaml'
                 }
 
                 stage('update generated aws config') {
