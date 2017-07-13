@@ -1,6 +1,7 @@
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
       hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/')
@@ -15,14 +16,17 @@ podTemplate(label: 'k2cli', containers: [
                 stage('test') {
                     kubesh 'go vet'
                     //not yet - kubesh 'go fmt -w -s .'
-                    //not yet - kubesh 'go test -v'
+                    kubesh 'go get -u github.com/jstemmer/go-junit-report'
+                    //kubesh 'go test -v cmd 2>&1 | go-junit-report > report.xml'
                 }
 
                 stage('build') {
                     kubesh 'go get -v -d -t ./... || true'
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
+            }
 
+            customContainer('k2-tools') {
                 stage('fetch credentials') {
                     kubesh 'build-scripts/fetch-credentials.sh /var/lib/docker/scratch'
                 }
