@@ -57,7 +57,7 @@ podTemplate(label: 'k2cli', containers: [
                         } finally {
                             stage('k2cli down') {
                                 kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
-                                kubesh "rm -rf /var/lib/docker/scratch/aws/"
+                                kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws"
                             }
                         }
                     }
