@@ -26,7 +26,7 @@ running it. To build a generic AWS configuration file that has a large number of
 ```
 k2cli generate
 ```
-which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** The `generate` subcommand will overwrite this file if it currently exists.  
+which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** If a config file already exists the `generate` subcommand will fail with the message: `A K2 config file already exists at <your config location> - rename, delete or move it to generate a new default K2 config file`
 
 Or you may specify a path with:
 ```

@@ -15,10 +15,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 var generatePath string
@@ -36,9 +38,17 @@ var generateCmd = &cobra.Command{
 
 func preRunEFunc(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
+
 		generatePath = os.ExpandEnv(args[0])
 	} else {
 		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+	}
+
+	fmt.Printf(generatePath)
+
+	if err := checkConfig(generatePath);  err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	if provider == "gke" {
@@ -52,6 +62,15 @@ func preRunEFunc(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func checkConfig(generatePath string) error {
+	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
+		err := errors.New(fmt.Sprintf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default K2 config file", generatePath))
+		return err
+	}
+
 	return nil
 }
 
