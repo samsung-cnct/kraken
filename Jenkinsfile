@@ -29,7 +29,7 @@ podTemplate(label: 'k2cli', containers: [
 
             customContainer('k2-tools') {
                 stage('fetch credentials') {
-                    kubesh 'build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/'
+                    kubesh "build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
                 }
 
                 parallel (
