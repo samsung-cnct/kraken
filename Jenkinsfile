@@ -49,7 +49,7 @@ podTemplate(label: 'k2cli', containers: [
                         
                         stage('cat') {
                             kubesh "cat var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
-
+                        }
                         try {
                             stage('k2cli up') {
                                //kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
