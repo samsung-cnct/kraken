@@ -36,7 +36,7 @@ podTemplate(label: 'k2cli', containers: [
                     aws: {
 
                         stage('aws config generation') {
-                            kubesh './k2cli generate /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml'
+                            kubesh "./k2cli generate /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
                         }
 
                         stage('update generated aws config') {
