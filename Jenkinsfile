@@ -29,27 +29,32 @@ podTemplate(label: 'k2cli', containers: [
 
             customContainer('k2-tools') {
                 stage('fetch credentials') {
-                    kubesh 'build-scripts/fetch-credentials.sh /var/lib/docker/scratch'
+                    kubesh 'build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/'
                 }
 
                 parallel (
                     aws: {
 
                         stage('aws config generation') {
-                            kubesh './k2cli generate /var/lib/docker/scratch/aws/config.yaml'
+                            kubesh './k2cli generate /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml'
                         }
 
                         stage('update generated aws config') {
-                            kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch"
+                            kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
+                        }
+
+                        stage('ls') {
+                            kubesh "ls /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                         }
 
                         try {
                             stage('k2cli up') {
-                               kubesh "./k2cli cluster up /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                               //kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
                             }
                         } finally {
                             stage('k2cli down') {
-                                kubesh "./k2cli cluster down /var/lib/docker/scratch/aws/config.yaml --output /var/lib/docker/scratch/aws/"
+                                kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
+                                kubesh "rm -rf /var/lib/docker/scratch/aws/"
                             }
                         }
                     }
