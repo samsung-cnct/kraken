@@ -81,7 +81,7 @@ var updateCmd = &cobra.Command{
 			"ansible/update.yaml",
 			"--extra-vars",
 			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools + 
-			" add_nodepools=" + addNodepools + " rm_nodepools=" + rmNodepools,
+			" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
 		}
 
 		ctx := getContext()
@@ -123,19 +123,19 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(updateCmd)
-	generateCmd.PersistentFlags().StringVarP(
+	updateCmd.PersistentFlags().StringVarP(
 		&updateNodepools,
 		"update-nodepools",
 		"",
 		"",
 		"specify a comma separated list of nodepools to update")
-	generateCmd.PersistentFlags().StringVarP(
+	updateCmd.PersistentFlags().StringVarP(
 		&addNodepools,
 		"add-nodepools",
 		"",
 		"",
 		"specify a comma separated list of nodepools to add")
-	generateCmd.PersistentFlags().StringVarP(
+	updateCmd.PersistentFlags().StringVarP(
 		&rmNodepools,
 		"rm-nodepools",
 		"",
