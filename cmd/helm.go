@@ -15,18 +15,21 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 // helmCmd represents the helm command
 var helmCmd = &cobra.Command{
 	Use:   "helm",
 	Short: "Use Kubernetes Helm with K2 cluster",
-	Long: `Use Kubernetes Helm with the  K2 
+	Long: `Use Kubernetes Helm with the  K2
 	cluster configured by the specified yaml file`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if _, err := os.Stat(k2Config); os.IsNotExist(err) {
@@ -43,29 +46,98 @@ var helmCmd = &cobra.Command{
 		backgroundCtx := getContext()
 		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
 
-		command := []string{"helm"}
-		for _, element := range args {
-			command = append(command, strings.Split(element, " ")...)
+		//check to see if path exists, else get latest
+		helmPath := func() string {
+			command := []string{"test", "-f", "/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"}
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			_, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
+
+			// unless command return 0 (filepath exists), assign path to latest
+			path := "/opt/cnct/kubernetes/latest/bin/helm"
+			if statusCode == 0 {
+				path = "/opt/cnct/kubernetes/" + getMinorMajorVersion() + "/bin/helm"
+			}
+			return path
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
-		defer timeout()
+		// Grab latest helm version to let user know which one it is
+		//this only happens when there is no valid version of helm for k8s
+		latestHelmVersion := func() string {
+			command := []string{"printenv", "K8S_HELM_VERSION_LATEST"}
+			for _, element := range args {
+				command = append(command, strings.Split(element, " ")...)
+			}
 
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			resp, _, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
+
+			out, err := printContainerLogs(
+				cli,
+				resp,
+				backgroundCtx,
+			)
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+
+			s := string(out)
+			return s
 		}
 
-		fmt.Printf("%s", out)
+		//Run helm if valid path or if user wants to run latest helm
+		runHelm := func() int {
+			command := []string{helmPath()}
+			for _, element := range args {
+				command = append(command, strings.Split(element, " ")...)
+			}
 
-		ExitCode = statusCode
+			ctx, cancel := getTimedContext()
+			defer cancel()
+			resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+			defer timeout()
+
+			out, err := printContainerLogs(
+				cli,
+				resp,
+				backgroundCtx,
+			)
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+
+			fmt.Printf("%s", out)
+
+			ExitCode = statusCode
+			return ExitCode
+
+		}
+
+		// Get user input if no helm for k8s version
+		if strings.Contains(helmPath(), getMinorMajorVersion()) {
+			runHelm()
+		} else {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("No version of helm available for Kubernetes " + getMinorMajorVersion())
+			fmt.Printf("Would you like to run the latest version of helm %s? [Y/N]: ", latestHelmVersion())
+
+			response, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatal(err)
+			}
+			response = strings.ToLower(strings.TrimSpace(response))
+
+			if response == "y" {
+				runHelm()
+			} else if response == "n" {
+				fmt.Println("No version of Helm running")
+			}
+		}
 	},
 }
 
