@@ -14,15 +14,15 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('Test: Unit') {
+                    kubesh 'go get -v -d -t ./... || true'
                     kubesh 'go vet'
                     kubesh 'go get -u github.com/jstemmer/go-junit-report'
-                    kubesh 'go test -v ./... '//2>&1 | go-junit-report > top_report.xml'
-                    kubesh 'go test -v cmd ./... '//2>&1 | go-junit-report > cmd_report.xml'
-                    //junit "*.xml"
+                    kubesh 'go test -v ./... 2>&1 | go-junit-report > top_report.xml'
+                    kubesh 'go test -v cmd ./... 2>&1 | go-junit-report > cmd_report.xml'
+                    junit "*.xml"
                 }
 
                 stage('Build') {
-                    kubesh 'go get -v -d -t ./... || true'
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
             }
