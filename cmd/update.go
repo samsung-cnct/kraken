@@ -23,6 +23,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var updateNodepools string
+var addNodepools string
+var rmNodepools string
+
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:           "update [path to K2 config file]",
@@ -36,8 +40,10 @@ var updateCmd = &cobra.Command{
 			k2ConfigPath = os.ExpandEnv(args[0])
 		}
 
-		if len(args) == 1 {
-			return errors.New("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to this command, for example: \n k2cli cluster update masterNodes,clusterNodes,otherNodes")
+		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
+			return errors.New("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
+			"add-nodepools or rm-nodepools depending on what action you are taking against the nodepools.  For example: \n k2cli cluster update " +
+			"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
 		}
 
 		_, err := os.Stat(k2ConfigPath)
@@ -68,15 +74,14 @@ var updateCmd = &cobra.Command{
 		terminalSpinner.Prefix = "Updating cluster '" + getContainerName() + "' "
 		terminalSpinner.Start()
 
-		nodepools := args[1]
-
 		command := []string{
 			"ansible-playbook",
 			"-i",
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + nodepools,
+			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools + 
+			" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
 		}
 
 		ctx := getContext()
@@ -118,4 +123,23 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(updateCmd)
+	updateCmd.PersistentFlags().StringVarP(
+		&updateNodepools,
+		"update-nodepools",
+		"",
+		"",
+		"specify a comma separated list of nodepools to update")
+	updateCmd.PersistentFlags().StringVarP(
+		&addNodepools,
+		"add-nodepools",
+		"",
+		"",
+		"specify a comma separated list of nodepools to add")
+	updateCmd.PersistentFlags().StringVarP(
+		&rmNodepools,
+		"rm-nodepools",
+		"",
+		"",
+		"specify a comma separated list of nodepools to remove")
+
 }
