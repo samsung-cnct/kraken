@@ -11,31 +11,34 @@ podTemplate(label: 'k2cli', containers: [
 
                 stage('Checkout') {
                     checkout scm
+                    kubesh "mkdir -p go/src/github.com/samsung-cnct/k2cli/ && cp -r ./ go/src/github.com/samsung-cnct/k2cli"
                 }
 
-                stage('Test: Unit') {
-                    kubesh 'go get github.com/tools/godep'
-                    kubesh 'make deps && make build'
-                    kubesh 'go vet'
-                    kubesh 'go get -u github.com/jstemmer/go-junit-report'
-                    kubesh 'go test -v ./... '//2>&1 | go-junit-report > top_report.xml'
-                    kubesh 'go test -v cmd ./...'// 2>&1 | go-junit-report > cmd_report.xml'
-                    junit "*.xml"
-                }
+                withEnv(["GOPATH=${WORKSPACE}/go/"]) {
+                    stage('Test: Unit') {
+                        kubesh 'go get github.com/tools/godep'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
+                        kubesh 'go get -u github.com/jstemmer/go-junit-report'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v ./... '//2>&1 | go-junit-report > top_report.xml'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v cmd ./...'// 2>&1 | go-junit-report > cmd_report.xml'
+                        junit "go/src/github.com/samsung-cnct/k2cli/*.xml"
+                    }
 
-                stage('Build') {
-                    kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
+                    stage('Build') {
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
+                    }
                 }
             }
 
             customContainer('k2-tools') {
                 stage('Configure Integration Tests') {
                     // fetches credentials, builds aws and gke config files with appropriate replacements
-                    kubesh "build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
-                    kubesh "./k2cli generate --provider aws /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
-                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                    kubesh "./k2cli generate --provider gke /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml"
-                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli generate --provider aws /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli generate --provider gke /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml"
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
 
                 }
 
@@ -43,10 +46,10 @@ podTemplate(label: 'k2cli', containers: [
                     stage('Test: Cloud') {
                         parallel ( 
                             "aws": {
-                                kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
+                                kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
                             },
                             "gke": {
-                                kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
+                                kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
                             }
                         )
                     }
@@ -54,11 +57,11 @@ podTemplate(label: 'k2cli', containers: [
                     stage('Cleanup') {
                         parallel (
                             "aws": {
-                                kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
+                                kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
                                 kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws"
                             },
                             "gke": {
-                                kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
+                                kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
                                 kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
                             }
                         )
