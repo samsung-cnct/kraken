@@ -9,54 +9,61 @@ podTemplate(label: 'k2cli', containers: [
         node('k2cli') {
             customContainer('golang') {
 
-                stage('checkout') {
+                stage('Checkout') {
                     checkout scm
                 }
 
-                stage('test') {
+                stage('Test: Unit') {
                     kubesh 'go vet'
-                    //not yet - kubesh 'go fmt -w -s .'
                     kubesh 'go get -u github.com/jstemmer/go-junit-report'
-                    //kubesh 'go test -v cmd 2>&1 | go-junit-report > report.xml'
-                    //junit "report.xml"
+                    kubesh 'go test -v ./... 2>&1 | go-junit-report > top_report.xml'
+                    kubesh 'go test -v cmd ./... 2>&1 | go-junit-report > cmd_report.xml'
+                    junit "*_report.xml"
                 }
 
-                stage('build') {
+                stage('Build') {
                     kubesh 'go get -v -d -t ./... || true'
                     kubesh 'GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o k2cli'
                 }
             }
 
             customContainer('k2-tools') {
-                stage('fetch credentials') {
+                stage('Configure Integration Tests') {
+                    // fetches credentials, builds aws and gke config files with appropriate replacements
                     kubesh "build-scripts/fetch-credentials.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
+                    kubesh "./k2cli generate --provider aws /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
+                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "./k2cli generate --provider gke /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml"
+                    kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+
                 }
 
-                parallel (
-                    aws: {
-
-                        stage('aws config generation') {
-                            kubesh "./k2cli generate /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
-                        }
-
-                        stage('update generated aws config') {
-                            kubesh "build-scripts/update-generated-config.sh /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kc${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                        }
-
-                        try {
-                            stage('k2cli up') {
-                               kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
+                try {
+                    stage('Test: Cloud') {
+                        parallel ( 
+                            "aws": {
+                                kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
                             }
-                        } finally {
-                            stage('k2cli down') {
+                            "gke": {
+                                kubesh "./k2cli -vvv cluster up /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
+                            }
+                        )
+                    }
+                } finally {
+                    stage('Cleanup') {
+                        parallel (
+                            "aws": {
                                 kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
                                 kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws"
                             }
-                        }
+                            "gke": {
+                                kubesh "./k2cli -vvv cluster down /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
+                                kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
+                            }
+                        )
                     }
-                )
+                }
             }
-
         }
     }
 def kubesh(command) {
