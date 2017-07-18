@@ -14,6 +14,7 @@ podTemplate(label: 'k2cli', containers: [
                 }
 
                 stage('Test: Unit') {
+                    kubesh 'go get github.com/tools/godep'
                     kubesh 'make deps && make build'
                     kubesh 'go vet'
                     kubesh 'go get -u github.com/jstemmer/go-junit-report'
