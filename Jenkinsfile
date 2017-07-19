@@ -86,7 +86,7 @@ def kubesh(command) {
 }
 
 def kubectl(command) {
-  "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && ${command}'"
+  "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && export GOPATH=${env.GOPATH} && ${command}'"
 }
 
 def customContainer(String name, Closure body) {
