@@ -17,7 +17,7 @@ podTemplate(label: 'k2cli', containers: [
 
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
-                        kubesh 'go get github.com/tools/godep'
+                        kubesh 'go get -u github.com/tools/godep'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
                         kubesh 'go get -u github.com/jstemmer/go-junit-report'
