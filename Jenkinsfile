@@ -12,7 +12,7 @@ podTemplate(label: 'k2cli', containers: [
                 stage('Checkout') {
                     checkout scm
                     kubesh "mkdir -p go/src/github.com/samsung-cnct/k2cli/ && cp -r `ls -A | grep -v \"go\"` go/src/github.com/samsung-cnct/k2cli"
-                    kubesh "ls -r go/src/github.com/samsung-cnct/k2cli"
+                    kubesh "ls -r go/src/github.com/samsung-cnct/k2cli/*"
                 }
 
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
