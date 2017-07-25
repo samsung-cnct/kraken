@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -65,7 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
+			fmt.Errorf("Fatal: the following error was thrown while reading user input for helm options: %v", err)
 		}
 		response = strings.ToLower(strings.TrimSpace(response))
 
@@ -94,7 +93,7 @@ func verifyHelmPath(helmPath string, cli *client.Client) string {
 
 // Get the k8s version from k2
 func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) string {
-	command := []string{"./max_k8s_version.sh", k2Config}
+	command := []string{"kraken/max_k8s_version.sh", k2Config}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
 	}
