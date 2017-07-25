@@ -1,6 +1,6 @@
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'golang', image: 'quay.io/coffeepac/k2cli-builder:latest', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
@@ -17,10 +17,8 @@ podTemplate(label: 'k2cli', containers: [
 
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
-                        kubesh 'go get -u github.com/tools/godep'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
-                        kubesh 'go get -u github.com/jstemmer/go-junit-report'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v ./... '//2>&1 | go-junit-report > top_report.xml'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v cmd ./...'// 2>&1 | go-junit-report > cmd_report.xml'
                         junit "go/src/github.com/samsung-cnct/k2cli/*.xml"
