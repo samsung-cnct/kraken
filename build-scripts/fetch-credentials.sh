@@ -13,7 +13,7 @@ SECRETS_ROOT=$1
 #  ssh keys
 mkdir ${SECRETS_ROOT}/.ssh/
 aws s3 cp --recursive s3://sundry-automata/keys/common-tools-jenkins/ ${SECRETS_ROOT}/.ssh/
-
+chmod 600 ${SECRETS_ROOT}/.ssh/*
 
 #  aws configs
 mkdir ${SECRETS_ROOT}/.aws/
