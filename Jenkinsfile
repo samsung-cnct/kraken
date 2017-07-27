@@ -19,8 +19,7 @@ podTemplate(label: 'k2cli', containers: [
                     stage('Test: Unit') {
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
-                        //kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v ./... '//2>&1 | go-junit-report > top_report.xml'
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go test -v cmd ./... 2>&1 | go-junit-report > cmd_report.xml'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && cd cmd go test -v 2>&1 | go-junit-report > cmd_report.xml'
                         junit "go/src/github.com/samsung-cnct/k2cli/*.xml"
                     }
 
