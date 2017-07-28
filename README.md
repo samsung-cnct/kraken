@@ -84,6 +84,40 @@ In the default generated configuration file, all clusters begin their lives in t
 *  **Cluster Node Size and Count**  
 This setting affects the type and total number of nodes in your cluster that can be used to schedule workloads on.  The default EC2 Instance type is `c4.large` and the default cluster includes 10 of these instances.  These fields are named  `definitions.nodeConfigs.defaultAwsClusterNode.providerConfig.type` for the instance type, and `deployment.clusters.nodePools.name: clusterNodes`, `.count: 10`, for the total number of worker nodes.  Keep in mind when setting the total number of nodes that these nodes will be spread across all the availability zones in your cluster.
 
+#### To Create a Small Research or Development Cluster
+To spinup a small low-resource consuming cluster, alter your config to the following:
+
+Role | # | Type
+--- | ---  | ---
+Primary etcd cluster | 1 | t2.small
+Events etcd cluster | 1 | t2.small
+Master nodes | 1 | m4.large
+Cluster nodes | 1 | c4.large
+~~Special~~ ~~nodes~~ | ~~2~~ | ~~m4.large~~
+
+Delete 'Special nodes'
+
+yaml:
+
+```deployment:
+  clusters:
+    - name:
+...
+      nodePools:
+        - name: etcd
+          count: 1
+...
+    - name: etcdEvents
+          count: 1
+...
+        - name: master
+          count: 1
+...
+        - name: clusterNodes
+          count: 1
+```
+
+
 ### Creating Your First Cluster
 To create your first cluster, run the following command. (This assumes you have a configuration built as described above.)
 If you have used the default config location:
