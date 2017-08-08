@@ -19,7 +19,7 @@ podTemplate(label: 'k2cli', containers: [
                     stage('Test: Unit') {
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/cmd go test -v'
+                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/cmd go test -v > chomp'
                     }
 
                     stage('Build') {
