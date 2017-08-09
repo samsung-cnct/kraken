@@ -41,6 +41,15 @@ podTemplate(label: 'k2cli', containers: [
 
                 }
 
+                stage('Generate current docs and compare') {
+                    // generates a comparison docs folder and sees if docs need updating
+                    kubesh "go/src/github.com/samsung-cnct/k2cli/k2cli docs test"
+                    kubesh "diff test docs"
+                    // here there should be some output for whether there's a difference, and handle it somehow.
+
+
+                }
+
                 try {
                     stage('Test: Cloud') {
                         parallel ( 
