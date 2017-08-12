@@ -93,7 +93,7 @@ func verifyHelmPath(helmPath string, cli *client.Client) string {
 
 // Get the k8s version from k2
 func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) string {
-	command := []string{"kraken/max_k8s_version.sh", k2Config}
+	command := []string{"/kraken/bin/max_k8s_version.sh", k2Config}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
 	}
