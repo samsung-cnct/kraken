@@ -152,6 +152,7 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 	}
 }
 
+// Convert dashes to underscore (if any) in cluster name and append to helm_override_ to be able to pull correct env for helm override
 func setHelmOverrideEnv(name string) string {
 	clusterName := strings.Replace(name, "-", "_", -1)
 	helmOverrideVar := "helm_override_" + clusterName
