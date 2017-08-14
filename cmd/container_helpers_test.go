@@ -48,3 +48,12 @@ func TestAddEnvironmentVarIfNotEmpty(t *testing.T) {
 		t.Error("For", envs, "expected to find key", goodEnvVar, "but not found.")
 	}
 }
+
+func TestHelmOverrideEnv(t *testing.T) {
+	nameOne := "test-123"
+
+	correctName := setHelmOverrideEnv(nameOne)
+	if correctName != "helm_override_test_123" {
+		t.Errorf("name coversion failed, got: %s, want: %s.", correctName, "helm_override_test_123")
+	}
+}

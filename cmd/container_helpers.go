@@ -152,17 +152,26 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 	}
 }
 
+// Convert dashes to underscore (if any) in cluster name and append to helm_override_ to be able to pull correct env for helm override
+func setHelmOverrideEnv(name string) string {
+	clusterName := strings.Replace(name, "-", "_", -1)
+	helmOverrideVar := "helm_override_" + clusterName
+	return helmOverrideVar
+}
+
 func containerEnvironment() []string {
+	containerName := getContainerName()
 	envs := []string{"ANSIBLE_NOCOLOR=True",
 		"DISPLAY_SKIPPED_HOSTS=0",
-		"KUBECONFIG=" + path.Join(outputLocation, getContainerName(), "admin.kubeconfig"),
-		"HELM_HOME=" + path.Join(outputLocation, getContainerName(), ".helm")}
+		"KUBECONFIG=" + path.Join(outputLocation, containerName, "admin.kubeconfig"),
+		"HELM_HOME=" + path.Join(outputLocation, containerName, ".helm")}
 
 	envs = appendIfValueNotEmpty(envs, "AWS_ACCESS_KEY_ID")
 	envs = appendIfValueNotEmpty(envs, "AWS_SECRET_ACCESS_KEY")
 	envs = appendIfValueNotEmpty(envs, "AWS_DEFAULT_REGION")
 	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_ZONE")
 	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_REGION")
+	envs = appendIfValueNotEmpty(envs, setHelmOverrideEnv(containerName))
 
 	return envs
 }
