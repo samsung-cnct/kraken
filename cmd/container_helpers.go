@@ -152,6 +152,12 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 	}
 }
 
+func setHelmOverrideEnv() string {
+	clusterName := strings.Replace(getContainerName(), "-", "_", -1)
+	helmOverrideVar := "helm_override_" + clusterName
+	return helmOverrideVar
+}
+
 func containerEnvironment() []string {
 	envs := []string{"ANSIBLE_NOCOLOR=True",
 		"DISPLAY_SKIPPED_HOSTS=0",
@@ -163,6 +169,7 @@ func containerEnvironment() []string {
 	envs = appendIfValueNotEmpty(envs, "AWS_DEFAULT_REGION")
 	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_ZONE")
 	envs = appendIfValueNotEmpty(envs, "CLOUDSDK_COMPUTE_REGION")
+	envs = appendIfValueNotEmpty(envs, setHelmOverrideEnv())
 
 	return envs
 }
