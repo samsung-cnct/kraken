@@ -20,13 +20,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 // toolCmd represents the tool command
 var toolCmd = &cobra.Command{
 	Use:   "tool",
-	Short: "Use tools with K2 cluster",
-	Long: `Use various third-party tools with a 
-	K2 cluster configured by specified yaml`,
+	Short: "Use tools with Krakenlib cluster",
+	Long: `Use various third-party tools with a
+	Krakenlib cluster configured by specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},
@@ -36,7 +35,7 @@ func init() {
 	RootCmd.AddCommand(toolCmd)
 
 	toolCmd.PersistentFlags().StringVarP(
-		&k2ConfigPath,
+		&krakenlibConfigPath,
 		"config",
 		"c",
 		os.ExpandEnv("$HOME/.kraken/config.yaml"),

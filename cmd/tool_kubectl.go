@@ -24,21 +24,21 @@ import (
 // kubectlCmd represents the kubectl command
 var kubectlCmd = &cobra.Command{
 	Use:   "kubectl",
-	Short: "Use Kubernetes kubectl with K2 cluster",
-	Long: `Use Kubernetes kubectl with the K2 
+	Short: "Use Kubernetes kubectl with Krakenlib cluster",
+	Long: `Use Kubernetes kubectl with the Krakenlib
 	cluster configured by the specified yaml file`,
 	PreRunE: preRunGetKrakenConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cli, _, err := pullKrakenContainerImage(containerImage)
 
-		command := []string{"/kraken/bin/computed_kubectl.sh", k2ConfigPath}
+		command := []string{"/kraken/bin/computed_kubectl.sh", krakenlibConfigPath}
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
 		if err != nil {
 			return err
 		}
