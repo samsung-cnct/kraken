@@ -23,9 +23,9 @@ import (
 // toolCmd represents the tool command
 var toolCmd = &cobra.Command{
 	Use:   "tool",
-	Short: "Use tools with Krakenlib cluster",
+	Short: "Use tools with Kraken cluster",
 	Long: `Use various third-party tools with a
-	Krakenlib cluster configured by specified yaml`,
+	Kraken cluster configured by specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},

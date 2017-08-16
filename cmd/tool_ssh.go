@@ -22,7 +22,7 @@ import (
 var sshCmd = &cobra.Command{
 	Use:   "ssh",
 	Short: "ssh inventory management",
-	Long:  `manage Krakenlib ssh configuration file for cluster configured by the specified yaml`,
+	Long:  `manage Kraken ssh configuration file for cluster configured by the specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		ExitCode = 0

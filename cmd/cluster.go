@@ -27,8 +27,8 @@ var configForced bool
 // clusterCmd represents the cluster command
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
-	Short: "Krakenlib cluster actions",
-	Long:  `Commands that perform actions on a Krakenlib cluster described by a provided yaml config`,
+	Short: "Kraken cluster actions",
+	Long:  `Commands that perform actions on a Kraken cluster described by a provided yaml config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		ExitCode = 1

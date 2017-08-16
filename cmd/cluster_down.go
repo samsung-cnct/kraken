@@ -107,5 +107,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of Krakenlib stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]")
+		"comma-separated list of Kraken stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]")
 }

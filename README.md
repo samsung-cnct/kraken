@@ -2,8 +2,7 @@
 Kraken is a command-line interface for [Krakenlib](https://github.com/samsung-cnct/k2).
 
 ## Getting Started
-This Getting Started guide describes a Kubernetes deployment to AWS. Krakenlib currently also supports deployments to GKE, but not
-by default.
+This Getting Started guide describes a Kubernetes deployment to AWS. Kraken currently also supports deployments to GKE, but not by default.
 
 ### Requirements
 Docker must be installed on the machine where you run Kraken, and your user must have permissions to run it.
@@ -24,7 +23,7 @@ running it. To build a generic AWS configuration file that has a large number of
 ```
 kraken generate
 ```
-which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** If a config file already exists the `generate` subcommand will fail with the message: `A Krakenlib config file already exists at <your config location> - rename, delete or move it to generate a new default Krakenlib config file`
+which will create a file at `${HOME}/.kraken/config.yaml`  **Note:** If a config file already exists the `generate` subcommand will fail with the message: `A Kraken config file already exists at <your config location> - rename, delete or move it to generate a new default Kraken config file`
 
 Or you may specify a path with:
 ```
@@ -39,17 +38,17 @@ kraken generate --provider gke
 
 #### Required Configuration Changes
 For an AWS cluster there are several fields that need to be set before this file can be used:
-*  **Cluster name**  All Krakenlib clusters should have a unique name so their assets can be easily identified by humans in the
+*  **Cluster name**  All Kraken clusters should have a unique name so their assets can be easily identified by humans in the
 AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
 
 The following fields are in the `definitions` section of the configuration file.
-In lieu of specifying all of the following, you may just put your credentials file and Krakenlib will grab the authentication specs from there.
+In lieu of specifying all of the following, you may just put your credentials file and Kraken will grab the authentication specs from there.
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
 `providerConfigs.authentication.accessKey`. This can be either set to the literal value, or to an environment
-variable that Krakenlib will use.
+variable that Kraken will use.
 *  **AWS access secret**  This is your AWS access secret that is paired to the above access key. This field is named
 `providerConfigs.authentication.accessSecret`. This can be either set to the literal value, or to an environment
-variable that Krakenlib will use.
+variable that Kraken will use.
 *  **AWS credentials file**  This is your AWS credentials file that is paired to the below profile. The field is named
 `providerConfigs.authentication.credentialsFile`. This file and path must exist bind mounted to /root
 inside the container, ie. ${HOME}/.aws/credentials.
@@ -200,7 +199,7 @@ KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kr
 You may update your nodepools with Kraken, specifically the Kubernetes version, the nodepool counts and instance types. To do so, please make desired changes in your configuration file, and then run Kraken's cluster update command, as described below, pointing to your configuration file.
 
 #### Running Kraken update
-You can specify different versions of Kubernetes in each nodepool. Note: this may affect the compatibility of your cluster's Krakenlib-provided services. Specify which nodepools you wish to update with a comma-separated list of the names of the nodepools. Please be patient; this process may take a while; about ten minutes per node.
+You can specify different versions of Kubernetes in each nodepool. Note: this may affect the compatibility of your cluster's Kraken-provided services. Specify which nodepools you wish to update with a comma-separated list of the names of the nodepools. Please be patient; this process may take a while; about ten minutes per node.
 
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run

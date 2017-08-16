@@ -52,10 +52,8 @@ var krakenConfig = viper.New()
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "kraken",
-	Short: "CLI for Krakenlib Kubernetes cluster provisioner",
-	Long: `kraken is a command line interface for Krakenlib
-	kubernetes cluster provisioner. Krakenlib documentation is available at:
-	https://github.com/samsung-cnct/k2`,
+	Short: "Kraken is an orchestration and cluster level management system for Kubernetes",
+	Long:  "Kraken is an orchestration and cluster level management system for Kubernetes that creates a production scale cluster on a range of platforms using its default settings.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := os.Stat(outputLocation); os.IsNotExist(err) {
 			os.Mkdir(outputLocation, 0755)

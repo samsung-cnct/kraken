@@ -29,11 +29,11 @@ var rmNodepools string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
-	Use:           "update [path to krakenlib config file]",
-	Short:         "update a Krakenlib cluster",
+	Use:           "update [path to kraken config file]",
+	Short:         "update a Kraken cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Updates a Krakenlib cluster described in the specified configuration yaml`,
+	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		krakenlibConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {

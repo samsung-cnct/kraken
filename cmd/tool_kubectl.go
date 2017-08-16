@@ -24,8 +24,8 @@ import (
 // kubectlCmd represents the kubectl command
 var kubectlCmd = &cobra.Command{
 	Use:   "kubectl",
-	Short: "Use Kubernetes kubectl with Krakenlib cluster",
-	Long: `Use Kubernetes kubectl with the Krakenlib
+	Short: "Use Kubernetes kubectl with Kraken cluster",
+	Long: `Use Kubernetes kubectl with the Kraken
 	cluster configured by the specified yaml file`,
 	PreRunE: preRunGetKrakenConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {

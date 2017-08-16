@@ -26,8 +26,8 @@ var upStagesList string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:           "up [path to Krakenlib config file]",
-	Short:         "create a Krakenlib cluster",
+	Use:           "up [path to Kraken config file]",
+	Short:         "create a Kraken cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Creates a K2 cluster described in the specified configuration yaml`,
@@ -103,5 +103,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of Krakenlib stages to run. Run 'kraken help topic stages' for more info.")
+		"comma-separated list of Kraken stages to run. Run 'kraken help topic stages' for more info.")
 }

@@ -28,8 +28,8 @@ import (
 // helmCmd represents the helm command
 var helmCmd = &cobra.Command{
 	Use:   "helm",
-	Short: "Use Kubernetes Helm with a Krakenlib cluster",
-	Long: `Use Kubernetes Helm with the Krakenlib
+	Short: "Use Kubernetes Helm with a Kraken cluster",
+	Long: `Use Kubernetes Helm with the Kraken
 	cluster configured by the specified yaml file`,
 	PreRunE: preRunGetKrakenConfig,
 	RunE:    run,

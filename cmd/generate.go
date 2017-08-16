@@ -27,10 +27,10 @@ var provider string
 var configPath string
 
 var generateCmd = &cobra.Command{
-	Use:          "generate [path to save the Krakenlib config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
-	Short:        "Generate a Krakenlib config file",
+	Use:          "generate [path to save the Kraken config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
+	Short:        "Generate a Kraken config file",
 	SilenceUsage: true,
-	Long:         `Generate a Krakenlib configuration file at the specified location`,
+	Long:         `Generate a Kraken configuration file at the specified location`,
 	PreRunE:      preRunEFunc,
 	RunE:         runFunc,
 }
