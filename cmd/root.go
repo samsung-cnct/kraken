@@ -35,7 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var k2Tag string  // this is set via linker flag
+var k2Tag string // this is set via linker flag
 
 // to be used by subcommands using --config
 var k2ConfigPath string
@@ -51,10 +51,10 @@ var krakenConfig = viper.New()
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "k2cli",
-	Short: "CLI for K2 Kubernetes cluster provisioner",
-	Long: `k2cli is a command line interface for K2
-	kubernetes cluster provisioner. K2 documentation is available at:
+	Use:   "kraken",
+	Short: "CLI for Krakenlib Kubernetes cluster provisioner",
+	Long: `kraken is a command line interface for Krakenlib
+	kubernetes cluster provisioner. Krakenlib documentation is available at:
 	https://github.com/samsung-cnct/k2`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := os.Stat(outputLocation); os.IsNotExist(err) {
@@ -76,7 +76,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initK2CliConfig)
+	cobra.OnInitialize(initKrakenConfig)
 	terminalSpinner.FinalMSG = "Complete\n"
 
 	RootCmd.SetHelpCommand(helpCmd)
@@ -106,14 +106,14 @@ func init() {
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:" + k2Tag,
+		"quay.io/samsung_cnct/k2:"+k2Tag,
 		"k2 container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
 		"output",
 		"o",
 		os.Getenv("HOME")+"/.kraken",
-		"K2 output folder")
+		"Krakenlib output folder")
 
 	// Specify the docker host string; typically unix:///var/run/docker.sock
 	RootCmd.PersistentFlags().StringVarP(
@@ -219,13 +219,10 @@ func initK2CliConfig() {
 	krakenConfig.AddConfigPath("$HOME/.kraken") // adding home directory as first search path
 	krakenConfig.AddConfigPath(".")             // optionally look for config in the working directory
 
-
-
 	cfgFile = krakenConfig.GetString("kraken.config")
 	if cfgFile != "" { // enable ability to specify config file via flag
 		krakenConfig.SetConfigFile(cfgFile)
 	}
-
 
 	// If a config file is found, read it in.
 	if err := krakenConfig.ReadInConfig(); err == nil {
