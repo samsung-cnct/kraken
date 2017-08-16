@@ -86,24 +86,6 @@ podTemplate(label: 'k2cli', containers: [
                     }
                 }
             }
-            customContainer('docker') {
-            // add a docker rmi/docker purge/etc.
-            stage('Build') {
-                kubesh "docker rmi quay.io/${quay_org}/k2cli:k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
-                kubesh "docker rmi quay.io/${quay_org}/k2cli:latest || true"
-                kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/k2cli:k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
-            }
-
-            //only push from master if we are on samsung-cnct fork
-            // stage('Publish') {
-            //     if (env.BRANCH_NAME == "master" && git_uri.contains(github_org)) {
-            //         kubesh "docker tag quay.io/${quay_org}/k2cli:k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2cli:latest"
-            //         kubesh "docker push quay.io/${quay_org}/k2cli:latest"
-            //     } else {
-            //         echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    git_uri='${git_uri}'"
-            //     }
-            // }
-        }
         }
     }
 def kubesh(command) {
