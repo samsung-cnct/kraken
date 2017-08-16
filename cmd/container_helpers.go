@@ -126,7 +126,7 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 		fmt.Println(" kubectl --kubeconfig=" + path.Join(
 			outputLocation,
 			getContainerName(), "admin.kubeconfig") + " [kubectl commands]")
-		fmt.Println(" or use 'k2cli tool kubectl --config " + clusterConfigFile + " [kubectl commands]'")
+		fmt.Println(" or use 'kraken tool kubectl --config " + clusterConfigFile + " [kubectl commands]'")
 
 		if _, err := os.Stat(path.Join(outputLocation,
 			getContainerName(), "admin.kubeconfig")); err == nil {
@@ -137,7 +137,7 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 			fmt.Println(" helm [helm command] --home " + path.Join(
 				outputLocation,
 				getContainerName(), ".helm"))
-			fmt.Println(" or use 'k2cli tool helm --config " + clusterConfigFile + " [helm commands]'")
+			fmt.Println(" or use 'kraken tool helm --config " + clusterConfigFile + " [helm commands]'")
 		}
 	}
 
@@ -148,7 +148,7 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 			outputLocation,
 			getContainerName(), "ssh_config"))
 		// This is usage has not been implemented. See issue #49
-		//fmt.Println(" or use 'k2cli tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
+		//fmt.Println(" or use 'kraken tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
 	}
 }
 
@@ -484,10 +484,10 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error
 	return nil
 }
 
-func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int, func(), error) {
+func containerAction(cli *client.Client, ctx context.Context, command []string, krakenlibconfig string) (types.ContainerCreateResponse, int, func(), error) {
 	var containerResponse types.ContainerCreateResponse
 
-	hostConfig, config_envs := makeMounts(k2config)
+	hostConfig, config_envs := makeMounts(krakenlibconfig)
 	containerConfig := &container.Config{
 		Image:        containerImage,
 		Env:          append(containerEnvironment(), config_envs...),
@@ -500,7 +500,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	//  clusterName can be empty as a valid thing when a user is generating a config so the
 	//  hardcoded base portion of the name must satisfy the above regex.
 	clusterName := getContainerName()
-	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2"+clusterName)
+	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "krakenlib"+clusterName)
 	if err != nil {
 		return containerResponse, -1, nil, err
 	}
@@ -531,12 +531,12 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 						panic(removeErr)
 					}
 
-					newContainerName := "k2-" + namesgenerator.GetRandomName(1)
+					newContainerName := "krakenlib-" + namesgenerator.GetRandomName(1)
 					removeErr = cli.ContainerRename(
 						getContext(),
 						resp.ID,
 						newContainerName)
-					fmt.Println("Renamed k2-" + clusterName + " to " + newContainerName)
+					fmt.Println("Renamed krakenlib-" + clusterName + " to " + newContainerName)
 				} else {
 					removeErr = cli.ContainerRemove(
 						getContext(),
@@ -559,12 +559,12 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	return resp, statusCode, func() {
 		var removeErr error
 		if keepAlive {
-			newContainerName := "k2-" + namesgenerator.GetRandomName(1)
+			newContainerName := "krakenlib-" + namesgenerator.GetRandomName(1)
 			removeErr = cli.ContainerRename(
 				getContext(),
 				resp.ID,
 				newContainerName)
-			fmt.Println("Renamed k2-" + clusterName + " to " + newContainerName)
+			fmt.Println("Renamed krakenlib-" + clusterName + " to " + newContainerName)
 		} else {
 			removeErr = cli.ContainerRemove(
 				getContext(),
