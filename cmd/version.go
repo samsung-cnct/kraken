@@ -16,13 +16,14 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 )
 
-var K2CliMajorMinorPatch string
-var K2CliType = "alpha"
-var K2CliGitCommit string
+var KrakenMajorMinorPatch string
+var KrakenType = "alpha"
+var KrakenGitCommit string
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
@@ -30,7 +31,7 @@ var versionCmd = &cobra.Command{
 	Short: "Display cli version",
 	Long:  `Display cli version information`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		semVer, err := semver.Make(K2CliMajorMinorPatch + "-" + K2CliType + "+git.sha." + K2CliGitCommit);
+		semVer, err := semver.Make(KrakenMajorMinorPatch + "-" + KrakenType + "+git.sha." + KrakenGitCommit)
 		if err != nil {
 			return err
 		}
