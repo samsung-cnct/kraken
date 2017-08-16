@@ -1,11 +1,3 @@
-// Configuration variables
-github_org             = "samsung-cnct"
-quay_org               = "samsung_cnct"
-
-
-
-
-
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'golang', image: 'quay.io/guineveresaenger/guinsci:latest', ttyEnabled: true, command: 'cat'),
