@@ -23,7 +23,7 @@ import (
 // stagesCmd represents the stages command
 var stagesCmd = &cobra.Command{
 	Use:   "stages",
-	Short: "List of k2 stages",
+	Short: "List of Krakenlib stages",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(`
 Following stages are available:

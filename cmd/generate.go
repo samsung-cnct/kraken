@@ -27,12 +27,12 @@ var provider string
 var configPath string
 
 var generateCmd = &cobra.Command{
-	Use:          "generate [path to save the K2 config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
-	Short:        "Generate a K2 config file",
+	Use:          "generate [path to save the Krakenlib config file at] (default ) " + os.ExpandEnv("$HOME/.kraken/config.yaml"),
+	Short:        "Generate a Krakenlib config file",
 	SilenceUsage: true,
-	Long:         `Generate a K2 configuration file at the specified location`,
+	Long:         `Generate a Krakenlib configuration file at the specified location`,
 	PreRunE:      preRunEFunc,
-	RunE:          runFunc,
+	RunE:         runFunc,
 }
 
 func preRunEFunc(cmd *cobra.Command, args []string) error {
@@ -55,7 +55,7 @@ func preRunEFunc(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
 
 	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
-		return fmt.Errorf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default K2 config file", generatePath)
+		return fmt.Errorf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default Kraken config file", generatePath)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(generatePath), 0777); err != nil {
