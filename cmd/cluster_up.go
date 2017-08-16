@@ -20,15 +20,14 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
 )
 
 var upStagesList string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:           "up [path to K2 config file]",
-	Short:         "create a K2 cluster",
+	Use:           "up [path to Krakenlib config file]",
+	Short:         "create a Krakenlib cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Creates a K2 cluster described in the specified configuration yaml`,
@@ -50,7 +49,7 @@ var upCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
+			"config_path=" + krakenlibConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
 			"--tags",
 			upStagesList,
 		}
@@ -58,7 +57,7 @@ var upCmd = &cobra.Command{
 		ctx, cancel := getTimedContext()
 		defer cancel()
 
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
 		if err != nil {
 			return err
 		}
@@ -83,13 +82,13 @@ var upCmd = &cobra.Command{
 		if statusCode != 0 {
 			fmt.Println("ERROR bringing up " + getContainerName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, k2ConfigPath)
+			clusterHelpError(Created, krakenlibConfigPath)
 		} else {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, k2ConfigPath)
+			clusterHelp(Created, krakenlibConfigPath)
 		}
 
 		ExitCode = statusCode
@@ -104,5 +103,5 @@ func init() {
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of K2 stages to run. Run 'k2cli help topic stages' for more info.")
+		"comma-separated list of Krakenlib stages to run. Run 'kraken help topic stages' for more info.")
 }
