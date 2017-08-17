@@ -197,7 +197,7 @@ func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 				outputLocation + ":" + outputLocation},
 		}
 
-		deployment := reflect.ValueOf(clusterConfig.Sub("deployment"))
+		deployment := reflect.ValueOf(krakenClusterConfig.Sub("deployment"))
 		parseMounts(deployment, hostConfig, &config_envs)
 
 	} else {
@@ -371,7 +371,7 @@ func (conf *DockerClientConfig) isTLSActivated() bool {
 	return true
 }
 
-func getClient() *client.Client {
+func getClient() (*client.Client, error) {
 
 	var httpClient *http.Client
 	var cli *client.Client
@@ -381,6 +381,10 @@ func getClient() *client.Client {
 	if config.isInheritedFromEnviron() {
 		// Rely on Docker's own standard environment handling.
 		cli, err = client.NewEnvClient()
+		if err != nil {
+			return nil, err
+		}
+
 	} else {
 		// Set up an optionally TLS-enabled client, based on non-environment flags.
 		// This replicates logic of Docker's `NewEnvClient`, but allows for our
@@ -395,8 +399,9 @@ func getClient() *client.Client {
 			})
 
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
+
 			httpClient = &http.Client{
 				Transport: &http.Transport{
 					TLSClientConfig: tlsClient,
@@ -410,17 +415,15 @@ func getClient() *client.Client {
 		}
 
 		cli, err = client.NewClient(config.DockerHost, config.DockerAPIVersion, httpClient, headers)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-
-	return cli
+	return cli, nil
 }
 
-func getAuthConfig64(cli *client.Client, ctx context.Context) string {
+func getAuthConfig64(cli *client.Client, ctx context.Context) (string, error) {
 	authConfig := types.AuthConfig{}
 	if len(userName) > 0 && len(password) > 0 {
 		imageParts := strings.Split(containerImage, "/")
@@ -435,21 +438,19 @@ func getAuthConfig64(cli *client.Client, ctx context.Context) string {
 
 		_, err := cli.RegistryLogin(ctx, authConfig)
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			return "", nil
 		}
 	}
 
 	base64Auth, err := base64EncodeAuth(authConfig)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return "", err
 	}
 
-	return base64Auth
+	return base64Auth, nil
 }
 
-func pullImage(cli *client.Client, ctx context.Context, base64Auth string) {
+func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error {
 
 	pullOpts := types.ImagePullOptions{
 		RegistryAuth:  base64Auth,
@@ -459,8 +460,7 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) {
 
 	pullResponseBody, err := cli.ImagePull(ctx, containerImage, pullOpts)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return err
 	}
 
 	defer pullResponseBody.Close()
@@ -473,19 +473,19 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) {
 			if err == io.EOF {
 				break
 			}
-			fmt.Println(err)
-			panic(err)
+			return err
 		}
 	}
 
-	// if the final stream object contained an error, panic
+	// if the final stream object contained an error
 	if errMsg, ok := m["error"]; ok {
-		fmt.Println("%v", errMsg)
-		panic(errMsg)
+		return fmt.Errorf("%v", errMsg)
 	}
+	return nil
 }
 
-func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int, func()) {
+func containerAction(cli *client.Client, ctx context.Context, command []string, k2config string) (types.ContainerCreateResponse, int, func(), error) {
+	var containerResponse types.ContainerCreateResponse
 
 	hostConfig, config_envs := makeMounts(k2config)
 	containerConfig := &container.Config{
@@ -502,13 +502,11 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	clusterName := getContainerName()
 	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "k2"+clusterName)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return containerResponse, -1, nil, err
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		fmt.Println(err)
-		panic(err)
+		return containerResponse, -1, nil, err
 	}
 
 	if verbosity == true {
@@ -552,10 +550,9 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 				if removeErr != nil {
 					panic(removeErr)
 				}
-			}
+			}, nil
 		default:
-			fmt.Println(err)
-			panic(err)
+			return containerResponse, -1, nil, err
 		}
 	}
 
@@ -581,7 +578,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		if removeErr != nil {
 			panic(removeErr)
 		}
-	}
+	}, nil
 }
 
 func getContext() (ctx context.Context) {
@@ -592,7 +589,7 @@ func getTimedContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), time.Duration(actionTimeout)*time.Second)
 }
 
-func writeLog(logFilePath string, out []byte) {
+func writeLog(logFilePath string, out []byte) error {
 	var fileHandle *os.File
 
 	_, err := os.Stat(logFilePath)
@@ -602,8 +599,7 @@ func writeLog(logFilePath string, out []byte) {
 			// make sure path exists
 			err = os.MkdirAll(filepath.Dir(logFilePath), 0777)
 			if err != nil {
-				fmt.Println(err)
-				panic(err)
+				return err
 			}
 
 			// check if a valid file path
@@ -611,14 +607,12 @@ func writeLog(logFilePath string, out []byte) {
 			if err := ioutil.WriteFile(logFilePath, d, 0644); err == nil {
 				os.Remove(logFilePath)
 			} else {
-				fmt.Println(err)
-				panic(err)
+				return err
 			}
 
 			fileHandle, err = os.Create(logFilePath)
 			if err != nil {
-				fmt.Println(err)
-				panic(err)
+				return err
 			}
 		} else {
 			fileHandle, err = os.OpenFile("test.txt", os.O_RDWR, 0666)
@@ -629,16 +623,21 @@ func writeLog(logFilePath string, out []byte) {
 
 	_, err = fileHandle.Write(out)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func getContainerName() string {
 	// only supports first cluster name right now
-	clusters := clusterConfig.Get("deployment.clusters")
+	clusters := krakenClusterConfig.Get("deployment.clusters")
 	if clusters != nil {
 		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
+		if firstCluster["name"] == nil {
+			return "cluster-name-missing"
+		}
+		// should not use type assertion .(string) without verifying interface isnt nil
 		return os.ExpandEnv(firstCluster["name"].(string))
 	} else {
 		return "cluster-name-missing"

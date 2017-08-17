@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"testing"
+	"fmt"
 )
+
+const randConfigNameLenght = 12
 
 func TestProviderFlagDefaultsToAWS(t *testing.T) {
 	if provider != "aws" {
@@ -12,7 +15,7 @@ func TestProviderFlagDefaultsToAWS(t *testing.T) {
 
 func TestPreRunSetsVariables(t *testing.T) {
 	args := make([]string, 2)
-	args[0] = "$HOME/sandbox/fake-config.tmp"
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
 	preRunEFunc(nil, args)
 
 	if configPath == "" || generatePath == "" {
@@ -21,16 +24,24 @@ func TestPreRunSetsVariables(t *testing.T) {
 }
 
 func TestAWSProviderCreatesAWSconfig(t *testing.T) {
-	preRunEFunc(nil, nil)
-	if configPath != "ansible/roles/kraken.config/files/config.yaml " {
-		t.Error("Expected generated config to be config.yaml")
+	args := make([]string, 2)
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
+
+	preRunEFunc(nil, args)
+
+	if configPath != "ansible/roles/kraken.config/files/config.yaml" {
+		t.Error("Expected the ansible config path to point to config.yaml")
 	}
 }
 
 func TestGKEProviderCreatesGKEConfig(t *testing.T) {
 	provider = "gke"
-	preRunEFunc(nil, nil)
-	if configPath != "ansible/roles/kraken.config/files/gke-config.yaml " {
-		t.Error("Expected generated config to be gke-config.yaml")
+	args := make([]string, 2)
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
+
+	preRunEFunc(nil, args)
+
+	if configPath != "ansible/roles/kraken.config/files/gke-config.yaml" {
+		t.Error("Expected the ansible config path to point to gke-config.yaml")
 	}
 }

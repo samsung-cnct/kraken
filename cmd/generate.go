@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,80 +32,68 @@ var generateCmd = &cobra.Command{
 	SilenceUsage: true,
 	Long:         `Generate a K2 configuration file at the specified location`,
 	PreRunE:      preRunEFunc,
-	Run:          runFunc,
+	RunE:          runFunc,
 }
 
 func preRunEFunc(cmd *cobra.Command, args []string) error {
-	if len(args) > 0 {
+	switch provider {
+	case "gke":
+		configPath = "ansible/roles/kraken.config/files/gke-config.yaml"
+	case "aws":
+		configPath = "ansible/roles/kraken.config/files/config.yaml"
+	default:
+		return fmt.Errorf("Error unsupported provider: %s", provider)
 
+	}
+
+	if len(args) > 0 {
 		generatePath = os.ExpandEnv(args[0])
 	} else {
 		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 	}
 
-	fmt.Printf(generatePath)
+	fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
 
-	if err := checkConfig(generatePath);  err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
+		return fmt.Errorf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default K2 config file", generatePath)
 	}
 
-	if provider == "gke" {
-		configPath = "ansible/roles/kraken.config/files/gke-config.yaml "
-	} else {
-		configPath = "ansible/roles/kraken.config/files/config.yaml "
-		provider = "aws"
+	if err := os.MkdirAll(filepath.Dir(generatePath), 0777); err != nil {
+		return err
 	}
 
-	err := os.MkdirAll(filepath.Dir(generatePath), 0777)
+	return nil
+}
+
+func runFunc(cmd *cobra.Command, args []string) error {
+	cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func checkConfig(generatePath string) error {
-	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
-		err := errors.New(fmt.Sprintf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default K2 config file", generatePath))
-		return err
-	}
-
-	return nil
-}
-
-func runFunc(cmd *cobra.Command, args []string) {
-	terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-	terminalSpinner.Start()
-
-	cli := getClient()
-
-	backgroundCtx := getContext()
-	pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-
-	terminalSpinner.Stop()
 
 	command := []string{
 		"bash",
 		"-c",
-		"cp " + configPath + generatePath,
+		fmt.Sprintf("cp %s %s", configPath, generatePath),
 	}
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
 
 	outputLocation = filepath.Dir(generatePath)
-	resp, statusCode, timeout := containerAction(cli, ctx, command, "")
+	resp, statusCode, timeout, err := containerAction(cli, ctx, command, "")
+	if err != nil {
+		return err
+	}
+
 	defer timeout()
 
-	out, err := printContainerLogs(
-		cli,
-		resp,
-		backgroundCtx,
-	)
+	out, err := printContainerLogs(cli, resp, backgroundCtx)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		fmt.Println("Error generating config at " + generatePath)
+		return err
 	}
+
 	if statusCode != 0 {
 		fmt.Println("Error generating config at " + generatePath)
 		fmt.Printf("%s", out)
@@ -118,6 +105,7 @@ func runFunc(cmd *cobra.Command, args []string) {
 	}
 
 	ExitCode = statusCode
+	return nil
 }
 
 func init() {

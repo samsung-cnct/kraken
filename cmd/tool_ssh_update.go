@@ -26,16 +26,11 @@ var sshUpdateCmd = &cobra.Command{
 	Short: "Refresh ssh host list",
 	Long: `Update a list of SSH hosts for the K2 
 	cluster configured by the specified yaml`,
-	Run: func(cmd *cobra.Command, args []string) {
-		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		terminalSpinner.Start()
-
-		cli := getClient()
-
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-
-		terminalSpinner.Stop()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
+		if err != nil {
+			return err
+		}
 
 		terminalSpinner.Prefix = "Updating ssh inventory for '" + getContainerName() + "' "
 		terminalSpinner.Start()
@@ -53,7 +48,10 @@ var sshUpdateCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, args[0])
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, args[0])
+		if err != nil {
+			return err
+		}
 		defer timeout()
 
 		terminalSpinner.Stop()
@@ -64,8 +62,8 @@ var sshUpdateCmd = &cobra.Command{
 			backgroundCtx,
 		)
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			fmt.Println("ERROR updating ssh inventory for " + getContainerName())
+			return err
 		}
 
 		if statusCode != 0 {
@@ -81,6 +79,7 @@ var sshUpdateCmd = &cobra.Command{
 		}
 
 		ExitCode = statusCode
+		return nil
 	},
 }
 

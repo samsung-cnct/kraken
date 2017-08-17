@@ -15,11 +15,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 // kubectlCmd represents the kubectl command
@@ -28,44 +27,32 @@ var kubectlCmd = &cobra.Command{
 	Short: "Use Kubernetes kubectl with K2 cluster",
 	Long: `Use Kubernetes kubectl with the K2 
 	cluster configured by the specified yaml file`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if _, err := os.Stat(k2Config); os.IsNotExist(err) {
-			return errors.New("File " + k2Config + " does not exist!")
-		}
+	PreRunE: preRunGetKrakenConfig,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cli, _, err := pullKrakenContainerImage(containerImage)
 
-		initK2Config(k2Config)
-
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		cli := getClient()
-
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-
-		command := []string{"/kraken/bin/computed_kubectl.sh", k2Config}
+		command := []string{"/kraken/bin/computed_kubectl.sh", k2ConfigPath}
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		if err != nil {
+			return err
+		}
 		defer timeout()
 
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			getContext(),
-		)
+		out, err := printContainerLogs(cli, resp, getContext())
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			return err
 		}
 
-		fmt.Printf("%s", out)
+		fmt.Printf("%s \n", out)
 
 		ExitCode = statusCode
+		return nil
 	},
 }
 

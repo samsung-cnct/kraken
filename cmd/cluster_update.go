@@ -41,7 +41,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
-			return errors.New("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
+			return fmt.Errorf("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
 			"add-nodepools or rm-nodepools depending on what action you are taking against the nodepools.  For example: \n k2cli cluster update " +
 			"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
 		}
@@ -52,24 +52,21 @@ var updateCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			return err
 		}
 
-		initK2Config(k2ConfigPath)
+		if err := initKrakenClusterConfig(k2ConfigPath); err != nil {
+			return err
+		}
+
 
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
-		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		terminalSpinner.Start()
-
-		cli := getClient()
-
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-
-		terminalSpinner.Stop()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
+		if err != nil {
+			return err
+		}
 
 		terminalSpinner.Prefix = "Updating cluster '" + getContainerName() + "' "
 		terminalSpinner.Start()
@@ -86,23 +83,24 @@ var updateCmd = &cobra.Command{
 
 		ctx := getContext()
 		// defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		if err != nil {
+			return err
+		}
+
 		defer timeout()
 
 		terminalSpinner.Stop()
 
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
+		out, err := printContainerLogs(cli, resp, backgroundCtx)
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			return err
 		}
 
 		if len(strings.TrimSpace(logPath)) > 0 {
-			writeLog(logPath, out)
+			if err := writeLog(logPath, out); err != nil {
+				return err
+			}
 		}
 
 		if statusCode != 0 {
@@ -118,6 +116,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		ExitCode = statusCode
+		return nil
 	},
 }
 

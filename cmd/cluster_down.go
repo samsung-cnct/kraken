@@ -15,10 +15,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -32,36 +30,12 @@ var downCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Destroys a K2 cluster described in the specified configuration yaml`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
-		if len(args) > 0 {
-			k2ConfigPath = os.ExpandEnv(args[0])
-		}
-
-		_, err := os.Stat(k2ConfigPath)
-		if os.IsNotExist(err) {
-			return errors.New("File " + k2ConfigPath + " does not exist!")
-		}
-
+	PreRunE:       preRunGetKrakenConfig,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			return err
 		}
-
-		initK2Config(k2ConfigPath)
-
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		terminalSpinner.Prefix = "Pulling image '" + containerImage + "' "
-		terminalSpinner.Start()
-
-		cli := getClient()
-
-		backgroundCtx := getContext()
-		pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-
-		terminalSpinner.Stop()
 
 		if verbosity == false {
 			terminalSpinner.Prefix = "Bringing down cluster '" + getContainerName() + "' "
@@ -81,7 +55,12 @@ var downCmd = &cobra.Command{
 
 		ctx, cancel := getTimedContext()
 		defer cancel()
-		resp, statusCode, timeout := containerAction(cli, ctx, command, k2ConfigPath)
+
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		if err != nil {
+			return err
+		}
+
 		defer timeout()
 
 		if verbosity == false {
@@ -94,12 +73,15 @@ var downCmd = &cobra.Command{
 			backgroundCtx,
 		)
 		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			fmt.Printf("ERROR bringing down %s \n", getContainerName())
+			return err
 		}
 
 		if len(strings.TrimSpace(logPath)) > 0 {
-			writeLog(logPath, out)
+			if err := writeLog(logPath, out); err != nil {
+				return err
+			}
+
 		}
 
 		if statusCode != 0 {
@@ -113,6 +95,7 @@ var downCmd = &cobra.Command{
 		}
 
 		ExitCode = statusCode
+		return nil
 	},
 }
 

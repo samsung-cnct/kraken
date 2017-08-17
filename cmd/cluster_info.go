@@ -15,10 +15,7 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // infoCmd represents the info command
@@ -29,27 +26,7 @@ var infoCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Long: `Output some basic information on the current 
 	cluster state configured by the specified K2 yaml`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
-
-		if len(args) > 0 {
-			k2ConfigPath = os.ExpandEnv(args[0])
-		}
-
-		_, err := os.Stat(k2ConfigPath)
-		if os.IsNotExist(err) {
-			return errors.New("File " + k2ConfigPath + " does not exist!")
-		}
-
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-
-		initK2Config(k2ConfigPath)
-
-		return nil
-	},
+	PreRunE: preRunGetKrakenConfig,
 	Run: func(cmd *cobra.Command, args []string) {
 		clusterHelpError(Created, k2ConfigPath)
 		ExitCode = 0
