@@ -2,7 +2,7 @@
 github_org             = "samsung-cnct"
 quay_org               = "samsung_cnct"
 publish_branch         = "master"
-image_tag              = "${env.RELEASE_VERSION}" ?: "latest"
+release_version        = "${env.RELEASE_VERSION}"
 k2_image_tag           = "${env.K2_VERSION}" ?: "latest"
 
 podTemplate(label: 'k2cli', containers: [
@@ -27,7 +27,7 @@ podTemplate(label: 'k2cli', containers: [
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && gosimple .'
-                        kubesh "KRAKENLIB_TAG=${k2_image_tag} cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build"
+                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build KLIB_VER=${k2_image_tag}"
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
                         kubesh 'cd go/src/github.com/samsung-cnct/k2cli/cmd && go test -v'
                     }
@@ -72,6 +72,16 @@ podTemplate(label: 'k2cli', containers: [
                                 kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
                             }
                         )
+                    }
+                }
+            }
+
+            if (git_branch.contains(publish_branch) && git_uri.contains(github_org)) {
+                customContainer('golang') {
+                    withEnv(["GOPATH=${WORKSPACE}/go/"]) {
+                        stage('Release') {
+                            kubesh "make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
+                        }
                     }
                 }
             }

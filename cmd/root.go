@@ -35,6 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
+var k2Tag string
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
@@ -93,7 +94,6 @@ func init() {
 		"",
 		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")")
 
-	k2Tag := os.Getenv("KRAKENLIB_TAG")
 	if k2Tag == "" {
 		k2Tag = "latest"
 	}
