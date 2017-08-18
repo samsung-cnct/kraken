@@ -7,11 +7,12 @@ k2_image_tag           = "${env.K2_VERSION}" ?: "latest"
 
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'quay.io/samsung_cnct/kraken-gobuild:1.8.3', ttyEnabled: true, command: 'cat', envVars: [secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'kraken-publish-token', secretKey: 'token')]),
+    containerTemplate(name: 'golang', image: 'quay.io/samsung_cnct/kraken-gobuild:1.8.3', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     ], volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/')
+      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/'),
+      secretVolume(mountPath: '/home/jenkins/kraken-release-token/', secretName: 'kraken-publish-token')
     ]) {
         node('k2cli') {
             customContainer('golang') {
@@ -80,7 +81,7 @@ podTemplate(label: 'k2cli', containers: [
                 customContainer('golang') {
                     withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                         stage('Release') {
-                            kubesh "make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
+                            kubesh ". /home/jenkins/kraken-release-token/token make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
                         }
                     }
                 }
