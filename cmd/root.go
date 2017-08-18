@@ -92,11 +92,16 @@ func init() {
 		"k",
 		"",
 		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")")
+
+	k2Tag := os.Getenv("KRAKENLIB_TAG")
+	if k2Tag == "" {
+		k2Tag = "latest"
+	}
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:latest",
+		"quay.io/samsung_cnct/k2:" + k2Tag,
 		"k2 container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
