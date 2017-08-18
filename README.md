@@ -39,10 +39,10 @@ kraken generate --provider gke
 #### Required Configuration Changes
 For an AWS cluster there are several fields that need to be set before this file can be used:
 *  **Cluster name**  All Kraken clusters should have a unique name so their assets can be easily identified by humans in the
-AWS console (no more than 13 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
+AWS console (no more than 32 characters). The cluster name is set in the `deployment.clusters.name` field.  This dotted notation refers to the hierarchical structure of a yaml file where cluster is a sub field of deployment. This line is towards the bottom of the file in the `deployment` section.
 
 The following fields are in the `definitions` section of the configuration file.
-In lieu of specifying all of the following, you may just put your credentials file and Kraken will grab the authentication specs from there.
+In lieu of specifying all of the following, you may just put your credentials in the AWS credentials file and Kraken will grab the authentication specs from there.
 *  **AWS access key**  Your AWS access key is required for programmatic access to AWS. The field is named
 `providerConfigs.authentication.accessKey`. This can be either set to the literal value, or to an environment
 variable that Kraken will use.
@@ -211,7 +211,7 @@ kraken cluster update ${HOME}/krakenlibconfigs/config.yaml <your,nodepools,here>
 While not something to be done in production, during development when you are done with your cluster (or with a quickstart) it's
 best to clean up your resources. To destroy the running cluster from this guide, simply run:
 ```
-kraken cluster down ${HOME}/kkrakenlibconfigs/config.yaml
+kraken cluster down ${HOME}/krakenConfigs/config.yaml
 ```
 
 **Note:** if you have specified an '--output' directory during the creation command, make sure you specify it here or the cluster
