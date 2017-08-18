@@ -35,7 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var k2Tag string
+var k2Tag string  // this is set via linker flag
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)

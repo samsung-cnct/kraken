@@ -26,10 +26,10 @@ podTemplate(label: 'k2cli', containers: [
 
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && gosimple .'
+                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && gosimple ."
                         kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build KLIB_VER=${k2_image_tag}"
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && go vet'
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/cmd && go test -v'
+                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && go vet"
+                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/cmd && go test -v"
                     }
 
                     stage('Build') {
