@@ -329,5 +329,5 @@ This will create a k2cli binary that can be executed directly like so:
 
 * Install github-release from https://github.com/c4milo/github-release
 * Create a github personal access token with repo read/write permissions and export it as GITHUB_TOKEN
-* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed
-* Run ```make release```
+* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed or set them as command line parmaters to `make`
+* Run ```make release``` or with paramaters ```make release VERSION=v0.1```

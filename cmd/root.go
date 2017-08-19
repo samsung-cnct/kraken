@@ -35,6 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
+var k2Tag string  // this is set via linker flag
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
@@ -92,11 +93,15 @@ func init() {
 		"k",
 		"",
 		"config file for k2cli (default \""+os.Getenv("HOME")+"/.k2cli.yaml\")")
+
+	if k2Tag == "" {
+		k2Tag = "latest"
+	}
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:latest",
+		"quay.io/samsung_cnct/k2:" + k2Tag,
 		"k2 container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
