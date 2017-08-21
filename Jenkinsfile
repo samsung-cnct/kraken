@@ -81,7 +81,7 @@ podTemplate(label: 'k2cli', containers: [
                 customContainer('golang') {
                     withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                         stage('Release') {
-                            kubesh ". /home/jenkins/kraken-release-token/token make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
+                            kubesh ". /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
                         }
                     }
                 }
