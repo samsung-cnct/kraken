@@ -35,7 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var k2Tag string // this is set via linker flag
+var krakenTag string // this is set via linker flag
 
 // to be used by subcommands using --config
 var k2ConfigPath string
@@ -98,20 +98,20 @@ func init() {
 		&cfgFile,
 		"kraken",
 		"k",
-		os.ExpandEnv("$HOME/.k2cli/config.yaml"),
+		os.ExpandEnv("$HOME/.kraken/.kraken/config.yaml"),
 		"Path to kraken config file")
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:"+k2Tag,
-		"k2 container image")
+		"quay.io/samsung_cnct/k2:"+krakenTag,
+		"Kraken container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
 		"output",
 		"o",
 		os.Getenv("HOME")+"/.kraken",
-		"Krakenlib output folder")
+		"Kraken output folder")
 
 	// Specify the docker host string; typically unix:///var/run/docker.sock
 	RootCmd.PersistentFlags().StringVarP(
