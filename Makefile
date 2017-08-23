@@ -3,6 +3,7 @@ VERSION   := 1.0.8
 KLIB_VER  := latest
 TYPE      := stable
 COMMIT    := $(shell git rev-parse HEAD)
+REL_BRANCH := "$$(git rev-parse --abbrev-ref HEAD)"
 godep=GOPATH=$(shell godep path):${GOPATH}
 
 
@@ -46,7 +47,6 @@ release: dist
 	comparison="$$latest_tag..HEAD"; \
 	if [ -z "$$latest_tag" ]; then comparison=""; fi; \
 	changelog=$$(git log $$comparison --oneline --no-merges --reverse); \
-	github-release samsung-cnct/$(NAME) $(VERSION) "$$(git rev-parse --abbrev-ref HEAD)" "**Changelog**<br/>$$changelog" 'dist/*'; \
-	git pull
+	github-release samsung-cnct/$(NAME) $(VERSION) $(REL_BRANCH) "**Changelog**<br/>$$changelog" 'dist/*'; \
 
 .PHONY: build compile install deps dist release
