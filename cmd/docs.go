@@ -43,6 +43,7 @@ var docsCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		doc.GenMarkdownTree(RootCmd, docPath)
+		ExitCode = 1
 	},
 }
 

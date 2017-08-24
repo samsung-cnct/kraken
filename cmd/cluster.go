@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var userName string
 var password string
-var k2ConfigPath string
 var configForced bool
+
 
 // clusterCmd represents the cluster command
 var clusterCmd = &cobra.Command{
@@ -36,22 +37,30 @@ var clusterCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(clusterCmd)
+
 	clusterCmd.PersistentFlags().StringVarP(
-		&userName,
-		"user",
-		"u",
-		"",
-		"registry user name")
-	clusterCmd.PersistentFlags().StringVarP(
-		&password,
-		"password",
-		"p",
-		"",
-		"registry password")
+		&k2ConfigPath,
+		"config",
+		"c",
+		os.ExpandEnv("$HOME/.kraken/config.yaml"),
+		"Path to the kraken cluster config")
 	clusterCmd.PersistentFlags().BoolVarP(
 		&configForced,
 		"force",
 		"f",
 		false,
 		"true if operation should be proceed even if config is deprecated (default false)")
+	clusterCmd.PersistentFlags().StringVarP(
+		&password,
+		"password",
+		"p",
+		"",
+		"registry password")
+	clusterCmd.PersistentFlags().StringVarP(
+		&userName,
+		"user",
+		"u",
+		"",
+		"registry user name")
+
 }

@@ -25,7 +25,7 @@ var topicCmd = &cobra.Command{
 	Long:  `Help on non-command topics`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
-		ExitCode = 1
+		ExitCode = 0
 	},
 }
 

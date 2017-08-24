@@ -17,7 +17,6 @@ package cmd
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -32,40 +31,49 @@ var helmCmd = &cobra.Command{
 	Short: "Use Kubernetes Helm with K2 cluster",
 	Long: `Use Kubernetes Helm with the  K2
 	cluster configured by the specified yaml file`,
-	PreRunE: preRunE,
-	Run:     run,
+	PreRunE: preRunGetKrakenConfig,
+	RunE:     run,
 }
 
-func preRunE(cmd *cobra.Command, args []string) error {
-	if _, err := os.Stat(k2Config); os.IsNotExist(err) {
-		return errors.New("File " + k2Config + " does not exist!")
+func run(cmd *cobra.Command, args []string) error {
+	cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
+
+	minorMajorVersion, err := getK8sVersion(cli, backgroundCtx, args)
+	if err != nil {
+		return err
 	}
 
-	initK2Config(k2Config)
-
-	return nil
-}
-
-func run(cmd *cobra.Command, args []string) {
-	cli := getClient()
-
-	backgroundCtx := getContext()
-	pullImage(cli, backgroundCtx, getAuthConfig64(cli, backgroundCtx))
-	minorMajorVersion := getK8sVersion(cli, backgroundCtx, args)
 	helmPath := "/opt/cnct/kubernetes/" + minorMajorVersion + "/bin/helm"
 
 	// Run helm if available, or get user input if no helm available.
-	if strings.Contains(verifyHelmPath(helmPath, cli), minorMajorVersion) {
-		runHelm(helmPath, cli, backgroundCtx, args)
+	verfiedHelmPath, err := verifyHelmPath(helmPath, cli)
+	if err != nil {
+		return err
+	}
+
+	if strings.Contains(verfiedHelmPath, minorMajorVersion) {
+		status, err := runHelm(helmPath, cli, backgroundCtx, args);
+		if err != nil {
+			return err
+		}
+
+		ExitCode = status
 	} else {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Println("No version of helm available for Kubernetes " + minorMajorVersion)
-		fmt.Printf("Would you like to run the latest version of helm %s? [Y/N]: ", latestHelmVersion(cli, backgroundCtx, args))
+
+		printHelmVersion, err := latestHelmVersion(cli, backgroundCtx, args)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Would you like to run the latest version of helm %s? [Y/N]: ", printHelmVersion)
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Errorf("Fatal: the following error was thrown while reading user input for helm options: %v", err)
+			return fmt.Errorf("Fatal: the following error was thrown while reading user input for helm options: %v", err)
 		}
+
 		response = strings.ToLower(strings.TrimSpace(response))
 
 		if response == "y" {
@@ -73,52 +81,59 @@ func run(cmd *cobra.Command, args []string) {
 		} else if response == "n" {
 			fmt.Println("No version of Helm running")
 		}
+
+		ExitCode = 0
 	}
+
+	return nil
 }
 
 // Check to see if path exists, else get latest.
-func verifyHelmPath(helmPath string, cli *client.Client) string {
+func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	command := []string{"test", "-f", helmPath}
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	_, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+	_, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	if err != nil {
+		return "", err
+	}
+
 	defer timeout()
 
 	// Unless command returns 0 (filepath exists), assign path to latest.
 	if statusCode != 0 {
 		helmPath = "/opt/cnct/kubernetes/latest/bin/helm"
 	}
-	return helmPath
+	return helmPath, nil
 }
 
 // Get the k8s version from k2
-func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) string {
-	command := []string{"/kraken/bin/max_k8s_version.sh", k2Config}
+func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) (string, error) {
+	command := []string{"/kraken/bin/max_k8s_version.sh", k2ConfigPath}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
 	}
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout := containerAction(cli, ctx, command, k2Config)
+	resp, _, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	if err != nil {
+		return "", err
+	}
+
 	defer timeout()
 
-	out, err := printContainerLogs(
-		cli,
-		resp,
-		backgroundCtx,
-	)
+	out, err := printContainerLogs(cli, resp, backgroundCtx)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return "", err
 	}
 
 	s := string(out)
-	return s
+	return s, nil
 }
 
 // If no valid helm version, let user know the latest helm version available.
-func latestHelmVersion(cli *client.Client, backgroundCtx context.Context, args []string) string {
+func latestHelmVersion(cli *client.Client, backgroundCtx context.Context, args []string) (string, error) {
 	command := []string{"printenv", "K8S_HELM_VERSION_LATEST"}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
@@ -126,26 +141,29 @@ func latestHelmVersion(cli *client.Client, backgroundCtx context.Context, args [
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout := containerAction(cli, ctx, command, k2Config)
+	resp, _, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	if err != nil {
+		return "", err
+	}
+
 	defer timeout()
 
-	out, err := printContainerLogs(
-		cli,
-		resp,
-		backgroundCtx,
-	)
+	out, err := printContainerLogs(cli, resp, backgroundCtx)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return "", err
 	}
 
 	s := string(out)
-	return s
+	return s, nil
 }
 
 // Run helm if valid path or if user wants to run latest helm.
-func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context, args []string) int {
-	path := verifyHelmPath(helmPath, cli)
+func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context, args []string) (int, error) {
+	path, err := verifyHelmPath(helmPath, cli)
+	if err != nil {
+		return -1, err
+	}
+
 	command := []string{path}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
@@ -153,23 +171,19 @@ func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context,
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, statusCode, timeout := containerAction(cli, ctx, command, k2Config)
+	resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	if err != nil {
+		return -1, err
+	}
 	defer timeout()
 
-	out, err := printContainerLogs(
-		cli,
-		resp,
-		backgroundCtx,
-	)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	if out, err := printContainerLogs(cli, resp, backgroundCtx); err != nil {
+		return -1, err
+	} else {
+		fmt.Printf("%s", out)
 	}
 
-	fmt.Printf("%s", out)
-
-	ExitCode = statusCode
-	return ExitCode
+	return statusCode, nil
 }
 
 func init() {

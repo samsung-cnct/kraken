@@ -53,6 +53,7 @@ Following stages are available:
 'readiness_only'  - wait for cluster to be ready (for the configured definition of 'ready')
 'services_only'   - install configured helm charts
 `)
+		ExitCode = 0
 	},
 }
 

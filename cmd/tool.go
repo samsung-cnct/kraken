@@ -15,11 +15,11 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
-var k2Config string
 
 // toolCmd represents the tool command
 var toolCmd = &cobra.Command{
@@ -29,16 +29,16 @@ var toolCmd = &cobra.Command{
 	K2 cluster configured by specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
-		ExitCode = 1
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(toolCmd)
+
 	toolCmd.PersistentFlags().StringVarP(
-		&k2Config,
+		&k2ConfigPath,
 		"config",
 		"c",
 		os.ExpandEnv("$HOME/.kraken/config.yaml"),
-		"Location of the k2config")
+		"Path to the kraken cluster config")
 }
