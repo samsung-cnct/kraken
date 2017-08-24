@@ -57,7 +57,7 @@ podTemplate(label: 'k2cli', containers: [
                                 kubesh "env helm_override_kca`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster up --config /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
                             },
                             "gke": {
-                                echo "no-op" //kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster up --config /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
+                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster up --config /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
                             }
                         )
                     }
@@ -69,8 +69,8 @@ podTemplate(label: 'k2cli', containers: [
                                 kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws"
                             },
                             "gke": {
-                                echo "no-op" //kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster down --config /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
-                                echo "no-op" //kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
+                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/k2cli -vvv cluster down --config /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
+                                kubesh "rm -rf /var/lib/docker/scratch/k2cli-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
                             }
                         )
                     }
