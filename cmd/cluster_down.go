@@ -57,7 +57,7 @@ var downCmd = &cobra.Command{
 		ctx, cancel := getTimedContext()
 		defer cancel()
 
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
 		if err != nil {
 			return err
 		}

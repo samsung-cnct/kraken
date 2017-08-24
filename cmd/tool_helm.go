@@ -108,7 +108,7 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	return helmPath, nil
 }
 
-// Get the k8s version from k2
+// Get the k8s version from Krakenlib
 func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) (string, error) {
 	command := []string{"/kraken/bin/max_k8s_version.sh", krakenlibConfigPath}
 	for _, element := range args {

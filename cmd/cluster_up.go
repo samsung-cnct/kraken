@@ -27,10 +27,10 @@ var upStagesList string
 // upCmd represents the up command
 var upCmd = &cobra.Command{
 	Use:           "up [path to Kraken config file]",
-	Short:         "create a Kraken cluster",
+	Short:         "Creates a Kraken cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Creates a K2 cluster described in the specified configuration yaml`,
+	Long:          `Creates a Kraken cluster described in the specified configuration yaml`,
 	PreRunE:       preRunGetKrakenConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)

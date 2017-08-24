@@ -55,7 +55,7 @@ var updateCmd = &cobra.Command{
 			return err
 		}
 
-		if err := initKrakenClusterConfig(krakenConfigPath); err != nil {
+		if err := initKrakenClusterConfig(krakenlibConfigPath); err != nil {
 			return err
 		}
 

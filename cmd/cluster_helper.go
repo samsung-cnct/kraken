@@ -11,28 +11,27 @@ import (
 
 func preRunGetKrakenConfig(cmd *cobra.Command, args []string) error {
 	if !cmd.Flag("config").Changed {
-		fmt.Printf("config file path not given, using default config file location (%s)\n", k2ConfigPath)
+		fmt.Printf("config file path not given, using default config file location (%s)\n", krakenlibConfigPath)
 	}
 
-	_, err := os.Stat(k2ConfigPath)
+	_, err := os.Stat(krakenlibConfigPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("File %s does not exist!", k2ConfigPath)
+		return fmt.Errorf("File %s does not exist!", krakenlibConfigPath)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	if err := initKrakenClusterConfig(k2ConfigPath); err != nil {
+	if err := initKrakenClusterConfig(krakenlibConfigPath); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-
 func pullKrakenContainerImage(containerImage string) (*client.Client, context.Context, error) {
-	terminalSpinner.Prefix = fmt.Sprintf("Pulling image '%s' ",containerImage)
+	terminalSpinner.Prefix = fmt.Sprintf("Pulling image '%s' ", containerImage)
 	terminalSpinner.Start()
 
 	cli, err := getClient()
