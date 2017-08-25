@@ -16,8 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -28,20 +26,11 @@ var upStagesList string
 var upCmd = &cobra.Command{
 	Use:           "up [path to Kraken config file]",
 	Short:         "Creates a Kraken cluster",
-	SilenceErrors: true,
-	SilenceUsage:  true,
 	Long:          `Creates a Kraken cluster described in the specified configuration yaml`,
 	PreRunE:       preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
-		if err != nil {
-			return err
-		}
-
-		if verbosity == false {
-			terminalSpinner.Prefix = "Bringing up cluster '" + getContainerName() + "' "
-			terminalSpinner.Start()
-		}
+		var err error
+		spinnerPrefix := fmt.Sprintf("Bringing up cluster '%s' ", getFirstClusterName())
 
 		command := []string{
 			"ansible-playbook",
@@ -49,41 +38,18 @@ var upCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
 			"--extra-vars",
-			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
+			fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=up", ClusterConfigPath, outputLocation, configForced),
 			"--tags",
 			upStagesList,
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
-		if err != nil {
-			return err
-		}
-
-		defer timeout()
-
-		if verbosity == false {
-			terminalSpinner.Stop()
-		}
-
-		out, err := printContainerLogs(cli, resp, backgroundCtx)
-		if err != nil {
-			return err
-		}
-
-		if len(strings.TrimSpace(logPath)) > 0 {
-			if err := writeLog(logPath, out); err != nil {
-				return err
-			}
-		}
-
-		if statusCode != 0 {
-			fmt.Println("ERROR bringing up " + getContainerName())
+		onFailure := func(out []byte) {
+			fmt.Printf("ERROR bringing up %s \n", getFirstClusterName())
 			fmt.Printf("%s", out)
 			clusterHelpError(Created, ClusterConfigPath)
-		} else {
+		}
+
+		onSuccess := func(out []byte) {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
@@ -91,8 +57,8 @@ var upCmd = &cobra.Command{
 			clusterHelp(Created, ClusterConfigPath)
 		}
 
-		ExitCode = statusCode
-		return nil
+		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)
+		return err
 	},
 }
 

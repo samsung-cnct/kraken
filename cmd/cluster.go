@@ -31,7 +31,7 @@ var clusterCmd = &cobra.Command{
 	Long:  `Commands that perform actions on a Kraken cluster described by a provided yaml config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
-		ExitCode = 1
+		ExitCode = 0
 	},
 }
 

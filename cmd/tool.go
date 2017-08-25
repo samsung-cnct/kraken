@@ -24,10 +24,13 @@ import (
 var toolCmd = &cobra.Command{
 	Use:   "tool",
 	Short: "Use tools with Kraken cluster",
+	SilenceUsage: true,
+	SilenceErrors: true,
 	Long: `Use various third-party tools with a
 	Kraken cluster configured by specified yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
+		ExitCode = 0
 	},
 }
 

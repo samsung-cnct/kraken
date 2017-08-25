@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -61,13 +60,8 @@ var updateCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
-		if err != nil {
-			return err
-		}
-
-		terminalSpinner.Prefix = "Updating cluster '" + getContainerName() + "' "
-		terminalSpinner.Start()
+		var err error
+		spinnerPrefix := fmt.Sprintf("Updating cluster '%s' ", getFirstClusterName())
 
 		command := []string{
 			"ansible-playbook",
@@ -75,37 +69,16 @@ var updateCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools +
-				" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
+			fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=update update_nodepools=%s add_nodepools=%s remove_nodepools=%s", ClusterConfigPath, outputLocation, configForced, updateNodepools, addNodepools, rmNodepools),
 		}
 
-		ctx := getContext()
-		// defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
-		if err != nil {
-			return err
-		}
-
-		defer timeout()
-
-		terminalSpinner.Stop()
-
-		out, err := printContainerLogs(cli, resp, backgroundCtx)
-		if err != nil {
-			return err
-		}
-
-		if len(strings.TrimSpace(logPath)) > 0 {
-			if err := writeLog(logPath, out); err != nil {
-				return err
-			}
-		}
-
-		if statusCode != 0 {
-			fmt.Println("ERROR updating " + getContainerName())
+		onFailure := func(out []byte) {
+			fmt.Println("ERROR updating " + getFirstClusterName())
 			fmt.Printf("%s", out)
 			clusterHelpError(Created, ClusterConfigPath)
-		} else {
+		}
+
+		onSuccess := func(out []byte) {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
@@ -113,8 +86,8 @@ var updateCmd = &cobra.Command{
 			clusterHelp(Created, ClusterConfigPath)
 		}
 
-		ExitCode = statusCode
-		return nil
+		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)
+		return err
 	},
 }
 

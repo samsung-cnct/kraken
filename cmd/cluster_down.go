@@ -16,8 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -33,15 +31,8 @@ var downCmd = &cobra.Command{
 	Long:          `Destroys a Kraken cluster described in the specified configuration yaml`,
 	PreRunE:       preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
-		if err != nil {
-			return err
-		}
-
-		if verbosity == false {
-			terminalSpinner.Prefix = "Bringing down cluster '" + getContainerName() + "' "
-			terminalSpinner.Start()
-		}
+		var err error
+		spinnerPrefix := fmt.Sprintf("Bringing down cluster '%s' ", getFirstClusterName())
 
 		command := []string{
 			"ansible-playbook",
@@ -49,54 +40,25 @@ var downCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/down.yaml",
 			"--extra-vars",
-			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=down ",
+			fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=down", ClusterConfigPath, outputLocation, configForced),
 			"--tags",
 			downStagesList,
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
-		if err != nil {
-			return err
-		}
-
-		defer timeout()
-
-		if verbosity == false {
-			terminalSpinner.Stop()
-		}
-
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Printf("ERROR bringing down %s \n", getContainerName())
-			return err
-		}
-
-		if len(strings.TrimSpace(logPath)) > 0 {
-			if err := writeLog(logPath, out); err != nil {
-				return err
-			}
-
-		}
-
-		if statusCode != 0 {
-			fmt.Println("ERROR bringing down " + getContainerName())
+		onFailure := func(out []byte) {
+			fmt.Printf("ERROR bringing down %s \n", getFirstClusterName())
 			fmt.Printf("%s", out)
-		} else {
+		}
+
+		onSuccess := func(out []byte) {
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
 			fmt.Println("Done.")
 		}
 
-		ExitCode = statusCode
-		return nil
+		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)
+		return err
 	},
 }
 

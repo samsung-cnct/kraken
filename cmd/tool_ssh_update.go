@@ -22,18 +22,13 @@ import (
 
 // sshUpdateCmd represents the update command
 var sshUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   "refresh",
 	Short: "Refresh ssh host list",
-	Long: `Update a list of SSH hosts for the Kraken 
+	Long: `Refresh a list of SSH hosts for an existing Kraken
 	cluster configured by the specified yaml`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
-		if err != nil {
-			return err
-		}
-
-		terminalSpinner.Prefix = "Updating ssh inventory for '" + getContainerName() + "' "
-		terminalSpinner.Start()
+		var err error
+		spinnerPrefix := fmt.Sprintf("Refreshing ssh config file for cluster '%s' ", getFirstClusterName())
 
 		command := []string{
 			"ansible-playbook",
@@ -41,45 +36,27 @@ var sshUpdateCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
 			"--extra-vars",
-			"config_path=" + args[0] + " config_base=" + outputLocation + " kraken_action=up ",
+			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " kraken_action=up ",
 			"--tags",
 			"ssh_only",
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, args[0])
-		if err != nil {
-			return err
-		}
-		defer timeout()
-
-		terminalSpinner.Stop()
-
-		out, err := printContainerLogs(
-			cli,
-			resp,
-			backgroundCtx,
-		)
-		if err != nil {
-			fmt.Println("ERROR updating ssh inventory for " + getContainerName())
-			return err
-		}
-
-		if statusCode != 0 {
-			fmt.Println("ERROR updating ssh inventory for " + getContainerName())
+		onFailure := func(out []byte) {
+			fmt.Println("ERROR refreshing ssh inventory for " + getFirstClusterName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, args[0])
-		} else {
+			clusterHelpError(Created, ClusterConfigPath)
+		}
+
+		onSuccess := func(out []byte) {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, args[0])
+			clusterHelp(Created, ClusterConfigPath)
 		}
 
-		ExitCode = statusCode
-		return nil
+		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)
+		return err
 	},
 }
 
