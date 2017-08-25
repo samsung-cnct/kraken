@@ -4,6 +4,7 @@ quay_org               = "samsung_cnct"
 publish_branch         = "master"
 release_version        = "${env.RELEASE_VERSION}"
 k2_image_tag           = "${env.K2_VERSION}" != "null" ? "${env.K2_VERSION}" : "latest"
+release_branch         = "${env.REL_BRANCH}"
 
 podTemplate(label: 'k2cli', containers: [
     containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
@@ -81,7 +82,7 @@ podTemplate(label: 'k2cli', containers: [
                 customContainer('golang') {
                     withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                         stage('Release') {
-                            kubesh ". /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag}"
+                            kubesh ". /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag} REL_BRANCH=${release_branch}"
                         }
                     }
                 }
