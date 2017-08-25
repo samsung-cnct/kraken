@@ -31,7 +31,7 @@ var upCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Creates a Kraken cluster described in the specified configuration yaml`,
-	PreRunE:       preRunGetKrakenConfig,
+	PreRunE:       preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
 		if err != nil {
@@ -49,7 +49,7 @@ var upCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/up.yaml",
 			"--extra-vars",
-			"config_path=" + krakenlibConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
+			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=up ",
 			"--tags",
 			upStagesList,
 		}
@@ -57,7 +57,7 @@ var upCmd = &cobra.Command{
 		ctx, cancel := getTimedContext()
 		defer cancel()
 
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 		if err != nil {
 			return err
 		}
@@ -82,13 +82,13 @@ var upCmd = &cobra.Command{
 		if statusCode != 0 {
 			fmt.Println("ERROR bringing up " + getContainerName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, krakenlibConfigPath)
+			clusterHelpError(Created, ClusterConfigPath)
 		} else {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, krakenlibConfigPath)
+			clusterHelp(Created, ClusterConfigPath)
 		}
 
 		ExitCode = statusCode

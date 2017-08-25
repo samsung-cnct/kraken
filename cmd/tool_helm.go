@@ -31,7 +31,7 @@ var helmCmd = &cobra.Command{
 	Short: "Use Kubernetes Helm with a Kraken cluster",
 	Long: `Use Kubernetes Helm with the Kraken
 	cluster configured by the specified yaml file`,
-	PreRunE: preRunGetKrakenConfig,
+	PreRunE: preRunGetClusterConfig,
 	RunE:    run,
 }
 
@@ -94,7 +94,7 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	ctx, cancel := getTimedContext()
 	defer cancel()
 
-	_, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+	_, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -110,14 +110,14 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 
 // Get the k8s version from Krakenlib
 func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) (string, error) {
-	command := []string{"/kraken/bin/max_k8s_version.sh", krakenlibConfigPath}
+	command := []string{"/kraken/bin/max_k8s_version.sh", ClusterConfigPath}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
 	}
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+	resp, _, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -142,7 +142,7 @@ func latestHelmVersion(cli *client.Client, backgroundCtx context.Context, args [
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+	resp, _, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -172,7 +172,7 @@ func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context,
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+	resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return -1, err
 	}

@@ -39,7 +39,7 @@ func init() {
 	RootCmd.AddCommand(clusterCmd)
 
 	clusterCmd.PersistentFlags().StringVarP(
-		&krakenlibConfigPath,
+		&ClusterConfigPath,
 		"config",
 		"c",
 		os.ExpandEnv("$HOME/.kraken/config.yaml"),

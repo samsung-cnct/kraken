@@ -38,13 +38,13 @@ var verbosity bool
 var krakenTag string // this is set via linker flag
 
 // to be used by subcommands using --config
-var krakenlibConfigPath string
+var ClusterConfigPath string
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
 
 // init the Krakenlib config viper instance
-var krakenClusterConfig = viper.New()
+var clusterConfig = viper.New()
 
 // init the Kraken config viper instance
 var krakenConfig = viper.New()
@@ -228,17 +228,17 @@ func initKrakenConfig() {
 	}
 }
 
-func initKrakenClusterConfig(krakenlibConfigPath string) error {
-	krakenClusterConfig.SetConfigFile(krakenlibConfigPath)
-	krakenClusterConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	krakenClusterConfig.SetEnvPrefix("krakenlib") // prefix for env vars to configure cluster
-	krakenClusterConfig.AutomaticEnv()            // read in environment variables that match
+func initClusterConfig(ClusterConfigPath string) error {
+	clusterConfig.SetConfigFile(ClusterConfigPath)
+	clusterConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	clusterConfig.SetEnvPrefix("krakenlib") // prefix for env vars to configure cluster
+	clusterConfig.AutomaticEnv()            // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := krakenClusterConfig.ReadInConfig(); err != nil {
+	if err := clusterConfig.ReadInConfig(); err != nil {
 		return err
 	}
 
-	fmt.Printf("Using Kraken config file: %s \n", krakenClusterConfig.ConfigFileUsed())
+	fmt.Printf("Using Kraken config file: %s \n", clusterConfig.ConfigFileUsed())
 	return nil
 }

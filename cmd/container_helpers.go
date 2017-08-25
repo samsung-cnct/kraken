@@ -197,7 +197,7 @@ func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 				outputLocation + ":" + outputLocation},
 		}
 
-		deployment := reflect.ValueOf(krakenClusterConfig.Sub("deployment"))
+		deployment := reflect.ValueOf(clusterConfig.Sub("deployment"))
 		parseMounts(deployment, hostConfig, &config_envs)
 
 	} else {
@@ -631,7 +631,7 @@ func writeLog(logFilePath string, out []byte) error {
 
 func getContainerName() string {
 	// only supports first cluster name right now
-	clusters := krakenClusterConfig.Get("deployment.clusters")
+	clusters := clusterConfig.Get("deployment.clusters")
 	if clusters != nil {
 		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
 		if firstCluster["name"] == nil {

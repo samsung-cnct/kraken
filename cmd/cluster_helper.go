@@ -9,21 +9,21 @@ import (
 	"golang.org/x/net/context"
 )
 
-func preRunGetKrakenConfig(cmd *cobra.Command, args []string) error {
+func preRunGetClusterConfig(cmd *cobra.Command, args []string) error {
 	if !cmd.Flag("config").Changed {
-		fmt.Printf("config file path not given, using default config file location (%s)\n", krakenlibConfigPath)
+		fmt.Printf("config file path not given, using default config file location (%s)\n", ClusterConfigPath)
 	}
 
-	_, err := os.Stat(krakenlibConfigPath)
+	_, err := os.Stat(ClusterConfigPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("File %s does not exist!", krakenlibConfigPath)
+		return fmt.Errorf("File %s does not exist!", ClusterConfigPath)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	if err := initKrakenClusterConfig(krakenlibConfigPath); err != nil {
+	if err := initClusterConfig(ClusterConfigPath); err != nil {
 		return err
 	}
 

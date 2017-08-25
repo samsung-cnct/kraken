@@ -26,9 +26,9 @@ var infoCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Long: `Output some basic information on the current
 	cluster state configured by the specified Krakenlib yaml`,
-	PreRunE: preRunGetKrakenConfig,
+	PreRunE: preRunGetClusterConfig,
 	Run: func(cmd *cobra.Command, args []string) {
-		clusterHelpError(Created, krakenlibConfigPath)
+		clusterHelpError(Created, ClusterConfigPath)
 		ExitCode = 0
 	},
 }

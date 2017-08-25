@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -35,9 +34,9 @@ var updateCmd = &cobra.Command{
 	SilenceUsage:  true,
 	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		krakenlibConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+		ClusterConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
-			krakenlibConfigPath = os.ExpandEnv(args[0])
+			ClusterConfigPath = os.ExpandEnv(args[0])
 		}
 
 		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
@@ -46,16 +45,16 @@ var updateCmd = &cobra.Command{
 				"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
 		}
 
-		_, err := os.Stat(krakenlibConfigPath)
+		_, err := os.Stat(ClusterConfigPath)
 		if os.IsNotExist(err) {
-			return errors.New("File " + krakenlibConfigPath + " does not exist!")
+			return fmt.Errorf("File %s does not exist!", ClusterConfigPath)
 		}
 
 		if err != nil {
 			return err
 		}
 
-		if err := initKrakenClusterConfig(krakenlibConfigPath); err != nil {
+		if err := initClusterConfig(ClusterConfigPath); err != nil {
 			return err
 		}
 
@@ -76,13 +75,13 @@ var updateCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + krakenlibConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools +
+			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools +
 				" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
 		}
 
 		ctx := getContext()
 		// defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 		if err != nil {
 			return err
 		}
@@ -105,13 +104,13 @@ var updateCmd = &cobra.Command{
 		if statusCode != 0 {
 			fmt.Println("ERROR updating " + getContainerName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, krakenlibConfigPath)
+			clusterHelpError(Created, ClusterConfigPath)
 		} else {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, krakenlibConfigPath)
+			clusterHelp(Created, ClusterConfigPath)
 		}
 
 		ExitCode = statusCode

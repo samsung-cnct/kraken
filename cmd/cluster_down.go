@@ -31,7 +31,7 @@ var downCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Destroys a Kraken cluster described in the specified configuration yaml`,
-	PreRunE:       preRunGetKrakenConfig,
+	PreRunE:       preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
 		if err != nil {
@@ -49,7 +49,7 @@ var downCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/down.yaml",
 			"--extra-vars",
-			"config_path=" + krakenlibConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=down ",
+			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " config_forced=" + strconv.FormatBool(configForced) + " kraken_action=down ",
 			"--tags",
 			downStagesList,
 		}
@@ -57,7 +57,7 @@ var downCmd = &cobra.Command{
 		ctx, cancel := getTimedContext()
 		defer cancel()
 
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, krakenlibConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 		if err != nil {
 			return err
 		}
