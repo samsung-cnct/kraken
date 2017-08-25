@@ -35,7 +35,7 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var krakenTag string // this is set via linker flag
+var krakenlibTag string // this is set via linker flag
 
 // to be used by subcommands using --config
 var ClusterConfigPath string
@@ -79,8 +79,8 @@ func init() {
 
 	RootCmd.SetHelpCommand(helpCmd)
 
-	if krakenTag == "" {
-		krakenTag = "latest"
+	if krakenlibTag == "" {
+		krakenlibTag = "latest"
 	}
 
 	// Populate the global with a "vanilla" Docker configuration
@@ -104,8 +104,8 @@ func init() {
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:"+krakenTag,
-		"Kraken container image")
+		"quay.io/samsung_cnct/k2:"+krakenlibTag,
+		"Krakenlib container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
 		"output",
