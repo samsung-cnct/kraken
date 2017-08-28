@@ -35,27 +35,25 @@ var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var k2Tag string  // this is set via linker flag
+var KrakenlibTag string // this is set via linker flag
 
 // to be used by subcommands using --config
-var k2ConfigPath string
+var ClusterConfigPath string
 
 // progress spinner
 var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
 
-// init the K2 config viper instance
-var krakenClusterConfig = viper.New()
+// init the Krakenlib config viper instance
+var clusterConfig = viper.New()
 
-// init the k2cli config viper instance
+// init the Kraken config viper instance
 var krakenConfig = viper.New()
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "k2cli",
-	Short: "CLI for K2 Kubernetes cluster provisioner",
-	Long: `k2cli is a command line interface for K2
-	kubernetes cluster provisioner. K2 documentation is available at:
-	https://github.com/samsung-cnct/k2`,
+	Use:   "kraken",
+	Short: "Kraken is an orchestration and cluster level management system for Kubernetes",
+	Long:  "Kraken is an orchestration and cluster level management system for Kubernetes that creates a production scale cluster on a range of platforms using its default settings.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := os.Stat(outputLocation); os.IsNotExist(err) {
 			os.Mkdir(outputLocation, 0755)
@@ -76,13 +74,13 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initK2CliConfig)
+	cobra.OnInitialize(initKrakenConfig)
 	terminalSpinner.FinalMSG = "Complete\n"
 
 	RootCmd.SetHelpCommand(helpCmd)
 
-	if k2Tag == "" {
-		k2Tag = "latest"
+	if KrakenlibTag == "" {
+		KrakenlibTag = "latest"
 	}
 
 	// Populate the global with a "vanilla" Docker configuration
@@ -100,20 +98,20 @@ func init() {
 		&cfgFile,
 		"kraken",
 		"k",
-		os.ExpandEnv("$HOME/.k2cli/config.yaml"),
+		os.ExpandEnv("$HOME/.kraken/.kraken/config.yaml"),
 		"Path to kraken config file")
 	RootCmd.PersistentFlags().StringVarP(
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:" + k2Tag,
-		"k2 container image")
+		"quay.io/samsung_cnct/k2:"+KrakenlibTag,
+		"Krakenlib container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,
 		"output",
 		"o",
 		os.Getenv("HOME")+"/.kraken",
-		"K2 output folder")
+		"Kraken output folder")
 
 	// Specify the docker host string; typically unix:///var/run/docker.sock
 	RootCmd.PersistentFlags().StringVarP(
@@ -191,7 +189,7 @@ func init() {
 }
 
 // initConfig reads in config file and ENV variables if set.
-func initK2CliConfig() {
+func initKrakenConfig() {
 
 	// first bind flags
 	krakenConfig.BindPFlag("kraken.config", RootCmd.Flags().Lookup("kraken"))
@@ -211,21 +209,18 @@ func initK2CliConfig() {
 
 	// Then env. variables
 	krakenConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	krakenConfig.SetEnvPrefix("k2cli") // prefix for env vars to configure client itself
-	krakenConfig.AutomaticEnv()        // read in environment variables that match
+	krakenConfig.SetEnvPrefix("kraken") // prefix for env vars to configure client itself
+	krakenConfig.AutomaticEnv()         // read in environment variables that match
 
 	// Then configs
 	krakenConfig.SetConfigName("kraken.config") // name of config file (without extension)
 	krakenConfig.AddConfigPath("$HOME/.kraken") // adding home directory as first search path
 	krakenConfig.AddConfigPath(".")             // optionally look for config in the working directory
 
-
-
 	cfgFile = krakenConfig.GetString("kraken.config")
 	if cfgFile != "" { // enable ability to specify config file via flag
 		krakenConfig.SetConfigFile(cfgFile)
 	}
-
 
 	// If a config file is found, read it in.
 	if err := krakenConfig.ReadInConfig(); err == nil {
@@ -233,17 +228,17 @@ func initK2CliConfig() {
 	}
 }
 
-func initKrakenClusterConfig(k2configPath string) error {
-	krakenClusterConfig.SetConfigFile(k2configPath)
-	krakenClusterConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	krakenClusterConfig.SetEnvPrefix("k2") // prefix for env vars to configure cluster
-	krakenClusterConfig.AutomaticEnv()     // read in environment variables that match
+func initClusterConfig(ClusterConfigPath string) error {
+	clusterConfig.SetConfigFile(ClusterConfigPath)
+	clusterConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	clusterConfig.SetEnvPrefix("krakenlib") // prefix for env vars to configure cluster
+	clusterConfig.AutomaticEnv()            // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := krakenClusterConfig.ReadInConfig(); err != nil {
+	if err := clusterConfig.ReadInConfig(); err != nil {
 		return err
 	}
 
-	fmt.Printf("Using K2 config file: %s \n", krakenClusterConfig.ConfigFileUsed())
+	fmt.Printf("Using Kraken config file: %s \n", clusterConfig.ConfigFileUsed())
 	return nil
 }

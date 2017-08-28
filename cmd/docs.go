@@ -15,9 +15,10 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
-	"os"
 )
 
 var docPath string
@@ -27,7 +28,7 @@ var docsCmd = &cobra.Command{
 	Use:          "docs [output dir]",
 	Short:        "Generate markdown docs",
 	SilenceUsage: true,
-	Long:         `Generate complete markdown doc tree for k2cli`,
+	Long:         `Generate complete markdown doc tree for Kraken`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			docPath = os.ExpandEnv(args[0])

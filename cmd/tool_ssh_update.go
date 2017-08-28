@@ -24,7 +24,7 @@ import (
 var sshUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Refresh ssh host list",
-	Long: `Update a list of SSH hosts for the K2 
+	Long: `Update a list of SSH hosts for the Kraken 
 	cluster configured by the specified yaml`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)

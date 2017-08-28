@@ -28,11 +28,11 @@ import (
 // helmCmd represents the helm command
 var helmCmd = &cobra.Command{
 	Use:   "helm",
-	Short: "Use Kubernetes Helm with K2 cluster",
-	Long: `Use Kubernetes Helm with the  K2
+	Short: "Use Kubernetes Helm with a Kraken cluster",
+	Long: `Use Kubernetes Helm with the Kraken
 	cluster configured by the specified yaml file`,
-	PreRunE: preRunGetKrakenConfig,
-	RunE:     run,
+	PreRunE: preRunGetClusterConfig,
+	RunE:    run,
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -52,7 +52,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if strings.Contains(verfiedHelmPath, minorMajorVersion) {
-		status, err := runHelm(helmPath, cli, backgroundCtx, args);
+		status, err := runHelm(helmPath, cli, backgroundCtx, args)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,8 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	command := []string{"test", "-f", helmPath}
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	_, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+
+	_, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -107,16 +108,16 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	return helmPath, nil
 }
 
-// Get the k8s version from k2
+// Get the k8s version from Krakenlib
 func getK8sVersion(cli *client.Client, backgroundCtx context.Context, args []string) (string, error) {
-	command := []string{"/kraken/bin/max_k8s_version.sh", k2ConfigPath}
+	command := []string{"/kraken/bin/max_k8s_version.sh", ClusterConfigPath}
 	for _, element := range args {
 		command = append(command, strings.Split(element, " ")...)
 	}
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	resp, _, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -141,7 +142,7 @@ func latestHelmVersion(cli *client.Client, backgroundCtx context.Context, args [
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, _, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	resp, _, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -171,7 +172,7 @@ func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context,
 
 	ctx, cancel := getTimedContext()
 	defer cancel()
-	resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+	resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 	if err != nil {
 		return -1, err
 	}

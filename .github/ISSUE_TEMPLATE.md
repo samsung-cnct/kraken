@@ -4,11 +4,11 @@
 
 | Component | Repo                                                                           |
 | --------- | ------------------------------------------------------------------------------ |
-| k2        | [samsung-cnct/k2cli](https://github.com/samsung-cnct/k2cli/issues/new)         |
-| k2-charts | [samsung-cnct/k2-charts](https://github.com/samsung-cnct/k2-charts/issues/new) |
-| k2-tools  | [samsung-cnct/k2-tools](https://github.com/samsung-cnct/k2-tools/issues/new)   |
+| Krakenlib     | [samsung-cnct/k2](https://github.com/samsung-cnct/k2/issues/new)         |
+| Kraken-charts | [samsung-cnct/k2-charts](https://github.com/samsung-cnct/k2-charts/issues/new) |
+| Kraken-tools  | [samsung-cnct/k2-tools](https://github.com/samsung-cnct/k2-tools/issues/new)   |
 
-**What keywords did you search in k2cli issues before filing this one?** (If you have found any duplicates, you should instead reply there.):
+**What keywords did you search in Kraken issues before filing this one?** (If you have found any duplicates, you should instead reply there.):
 
 ---
 
@@ -28,7 +28,7 @@ might close your issue.  If we're wrong, PLEASE feel free to reopen it and
 explain why.
 -->
 
-**k2cli version** (use `k2cli version`):
+**Kraken version** (use `kraken version`):
 
 
 **Environment**:
@@ -36,7 +36,7 @@ explain why.
 Please be sure not to submit any confidential information (e.g. ssh keys, provider secrets, etc.) as issues are publicly accessible.
 
 - **Environment variables** (e.g. `env | grep 'KRAKEN_`):
-- **Configuration files (`~/.kraken/config.yaml` or the file passed to `k2cli --config`) **:
+- **Configuration files (`~/.kraken/config.yaml` or the file passed to `kraken --config`) **:
 - **Others**:
 
 
@@ -50,4 +50,3 @@ Please be sure not to submit any confidential information (e.g. ssh keys, provid
 
 
 **Anything else we need to know**:
-

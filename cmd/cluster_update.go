@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -29,36 +28,35 @@ var rmNodepools string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
-	Use:           "update [path to K2 config file]",
-	Short:         "update a K2 cluster",
+	Use:           "update [path to kraken config file]",
+	Short:         "update a Kraken cluster",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long:          `Updates a K2 cluster described in the specified configuration yaml`,
+	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		k2ConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
+		ClusterConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 		if len(args) > 0 {
-			k2ConfigPath = os.ExpandEnv(args[0])
+			ClusterConfigPath = os.ExpandEnv(args[0])
 		}
 
 		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
 			return fmt.Errorf("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
-			"add-nodepools or rm-nodepools depending on what action you are taking against the nodepools.  For example: \n k2cli cluster update " +
-			"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
+				"add-nodepools or rm-nodepools depending on what action you are taking against the nodepools.  For example: \n kraken cluster update " +
+				"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
 		}
 
-		_, err := os.Stat(k2ConfigPath)
+		_, err := os.Stat(ClusterConfigPath)
 		if os.IsNotExist(err) {
-			return errors.New("File " + k2ConfigPath + " does not exist!")
+			return fmt.Errorf("File %s does not exist!", ClusterConfigPath)
 		}
 
 		if err != nil {
 			return err
 		}
 
-		if err := initKrakenClusterConfig(k2ConfigPath); err != nil {
+		if err := initClusterConfig(ClusterConfigPath); err != nil {
 			return err
 		}
-
 
 		return nil
 	},
@@ -77,13 +75,13 @@ var updateCmd = &cobra.Command{
 			"ansible/inventory/localhost",
 			"ansible/update.yaml",
 			"--extra-vars",
-			"config_path=" + k2ConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools + 
-			" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
+			"config_path=" + ClusterConfigPath + " config_base=" + outputLocation + " kraken_action=update " + " update_nodepools=" + updateNodepools +
+				" add_nodepools=" + addNodepools + " remove_nodepools=" + rmNodepools,
 		}
 
 		ctx := getContext()
 		// defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, k2ConfigPath)
+		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
 		if err != nil {
 			return err
 		}
@@ -106,13 +104,13 @@ var updateCmd = &cobra.Command{
 		if statusCode != 0 {
 			fmt.Println("ERROR updating " + getContainerName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, k2ConfigPath)
+			clusterHelpError(Created, ClusterConfigPath)
 		} else {
 			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, k2ConfigPath)
+			clusterHelp(Created, ClusterConfigPath)
 		}
 
 		ExitCode = statusCode

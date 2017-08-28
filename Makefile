@@ -1,4 +1,4 @@
-NAME      := k2cli
+NAME      := Kraken
 VERSION   := 1.0.8
 KLIB_VER  := latest
 TYPE      := stable
@@ -8,17 +8,17 @@ godep=GOPATH=$(shell godep path):${GOPATH}
 
 
 build:
-	@godep go build -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-		-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
-		-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT) \
-		-X github.com/samsung-cnct/k2cli/cmd.k2Tag=$(KLIB_VER)"
+	@godep go build -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
+		-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
+		-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT) \
+		-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)"
 
 compile:
 	@rm -rf build/
-	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
-									-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT) \
-									-X github.com/samsung-cnct/k2cli/cmd.k2Tag=$(KLIB_VER)" \
+	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT) \
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)"
 	-osarch="linux/386" \
 	-osarch="linux/amd64" \
 	-osarch="darwin/amd64" \
@@ -26,9 +26,9 @@ compile:
 	./...
 
 install:
-	@godep go install -ldflags "-X github.com/samsung-cnct/k2cli/cmd.K2CliMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.K2CliType=$(TYPE) \
-									-X github.com/samsung-cnct/k2cli/cmd.K2CliGitCommit=$(COMMIT)"
+	@godep go install -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT)"
 
 deps:
 	go get github.com/mitchellh/gox

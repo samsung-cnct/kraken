@@ -15,20 +15,20 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 var userName string
 var password string
 var configForced bool
 
-
 // clusterCmd represents the cluster command
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
-	Short: "K2 cluster actions",
-	Long:  `Commands that perform actions on a K2 cluster described by a provided yaml config`,
+	Short: "Kraken cluster actions",
+	Long:  `Commands that perform actions on a Kraken cluster described by a provided yaml config`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 		ExitCode = 1
@@ -39,7 +39,7 @@ func init() {
 	RootCmd.AddCommand(clusterCmd)
 
 	clusterCmd.PersistentFlags().StringVarP(
-		&k2ConfigPath,
+		&ClusterConfigPath,
 		"config",
 		"c",
 		os.ExpandEnv("$HOME/.kraken/config.yaml"),

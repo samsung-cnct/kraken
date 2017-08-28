@@ -24,11 +24,11 @@ var infoCmd = &cobra.Command{
 	Short:         "Print out cluster state information",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	Long: `Output some basic information on the current 
-	cluster state configured by the specified K2 yaml`,
-	PreRunE: preRunGetKrakenConfig,
+	Long: `Output some basic information on the current
+	cluster state configured by the specified Krakenlib yaml`,
+	PreRunE: preRunGetClusterConfig,
 	Run: func(cmd *cobra.Command, args []string) {
-		clusterHelpError(Created, k2ConfigPath)
+		clusterHelpError(Created, ClusterConfigPath)
 		ExitCode = 0
 	},
 }

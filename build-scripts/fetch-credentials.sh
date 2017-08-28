@@ -1,4 +1,4 @@
-#  this script fetches all credentials to support the building of a k2 cluster
+#  this script fetches all credentials to support the building of a Kraken cluster
 #  for now this includes:
 #   - an ssh key pair
 #   - aws credentials file
