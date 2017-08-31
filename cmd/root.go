@@ -186,6 +186,14 @@ func init() {
 		"v",
 		false,
 		"Verbose output")
+
+	RootCmd.PersistentFlags().BoolVarP(
+		&verbosity,
+		"release-it",
+		"v",
+		false,
+		"Release the Kraken")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -206,6 +214,7 @@ func initKrakenConfig() {
 	krakenConfig.BindPFlag("log-path", RootCmd.Flags().Lookup("log-path"))
 	krakenConfig.BindPFlag("log-success", RootCmd.Flags().Lookup("log-success"))
 	krakenConfig.BindPFlag("verbosity", RootCmd.Flags().Lookup("verbosity"))
+	krakenConfig.BindPFlag("release-it", RootCmd.Flags().Lookup("releast-it"))
 
 	// Then env. variables
 	krakenConfig.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
