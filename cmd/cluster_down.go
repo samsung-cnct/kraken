@@ -20,7 +20,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// deprecated
 var downStagesList string
+var downtagsList string
+
 
 // downCmd represents the down command
 var downCmd = &cobra.Command{
@@ -33,6 +36,14 @@ var downCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 		spinnerPrefix := fmt.Sprintf("Bringing down cluster '%s' ", getFirstClusterName())
+		var tagList string
+
+		// remove when deprecation is finalized
+		if downStagesList == "all" {
+			tagList =  downtagsList
+		} else {
+			tagList = downStagesList
+		}
 
 		command := []string{
 			"ansible-playbook",
@@ -42,7 +53,7 @@ var downCmd = &cobra.Command{
 			"--extra-vars",
 			fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=down", ClusterConfigPath, outputLocation, configForced),
 			"--tags",
-			downStagesList,
+			tagList,
 		}
 
 		onFailure := func(out []byte) {
@@ -64,10 +75,20 @@ var downCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(downCmd)
+
+	downCmd.PersistentFlags().StringVar(
+		&downtagsList,
+		"tags",
+		"all",
+		"comma-separated list of Kraken stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]",
+	)
+
 	downCmd.PersistentFlags().StringVarP(
 		&downStagesList,
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of Kraken stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]")
+		"[DEPRECATED, please use --tags] comma-separated list of Kraken stages to run: [all, dryrun, config, fabric, master, node, assembler, readiness, services]",
+	)
+
 }

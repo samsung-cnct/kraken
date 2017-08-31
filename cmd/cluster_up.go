@@ -20,7 +20,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// deprecated
 var upStagesList string
+var upTagsList string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -31,6 +33,14 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 		spinnerPrefix := fmt.Sprintf("Bringing up cluster '%s' ", getFirstClusterName())
+		var tagList string
+
+		// remove when deprecation is finalized
+		if upStagesList == "all" {
+			tagList =  upTagsList
+		} else {
+			tagList = upStagesList
+		}
 
 		command := []string{
 			"ansible-playbook",
@@ -40,7 +50,7 @@ var upCmd = &cobra.Command{
 			"--extra-vars",
 			fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=up", ClusterConfigPath, outputLocation, configForced),
 			"--tags",
-			upStagesList,
+			tagList,
 		}
 
 		onFailure := func(out []byte) {
@@ -64,10 +74,19 @@ var upCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(upCmd)
+
+	upCmd.PersistentFlags().StringVar(
+		&upTagsList,
+		"tags",
+		"all",
+		"comma-separated list of Kraken stages to run. Run 'kraken help topic stages' for more info.",
+	)
+
 	upCmd.PersistentFlags().StringVarP(
 		&upStagesList,
 		"stages",
 		"s",
 		"all",
-		"comma-separated list of Kraken stages to run. Run 'kraken help topic stages' for more info.")
+		"[DEPRECATED, please use --tags] comma-separated list of Kraken stages to run. Run 'kraken help topic stages' for more info.",
+	)
 }
