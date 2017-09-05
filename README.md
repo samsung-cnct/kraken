@@ -322,9 +322,20 @@ This will create a Kraken binary that can be executed directly like so:
 ./kraken
 ```
 
+#### Asset changes
+Asset are stored in the `/data` directory of this project's directory. Any changes made to files will only take if you
+follow the steps below:
+
+* Run `go-bindata data/`.
+* Move the generated `bindata.go` file to the /cmd directory.
+* Commit the changes.
+
+The process above should and will be automated in a later date.
+
 ## Cutting a release
 
 * Install github-release from https://github.com/c4milo/github-release
 * Create a github personal access token with repo read/write permissions and export it as GITHUB_TOKEN
 * Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed or set them as command line parmaters to `make`
 * Run ```make release``` or with paramaters ```make release VERSION=v0.1```
+

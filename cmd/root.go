@@ -186,14 +186,6 @@ func init() {
 		"v",
 		false,
 		"Verbose output")
-
-	RootCmd.PersistentFlags().BoolVarP(
-		&verbosity,
-		"release-it",
-		"v",
-		false,
-		"Release the Kraken")
-
 }
 
 // initConfig reads in config file and ENV variables if set.
