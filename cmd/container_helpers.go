@@ -35,21 +35,16 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/namesgenerator"
-	"github.com/docker/docker/pkg/tlsconfig"
 	"golang.org/x/net/context"
 )
 
-var DockerAPIVersion = client.DefaultVersion
 
-// DockerClientConfig provides a simple encapsulation of parameters to construct the Docker API client
-type DockerClientConfig struct {
-	DockerHost       string
-	DockerAPIVersion string
-	TLSEnabled       bool
-	TLSVerify        bool
-	TLSCACertificate string
-	TLSCertificate   string
-	TLSKey           string
+// Close can throw an err, so to defer to it is risky,
+// review http://www.blevesearch.com/news/Deferred-Cleanup,-Checking-Errors,-and-Potential-Problems/
+func Close(c io.Closer) {
+	if err := c.Close(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func base64EncodeAuth(auth types.AuthConfig) (string, error) {
@@ -64,89 +59,69 @@ func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx cont
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	reader, err := cli.ContainerLogs(
-		ctx,
-		resp.ID,
-		types.ContainerLogsOptions{
-			ShowStdout: true,
-			Follow:     true,
-		})
+	containerLogOpts := types.ContainerLogsOptions{ ShowStdout: true, Follow: true}
+	reader, err := cli.ContainerLogs(ctx, resp.ID, containerLogOpts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer reader.Close()
+	defer Close(reader)
 
-	_, err = io.Copy(os.Stdout, reader)
-	if err != nil && err != io.EOF {
+	if _, err = io.Copy(os.Stdout, reader); err != nil && err != io.EOF {
 		log.Fatal(err)
 	}
 }
 
 func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) ([]byte, error) {
-	out, err := cli.ContainerLogs(
-		ctx,
-		resp.ID,
-		types.ContainerLogsOptions{
-			ShowStdout: true,
-			ShowStderr: true,
-		})
+	containerLogOpts := types.ContainerLogsOptions{ ShowStdout: true, ShowStderr: true}
+	out, err := cli.ContainerLogs(ctx, resp.ID, containerLogOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	defer out.Close()
+	defer Close(out)
 
-	content, err := ioutil.ReadAll(out)
-	if err != nil {
-		return nil, err
-	}
-
-	return content, nil
+	return ioutil.ReadAll(out)
 }
 
 // post cluster help types
-type helptype int
+type helpType int
 
 const (
-	Created helptype = iota
+	Created   helpType = iota
 	Destroyed
 	Updated
 )
 
-func clusterHelpError(help helptype, clusterConfigFile string) {
+func clusterHelpError(help helpType, clusterConfigFile string) {
 	fmt.Println("Some of the cluster state MAY be available:")
 	clusterHelp(help, clusterConfigFile)
 }
 
-func clusterHelp(help helptype, clusterConfigFile string) {
-	if _, err := os.Stat(path.Join(outputLocation,
-		getContainerName(), "admin.kubeconfig")); err == nil {
+func clusterHelp(help helpType, clusterConfigFile string) {
+	if _, err := os.Stat(path.Join(outputLocation, getFirstClusterName(), "admin.kubeconfig")); err == nil {
 		fmt.Println("To use kubectl: ")
 		fmt.Println(" kubectl --kubeconfig=" + path.Join(
 			outputLocation,
-			getContainerName(), "admin.kubeconfig") + " [kubectl commands]")
+			getFirstClusterName(), "admin.kubeconfig") + " [kubectl commands]")
 		fmt.Println(" or use 'kraken tool kubectl --config " + clusterConfigFile + " [kubectl commands]'")
 
 		if _, err := os.Stat(path.Join(outputLocation,
-			getContainerName(), "admin.kubeconfig")); err == nil {
+			getFirstClusterName(), "admin.kubeconfig")); err == nil {
 			fmt.Println("To use helm: ")
 			fmt.Println(" export KUBECONFIG=" + path.Join(
 				outputLocation,
-				getContainerName(), "admin.kubeconfig"))
+				getFirstClusterName(), "admin.kubeconfig"))
 			fmt.Println(" helm [helm command] --home " + path.Join(
 				outputLocation,
-				getContainerName(), ".helm"))
+				getFirstClusterName(), ".helm"))
 			fmt.Println(" or use 'kraken tool helm --config " + clusterConfigFile + " [helm commands]'")
 		}
 	}
 
-	if _, err := os.Stat(path.Join(outputLocation,
-		getContainerName(), "ssh_config")); err == nil {
+	if _, err := os.Stat(path.Join(outputLocation, getFirstClusterName(), "ssh_config")); err == nil {
 		fmt.Println("To use ssh: ")
-		fmt.Println(" ssh <node pool name>-<number> -F " + path.Join(
-			outputLocation,
-			getContainerName(), "ssh_config"))
+		fmt.Println(" ssh <node pool name>-<number> -F " + path.Join(outputLocation, getFirstClusterName(), "ssh_config"))
 		// This is usage has not been implemented. See issue #49
 		//fmt.Println(" or use 'kraken tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
 	}
@@ -154,13 +129,12 @@ func clusterHelp(help helptype, clusterConfigFile string) {
 
 // Convert dashes to underscore (if any) in cluster name and append to helm_override_ to be able to pull correct env for helm override
 func setHelmOverrideEnv(name string) string {
-	clusterName := strings.Replace(name, "-", "_", -1)
-	helmOverrideVar := "helm_override_" + clusterName
-	return helmOverrideVar
+	return fmt.Sprintf("helm_override_%s", strings.Replace(name, "-", "_", -1))
 }
 
 func containerEnvironment() []string {
-	containerName := getContainerName()
+	containerName := getFirstClusterName()
+
 	envs := []string{"ANSIBLE_NOCOLOR=True",
 		"DISPLAY_SKIPPED_HOSTS=0",
 		"KUBECONFIG=" + path.Join(outputLocation, containerName, "admin.kubeconfig"),
@@ -265,168 +239,42 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, con
 	}
 }
 
-// GetDefaultHost produces either the environment-provided host, or a sensible default.
-func (conf *DockerClientConfig) GetDefaultHost() string {
-	env := os.Getenv("DOCKER_HOST")
-	if env == "" {
-		return client.DefaultDockerHost
-	}
-	return env
-}
-
-// GetDefaultTLSVerify indicates whether TLS is enabled by the current environment.
-func (conf *DockerClientConfig) GetDefaultTLSVerify() bool {
-	env := os.Getenv("DOCKER_TLS_VERIFY")
-	if (env == "") || (env == "0") {
-		return false
-	}
-	return true
-}
-
-// GetDefaultDockerAPIVersion produces either the environment-provided Docker API version, or a sensible default.
-func (conf *DockerClientConfig) GetDefaultDockerAPIVersion() string {
-	env := os.Getenv("DOCKER_API_VERSION")
-	if env == "" {
-		return client.DefaultVersion
-	}
-	return env
-}
-
-// GetDefaultTLSCertificatePath produces either the environment-provided path to TLS certificates, or a sensible default.
-func (conf *DockerClientConfig) GetDefaultTLSCertificatePath() string {
-	env := os.Getenv("DOCKER_CERT_PATH")
-	if env == "" {
-		return os.ExpandEnv("${HOME}/.docker/")
-	}
-	return env
-}
-
-// GetDefaultTLSCACertificate produces the path to the environment-configured CA certificate for TLS verification.
-func (conf *DockerClientConfig) GetDefaultTLSCACertificate() string {
-	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "ca.pem")
-}
-
-// GetDefaultTLSCertificate produces the path to the environment-configured TLS certificate.
-func (conf *DockerClientConfig) GetDefaultTLSCertificate() string {
-	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "cert.pem")
-}
-
-// GetDefaultTLSKey produces the path to the environment-configured TLS key.
-func (conf *DockerClientConfig) GetDefaultTLSKey() string {
-	return filepath.Join(conf.GetDefaultTLSCertificatePath(), "key.pem")
-}
-
-// Was this config derived solely by OS environment?
-// The properties of `conf` will be overridden only by command line args,
-// otherwise they're given the values of the associated Default methods.
-func (conf *DockerClientConfig) isInheritedFromEnviron() bool {
-
-	boolstr := func(val bool) string {
-		if val {
-			return "true"
-		}
-		return "false"
-	}
-
-	// This is structured like a table-test, to improve readability. Huzzah!
-	compare := map[string][]string{
-		"version": []string{conf.DockerAPIVersion, conf.GetDefaultDockerAPIVersion()},
-		"host":    []string{conf.DockerHost, conf.GetDefaultHost()},
-		"verify":  []string{boolstr(conf.TLSVerify), boolstr(conf.GetDefaultTLSVerify())},
-		"cacert":  []string{conf.TLSCACertificate, conf.GetDefaultTLSCACertificate()},
-		"cert":    []string{conf.TLSCertificate, conf.GetDefaultTLSCertificate()},
-		"key":     []string{conf.TLSKey, conf.GetDefaultTLSKey()},
-	}
-
-	for _, vals := range compare {
-		if vals[0] != vals[1] {
-			return false
-		}
-	}
-
-	return true
-
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return os.IsExist(err)
-}
-
-func (conf *DockerClientConfig) isTLSActivated() bool {
-
-	components := []bool{ // all of these must be true.
-		(conf.TLSEnabled || conf.TLSVerify),
-		fileExists(conf.TLSCACertificate),
-		fileExists(conf.TLSCertificate),
-		fileExists(conf.TLSKey),
-	}
-
-	for _, val := range components {
-		if !val {
-			return false
-		}
-	}
-
-	return true
-}
-
 func getClient() (*client.Client, error) {
-
 	var httpClient *http.Client
-	var cli *client.Client
-	var err error
-	config := dockerClient // global
 
-	if config.isInheritedFromEnviron() {
+	if dockerClient.isInheritedFromEnvironment() {
 		// Rely on Docker's own standard environment handling.
-		cli, err = client.NewEnvClient()
-		if err != nil {
-			return nil, err
-		}
-
+		return client.NewEnvClient()
 	} else {
 		// Set up an optionally TLS-enabled client, based on non-environment flags.
 		// This replicates logic of Docker's `NewEnvClient`, but allows for our
 		// command-line argument overrides.
-		if config.isTLSActivated() {
+		if dockerClient.isTLSActivated() {
 
-			tlsClient, err := tlsconfig.Client(tlsconfig.Options{
-				CAFile:             config.TLSCACertificate,
-				CertFile:           config.TLSCertificate,
-				KeyFile:            config.TLSKey,
-				InsecureSkipVerify: !(config.TLSVerify),
-			})
-
+			tlsClientConfig, err := dockerClient.createTLSConfig()
 			if err != nil {
 				return nil, err
 			}
 
 			httpClient = &http.Client{
 				Transport: &http.Transport{
-					TLSClientConfig: tlsClient,
+					TLSClientConfig: tlsClientConfig,
 				},
 			}
 
 		}
 
-		headers := map[string]string{
-			"User-Agent": fmt.Sprintf("engine-api-cli-%s", config.DockerAPIVersion),
-		}
+		headers := map[string]string{"User-Agent": fmt.Sprintf("engine-api-cli-%s", dockerClient.DockerAPIVersion)}
 
-		cli, err = client.NewClient(config.DockerHost, config.DockerAPIVersion, httpClient, headers)
-		if err != nil {
-			return nil, err
-		}
+		return client.NewClient(dockerClient.DockerHost, dockerClient.DockerAPIVersion, httpClient, headers)
 	}
-
-	return cli, nil
 }
 
 func getAuthConfig64(cli *client.Client, ctx context.Context) (string, error) {
 	authConfig := types.AuthConfig{}
 	if len(userName) > 0 && len(password) > 0 {
 		imageParts := strings.Split(containerImage, "/")
+
 		if strings.Count(imageParts[0], ".") > 0 {
 			authConfig.ServerAddress = imageParts[0]
 		} else {
@@ -442,12 +290,7 @@ func getAuthConfig64(cli *client.Client, ctx context.Context) (string, error) {
 		}
 	}
 
-	base64Auth, err := base64EncodeAuth(authConfig)
-	if err != nil {
-		return "", err
-	}
-
-	return base64Auth, nil
+	return base64EncodeAuth(authConfig)
 }
 
 func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error {
@@ -463,7 +306,7 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error
 		return err
 	}
 
-	defer pullResponseBody.Close()
+	defer Close(pullResponseBody)
 
 	// wait until the image download is finished
 	dec := json.NewDecoder(pullResponseBody)
@@ -499,7 +342,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	// ^[\\w]+[\\w-. ]*[\\w]+$ is the name requirement for docker containers as of 1.13.0
 	//  clusterName can be empty as a valid thing when a user is generating a config so the
 	//  hardcoded base portion of the name must satisfy the above regex.
-	clusterName := getContainerName()
+	clusterName := getFirstClusterName()
 	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, "krakenlib"+clusterName)
 	if err != nil {
 		return containerResponse, -1, nil, err
@@ -509,7 +352,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		return containerResponse, -1, nil, err
 	}
 
-	if verbosity == true {
+	if verbosity {
 		backgroundCtx := getContext()
 		streamLogs(cli, resp, backgroundCtx)
 	}
@@ -519,66 +362,42 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 		select {
 		case <-ctx.Done():
 			fmt.Println("Action timed out!")
-			return resp, 1, func() {
-				// make sure container is killed
-				var removeErr error
-				if keepAlive {
-					removeErr = cli.ContainerKill(
-						getContext(),
-						resp.ID,
-						"KILL")
-					if removeErr != nil {
-						panic(removeErr)
-					}
-
-					newContainerName := "krakenlib-" + namesgenerator.GetRandomName(1)
-					removeErr = cli.ContainerRename(
-						getContext(),
-						resp.ID,
-						newContainerName)
-					fmt.Println("Renamed krakenlib-" + clusterName + " to " + newContainerName)
-				} else {
-					removeErr = cli.ContainerRemove(
-						getContext(),
-						resp.ID,
-						types.ContainerRemoveOptions{
-							RemoveVolumes: false,
-							RemoveLinks:   false,
-							Force:         true,
-						})
-				}
-				if removeErr != nil {
-					panic(removeErr)
-				}
-			}, nil
+			return resp, 1, containerRenameOrRemove(cli, resp, clusterName, true, true), nil
 		default:
 			return containerResponse, -1, nil, err
 		}
 	}
 
-	return resp, statusCode, func() {
-		var removeErr error
+	return resp, statusCode, containerRenameOrRemove(cli, resp, clusterName, false, false), nil
+}
+
+func containerRenameOrRemove(cli *client.Client, resp types.ContainerCreateResponse, clusterName string, doKill bool, forceRemove bool) func() {
+	return func() {
+		var err error
+
 		if keepAlive {
-			newContainerName := "krakenlib-" + namesgenerator.GetRandomName(1)
-			removeErr = cli.ContainerRename(
-				getContext(),
-				resp.ID,
-				newContainerName)
-			fmt.Println("Renamed krakenlib-" + clusterName + " to " + newContainerName)
+			if doKill {
+				if err = cli.ContainerKill(getContext(), resp.ID, "KILL"); err != nil {
+					log.Fatalf("Error clean doing container renaming or removing: %s", err)
+				}
+			}
+
+			oldContainerName := fmt.Sprintf("k2-%s", clusterName)
+			newContainerName := fmt.Sprintf("k2-%s", namesgenerator.GetRandomName(1))
+
+			err = cli.ContainerRename(getContext(), resp.ID, newContainerName)
+			if err == nil {
+				fmt.Printf("Renamed %s to %s \n", oldContainerName, newContainerName)
+			}
 		} else {
-			removeErr = cli.ContainerRemove(
-				getContext(),
-				resp.ID,
-				types.ContainerRemoveOptions{
-					RemoveVolumes: false,
-					RemoveLinks:   false,
-					Force:         false,
-				})
+			removeOpts := types.ContainerRemoveOptions{	RemoveVolumes: false, RemoveLinks: false, Force: forceRemove}
+			err = cli.ContainerRemove(getContext(),	resp.ID, removeOpts)
 		}
-		if removeErr != nil {
-			panic(removeErr)
+
+		if err != nil {
+			log.Fatalf("Error clean doing container renaming or removing: %s", err)
 		}
-	}, nil
+	}
 }
 
 func getContext() (ctx context.Context) {
@@ -604,10 +423,11 @@ func writeLog(logFilePath string, out []byte) error {
 
 			// check if a valid file path
 			var d []byte
-			if err := ioutil.WriteFile(logFilePath, d, 0644); err == nil {
-				os.Remove(logFilePath)
-			} else {
+
+			if err := ioutil.WriteFile(logFilePath, d, 0644); err != nil {
 				return err
+			} else {
+				os.Remove(logFilePath)
 			}
 
 			fileHandle, err = os.Create(logFilePath)
@@ -616,23 +436,21 @@ func writeLog(logFilePath string, out []byte) error {
 			}
 		} else {
 			fileHandle, err = os.OpenFile("test.txt", os.O_RDWR, 0666)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	defer fileHandle.Close()
+	defer Close(fileHandle)
 
 	_, err = fileHandle.Write(out)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-func getContainerName() string {
+func getFirstClusterName() string {
 	// only supports first cluster name right now
-	clusters := clusterConfig.Get("deployment.clusters")
-	if clusters != nil {
+	if clusters := clusterConfig.Get("deployment.clusters"); clusters != nil {
 		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
 		if firstCluster["name"] == nil {
 			return "cluster-name-missing"

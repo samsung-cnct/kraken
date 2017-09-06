@@ -31,4 +31,6 @@ var sshCmd = &cobra.Command{
 
 func init() {
 	toolCmd.AddCommand(sshCmd)
+
+
 }
