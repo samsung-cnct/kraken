@@ -147,7 +147,7 @@ To see all installed applications across all namespaces:
 kraken tool kubectl --config ${HOME}/krakenlibconfigs/config.yaml -- get pods --all-namespaces
 ```
 
-### Example usage - kraken tool Helm
+### Example usage - kraken tool helm
 To list all installed charts with the default config.yaml location:
 ```
 kraken tool helm list
@@ -157,6 +157,26 @@ To install the Kafka chart maintained by Samsung CNCT:
 ```
 kraken tool helm install atlas/kafka
 ```
+
+### Example usage - kraken tool etcdctl
+In both cases below, the assumption is that ssh-agent is running with the cluster keyfile added where you will run kraken.
+It is also recommended to use kraken on a bastion if you are on a private topology.
+
+To check on etcd cluster health:
+```
+kraken tool etcdctl --api-version 2 --host-address <etcd_host_address> --endpoints=<etcd_instance_node_endpoints> cluster-health
+```
+
+To create a snapshot:
+```
+./kraken tool etcdctl --host-address <etcd_host_address> --endpoints=<etcd_instance_node_endpoints> snapshot save
+```
+The snapshot will be saved on the machine `<etcd_host_address>` in the directory: `/tmp/snapshots/snapshot.db`. Alternatively you can specify the location of your choice by 
+instead specifying the location of your choice.
+
+
+\*Docker for mac currently does not support using unix sockets, as such, commands that require ssh will not currently work. Please consider using
+this tool in a bastion running linux or use a linux virtual machine. Details can be found [here](https://github.com/docker/for-mac/issues/483#issuecomment-253983662).
 
 ## Working with Your Cluster (Using Host-Installed Tools)
 Your local machine's output directory stores the file needed by Helm and kubectl for connecting to and interacting with your Kubernetes deployment. By default, this directory is `${HOME}/.kraken/<cluster name>/`. The filename is `admin.kubeconfig`.
@@ -185,6 +205,22 @@ To install the Kafka chart maintained by Samsung CNCT:
 ```
 KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kraken/<cluster name>/.helm helm install atlas/kafka
 ```
+
+### Example usage - local etcdctl
+By local here we mean ssh into host machine `<host-address>`. In both cases below, use of a docker container is recommended as the OS may not have the default etcd version installed.  
+
+To check on etcd cluster health:
+
+```
+docker run -e ETCDCTL_API=2 -v /etc/etcd/ssl:/etc/etcd/ssl quay.io/coreos/etcd:v3.2.5 /usr/local/bin/etcdctl --endpoints=<etcd_instance_node_endpoints> --cert-file /etc/etcd/ssl/client.pem --ca-file /etc/etcd/ssl/client-ca.pem --key-file /etc/etcd/ssl/client-key.pem  cluster-health
+```
+
+To create a snapshot:
+
+```
+docker run -e ETCDCTL_API=3 -v /etc/etcd/ssl:/etc/etcd/ssl -v /tmp/snapshots:/tmp/snapshots quay.io/coreos/etcd:v3.2.5 /usr/local/bin/etcdctl --endpoints=<etcd_instance_node_endpoints> --cert /etc/etcd/ssl/client.pem --cacert /etc/etcd/ssl/client-ca.pem --key /etc/etcd/ssl/client-key.pem snapshot save /tmp/snapshots/snapshot.db
+```
+
 
 ## Updating your Cluster
 With kraken, you can update all aspects of your node pools including count, Kubernetes version, instance type and more. To do so, please make desired changes in your configuration file, and then run kraken's cluster update command, as described below, pointing to your configuration file.
