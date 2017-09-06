@@ -110,7 +110,7 @@ func init() {
 		&outputLocation,
 		"output",
 		"o",
-		os.Getenv("HOME")+"/.kraken",
+		os.ExpandEnv("$HOME/.kraken"),
 		"Kraken output folder")
 
 	// Specify the docker host string; typically unix:///var/run/docker.sock
@@ -215,7 +215,7 @@ func initKrakenConfig() {
 
 	// Then configs
 	krakenConfig.SetConfigName("kraken.config") // name of config file (without extension)
-	krakenConfig.AddConfigPath("$HOME/.kraken") // adding home directory as first search path
+	krakenConfig.AddConfigPath("$HOME/.kraken/.kraken") // adding home directory as first search path
 	krakenConfig.AddConfigPath(".")             // optionally look for config in the working directory
 
 	cfgFile = krakenConfig.GetString("kraken.config")

@@ -29,30 +29,24 @@ var kubectlCmd = &cobra.Command{
 	cluster configured by the specified yaml file`,
 	PreRunE: preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cli, _, err := pullKrakenContainerImage(containerImage)
+		var err error
 
 		command := []string{"/kraken/bin/computed_kubectl.sh", ClusterConfigPath}
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}
 
-		ctx, cancel := getTimedContext()
-		defer cancel()
-		resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
-		if err != nil {
-			return err
-		}
-		defer timeout()
-
-		out, err := printContainerLogs(cli, resp, getContext())
-		if err != nil {
-			return err
+		onFailure := func(out []byte) {
+			fmt.Printf("%s \n", out)
 		}
 
-		fmt.Printf("%s \n", out)
+		onSuccess := func(out []byte) {
+			fmt.Printf("%s \n", out)
+		}
 
-		ExitCode = statusCode
-		return nil
+		ExitCode, err = runKrakenLibCommandNoSpinner(command, ClusterConfigPath, onFailure, onSuccess)
+
+		return err
 	},
 }
 

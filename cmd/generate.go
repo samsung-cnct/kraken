@@ -52,24 +52,24 @@ func preRunEFunc(cmd *cobra.Command, args []string) error {
 		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 	}
 
+
 	fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
 
 	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
 		return fmt.Errorf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default Kraken config file", generatePath)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(generatePath), 0777); err != nil {
-		return err
-	}
+	// needed to put define correct location to generate to.
+	outputLocation = filepath.Dir(generatePath)
 
-	return nil
+	return os.MkdirAll(outputLocation, 0777)
+
 }
 
 func runFunc(cmd *cobra.Command, args []string) error {
-	cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
-	if err != nil {
-		return err
-	}
+	var err error
+	spinnerPrefix := fmt.Sprintf("Generating cluster config %s ", getFirstClusterName())
+
 
 	command := []string{
 		"bash",
@@ -77,35 +77,21 @@ func runFunc(cmd *cobra.Command, args []string) error {
 		fmt.Sprintf("cp %s %s", configPath, generatePath),
 	}
 
-	ctx, cancel := getTimedContext()
-	defer cancel()
 
-	outputLocation = filepath.Dir(generatePath)
-	resp, statusCode, timeout, err := containerAction(cli, ctx, command, "")
-	if err != nil {
-		return err
-	}
-
-	defer timeout()
-
-	out, err := printContainerLogs(cli, resp, backgroundCtx)
-	if err != nil {
-		fmt.Println("Error generating config at " + generatePath)
-		return err
-	}
-
-	if statusCode != 0 {
+	onFailure := func(out []byte) {
 		fmt.Println("Error generating config at " + generatePath)
 		fmt.Printf("%s", out)
-	} else {
-		fmt.Println("Generated " + provider + " config at " + generatePath)
+	}
+
+	onSuccess := func(out []byte) {
+		fmt.Printf("Generated %s config at %s \n", provider, generatePath)
 		if logSuccess {
 			fmt.Printf("%s", out)
 		}
 	}
 
-	ExitCode = statusCode
-	return nil
+	ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, "", onFailure, onSuccess)
+	return err
 }
 
 func init() {
