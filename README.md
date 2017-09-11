@@ -316,7 +316,7 @@ This will create a kraken binary that can be executed directly like so:
 ```
 
 ### Asset changes
-Asset changes are stored in the `/data` directory of this project's directory. Any file changes only get implemented if you
+Assets  are stored in the `/data` directory of this project's directory. Any file changes only get implemented if you
 follow the steps below:
 
 * Run `go-bindata data/`
