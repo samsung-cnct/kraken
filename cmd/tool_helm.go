@@ -27,19 +27,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const(
+const (
 	tmpFile string = "k8s_version.txt"
 )
 
 // helmCmd represents the helm command
 var helmCmd = &cobra.Command{
-	Use:   "helm",
-	Short: "Use Kubernetes Helm with a Kraken cluster",
-	SilenceUsage: true,
+	Use:           "helm",
+	Short:         "Use Kubernetes Helm with a Kraken cluster",
+	SilenceUsage:  true,
 	SilenceErrors: true,
-	Long: `Use Kubernetes Helm with the Kraken cluster configured by the specified yaml file`,
-	PreRunE: preRunGetClusterConfig,
-	RunE:    func(cmd *cobra.Command, args []string) error {
+	Long:          `Use Kubernetes Helm with the Kraken cluster configured by the specified yaml file`,
+	PreRunE:       preRunGetClusterConfig,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 
 		cli, backgroundCtx, err := pullKrakenContainerImage(containerImage)
@@ -61,34 +61,37 @@ var helmCmd = &cobra.Command{
 		}
 
 		if strings.Contains(verifiedHelmPath, minorMajorVersion) {
-			ExitCode, err = runHelm(helmPath, cli, backgroundCtx, args);
+			ExitCode, err = runHelm(backgroundCtx, helmPath, cli, args)
 			return err
-		} else {
-			fmt.Printf("No version of helm available for Kubernetes %s \n" , minorMajorVersion)
-
-			if latestHelmVersion, err := latestSupportedHelmVersion(cli, backgroundCtx); err != nil {
-				return err
-			} else {
-				fmt.Printf("Would you like to run the latest version of helm %s [Y/N]?: \n", latestHelmVersion)
-			}
-
-			if response, err := bufio.NewReader(os.Stdin).ReadString('\n'); err != nil {
-				return fmt.Errorf("Fatal: the following error was thrown while reading user input for helm options: %v", err)
-			} else {
-				switch  strings.ToLower(strings.TrimSpace(response)) {
-				case "y","yes":
-					ExitCode, err = runHelm(helmPath, cli, backgroundCtx, args)
-					return err
-				case "n","no":
-					fmt.Println("No version of Helm running")
-				default:
-					return fmt.Errorf("Please answer with only 'Y' or 'N'")
-				}
-			}
-
-			ExitCode = 0
 		}
 
+		fmt.Printf("No version of helm available for Kubernetes %s \n", minorMajorVersion)
+
+		latestHelmVersion, err := latestSupportedHelmVersion(backgroundCtx, cli)
+		if err != nil {
+			ExitCode = -1
+			return err
+		}
+
+		fmt.Printf("Would you like to run the latest version of helm %s [Y/N]?: \n", latestHelmVersion)
+
+		response, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			ExitCode = 1
+			return fmt.Errorf("Fatal: the following error was thrown while reading user input for helm options: %v", err)
+		}
+
+		switch strings.ToLower(strings.TrimSpace(response)) {
+		case "y", "yes":
+			ExitCode, err = runHelm(backgroundCtx, helmPath, cli, args)
+			return err
+		case "n", "no":
+			fmt.Println("No version of Helm running")
+		default:
+			return fmt.Errorf("Please answer with only 'Y' or 'N'")
+		}
+
+		ExitCode = 0
 		return err
 	},
 }
@@ -101,7 +104,7 @@ func init() {
 func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 	command := []string{"test", "-f", helmPath}
 
-	statusCode, err := runContainerCommand(cli, nil, command, nil)
+	statusCode, err := runContainerCommand(nil, cli, command, nil)
 
 	// Unless command returns 0 (filepath exists), assign path to latest.
 	if statusCode != 0 {
@@ -115,7 +118,7 @@ func verifyHelmPath(helmPath string, cli *client.Client) (string, error) {
 func getK8sVersion(cli *client.Client) (string, error) {
 	k8sVersionErr := fmt.Errorf("Error: retrieving k8s version from config file: %s", ClusterConfigPath)
 
-	outputFile := fmt.Sprintf("%s_%s",ClusterConfigPath, tmpFile)
+	outputFile := fmt.Sprintf("%s_%s", ClusterConfigPath, tmpFile)
 	command := []string{
 		"ansible-playbook",
 		"-i",
@@ -125,7 +128,7 @@ func getK8sVersion(cli *client.Client) (string, error) {
 		fmt.Sprintf("config_path=%s config_base=%s config_forced=%t kraken_action=max_k8s_version version_outfile=%s", ClusterConfigPath, outputLocation, configForced, outputFile),
 	}
 
-	statusCode, err := runContainerCommand(cli, nil, command, nil)
+	statusCode, err := runContainerCommand(nil, cli, command, nil)
 	if err != nil {
 		return "", err
 	}
@@ -141,7 +144,7 @@ func getK8sVersion(cli *client.Client) (string, error) {
 	}
 
 	defer Close(file)
-	defer Remove(outputFile)
+	defer remove(outputFile)
 
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
@@ -152,35 +155,14 @@ func getK8sVersion(cli *client.Client) (string, error) {
 
 	// we should catch this error more precisely.
 	if !strings.HasPrefix(version, "v") {
-		err =  fmt.Errorf("Error: unexpected version: %s", version)
+		err = fmt.Errorf("Error: unexpected version: %s", version)
 	}
 
 	return version, err
 }
 
-func Remove(path string) {
-	if err := os.Remove(path); err != nil {
-		log.Fatal(err)
-	}
-}
-
-// If no valid helm version, let user know the latest helm version available.
-func latestSupportedHelmVersion(cli *client.Client, backgroundCtx context.Context) (string, error) {
-	var result string
-
-	command := []string{"printenv", "K8S_HELM_VERSION_LATEST"}
-
-	onComplete := func(out []byte) {
-		result = string(out)
-	}
-
-	_, err := runContainerCommand(cli, backgroundCtx, command, onComplete)
-
-	return result, err
-}
-
 // Run helm if valid path or if user wants to run latest helm.
-func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context, args []string) (int, error) {
+func runHelm(backgroundCtx context.Context, helmPath string, cli *client.Client, args []string) (int, error) {
 	path, err := verifyHelmPath(helmPath, cli)
 	if err != nil {
 		return -1, err
@@ -195,16 +177,37 @@ func runHelm(helmPath string, cli *client.Client, backgroundCtx context.Context,
 		fmt.Printf("%s", out)
 	}
 
-	return runContainerCommand(cli, backgroundCtx, command, onComplete)
+	return runContainerCommand(backgroundCtx, cli, command, onComplete)
 }
 
-func runContainerCommand(cli *client.Client,  backgroundCtx context.Context, command []string, onComplete func([]byte)) (int, error) {
+func remove(path string) {
+	if err := os.Remove(path); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// If no valid helm version, let user know the latest helm version available.
+func latestSupportedHelmVersion(backgroundCtx context.Context, cli *client.Client) (string, error) {
+	var result string
+
+	command := []string{"printenv", "K8S_HELM_VERSION_LATEST"}
+
+	onComplete := func(out []byte) {
+		result = string(out)
+	}
+
+	_, err := runContainerCommand(backgroundCtx, cli, command, onComplete)
+
+	return result, err
+}
+
+func runContainerCommand(backgroundCtx context.Context, cli *client.Client, command []string, onComplete func([]byte)) (int, error) {
 	var err error
 	ctx, cancel := getTimedContext()
 
 	defer cancel()
 
-	resp, statusCode, timeout, err := containerAction(cli, ctx, command, ClusterConfigPath)
+	resp, statusCode, timeout, err := containerAction(ctx, cli, command, ClusterConfigPath)
 	if err != nil {
 		return -1, err
 	}
@@ -212,7 +215,7 @@ func runContainerCommand(cli *client.Client,  backgroundCtx context.Context, com
 	defer timeout()
 
 	if backgroundCtx != nil {
-		out, err := printContainerLogs(cli, resp, backgroundCtx)
+		out, err := printContainerLogs(backgroundCtx, cli, resp)
 
 		if err != nil {
 			return -1, err
@@ -227,4 +230,3 @@ func runContainerCommand(cli *client.Client,  backgroundCtx context.Context, com
 	return statusCode, err
 
 }
-

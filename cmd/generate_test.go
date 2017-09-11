@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 const randConfigNameLenght = 12
@@ -15,7 +15,7 @@ func TestProviderFlagDefaultsToAWS(t *testing.T) {
 
 func TestPreRunSetsVariables(t *testing.T) {
 	args := make([]string, 2)
-	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp", randStringBytesMaskImprSrc(randConfigNameLenght))
 	preRunEFunc(nil, args)
 
 	if configPath == "" || generatePath == "" {
@@ -25,7 +25,7 @@ func TestPreRunSetsVariables(t *testing.T) {
 
 func TestAWSProviderCreatesAWSconfig(t *testing.T) {
 	args := make([]string, 2)
-	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp", randStringBytesMaskImprSrc(randConfigNameLenght))
 
 	preRunEFunc(nil, args)
 
@@ -37,7 +37,7 @@ func TestAWSProviderCreatesAWSconfig(t *testing.T) {
 func TestGKEProviderCreatesGKEConfig(t *testing.T) {
 	provider = "gke"
 	args := make([]string, 2)
-	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp",randStringBytesMaskImprSrc(randConfigNameLenght))
+	args[0] = fmt.Sprintf("$HOME/sandbox/%s.tmp", randStringBytesMaskImprSrc(randConfigNameLenght))
 
 	preRunEFunc(nil, args)
 

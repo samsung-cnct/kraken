@@ -46,7 +46,7 @@ var updateCmd = &cobra.Command{
 
 		_, err := os.Stat(ClusterConfigPath)
 		if os.IsNotExist(err) {
-			return fmt.Errorf("File %s does not exist!", ClusterConfigPath)
+			return fmt.Errorf("file %s does not exist", ClusterConfigPath)
 		}
 
 		if err != nil {
@@ -73,9 +73,9 @@ var updateCmd = &cobra.Command{
 		}
 
 		onFailure := func(out []byte) {
-			fmt.Println("ERROR updating " + getFirstClusterName())
+			fmt.Printf("ERROR updating cluster %s \n", getFirstClusterName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, ClusterConfigPath)
+			clusterHelpError(HelpTypeUpdated, ClusterConfigPath)
 		}
 
 		onSuccess := func(out []byte) {
@@ -83,7 +83,7 @@ var updateCmd = &cobra.Command{
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, ClusterConfigPath)
+			clusterHelp(HelpTypeUpdated, ClusterConfigPath)
 		}
 
 		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)

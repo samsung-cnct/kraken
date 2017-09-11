@@ -30,14 +30,18 @@ var containerImage string
 var outputLocation string
 var actionTimeout int
 var dockerClient DockerClientConfig
+
+// ExitCode is used by commands and subcommands to write out main's exitcode
 var ExitCode int
 var keepAlive bool
 var logPath string
 var logSuccess bool
 var verbosity bool
-var KrakenlibTag string // this is set via linker flag
 
-// to be used by subcommands using --config
+// KrakenlibTag this is set via linker flag
+var KrakenlibTag string
+
+// ClusterConfigPath to be used by subcommands using --config
 var ClusterConfigPath string
 
 // progress spinner
@@ -214,9 +218,9 @@ func initKrakenConfig() {
 	krakenConfig.AutomaticEnv()         // read in environment variables that match
 
 	// Then configs
-	krakenConfig.SetConfigName("kraken.config") // name of config file (without extension)
+	krakenConfig.SetConfigName("kraken.config")         // name of config file (without extension)
 	krakenConfig.AddConfigPath("$HOME/.kraken/.kraken") // adding home directory as first search path
-	krakenConfig.AddConfigPath(".")             // optionally look for config in the working directory
+	krakenConfig.AddConfigPath(".")                     // optionally look for config in the working directory
 
 	cfgFile = krakenConfig.GetString("kraken.config")
 	if cfgFile != "" { // enable ability to specify config file via flag

@@ -26,10 +26,10 @@ var upTagsList string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:           "up [path to Kraken config file]",
-	Short:         "Creates a Kraken cluster",
-	Long:          `Creates a Kraken cluster described in the specified configuration yaml`,
-	PreRunE:       preRunGetClusterConfig,
+	Use:     "up [path to Kraken config file]",
+	Short:   "Creates a Kraken cluster",
+	Long:    `Creates a Kraken cluster described in the specified configuration yaml`,
+	PreRunE: preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 		spinnerPrefix := fmt.Sprintf("Bringing up cluster '%s' ", getFirstClusterName())
@@ -56,7 +56,7 @@ var upCmd = &cobra.Command{
 		onFailure := func(out []byte) {
 			fmt.Printf("ERROR bringing up %s \n", getFirstClusterName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, ClusterConfigPath)
+			clusterHelpError(HelpTypeCreated, ClusterConfigPath)
 		}
 
 		onSuccess := func(out []byte) {
@@ -64,7 +64,7 @@ var upCmd = &cobra.Command{
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, ClusterConfigPath)
+			clusterHelp(HelpTypeCreated, ClusterConfigPath)
 		}
 
 		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)

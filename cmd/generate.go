@@ -52,7 +52,6 @@ func preRunEFunc(cmd *cobra.Command, args []string) error {
 		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 	}
 
-
 	fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
 
 	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
@@ -70,13 +69,11 @@ func runFunc(cmd *cobra.Command, args []string) error {
 	var err error
 	spinnerPrefix := fmt.Sprintf("Generating cluster config %s ", getFirstClusterName())
 
-
 	command := []string{
 		"bash",
 		"-c",
 		fmt.Sprintf("cp %s %s", configPath, generatePath),
 	}
-
 
 	onFailure := func(out []byte) {
 		fmt.Println("Error generating config at " + generatePath)

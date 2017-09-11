@@ -7,14 +7,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const(
+const (
 	krakenImage string = "kraken_store"
-	basePath string = "data"
+	basePath    string = "data"
 )
+
 var releaseCmd = &cobra.Command{
 	Use:   "release-it",
 	Short: "Release the kraken!",
-	Long: `Tool to release the kraken!`,
+	Long:  `Tool to release the kraken!`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		resource, err := Asset(path.Join(basePath, krakenImage))
 		if err != nil {
@@ -30,7 +31,6 @@ var releaseCmd = &cobra.Command{
 	},
 	SilenceUsage: true,
 }
-
 
 func init() {
 	RootCmd.AddCommand(releaseCmd)

@@ -38,7 +38,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-
 // Close can throw an err, so to defer to it is risky,
 // review http://www.blevesearch.com/news/Deferred-Cleanup,-Checking-Errors,-and-Potential-Problems/
 func Close(c io.Closer) {
@@ -55,11 +54,11 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 	return base64.URLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) {
+func streamLogs(ctx context.Context, cli *client.Client, resp types.ContainerCreateResponse) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	containerLogOpts := types.ContainerLogsOptions{ ShowStdout: true, Follow: true}
+	containerLogOpts := types.ContainerLogsOptions{ShowStdout: true, Follow: true}
 	reader, err := cli.ContainerLogs(ctx, resp.ID, containerLogOpts)
 	if err != nil {
 		log.Fatal(err)
@@ -72,8 +71,8 @@ func streamLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx cont
 	}
 }
 
-func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, ctx context.Context) ([]byte, error) {
-	containerLogOpts := types.ContainerLogsOptions{ ShowStdout: true, ShowStderr: true}
+func printContainerLogs(ctx context.Context, cli *client.Client, resp types.ContainerCreateResponse) ([]byte, error) {
+	containerLogOpts := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}
 	out, err := cli.ContainerLogs(ctx, resp.ID, containerLogOpts)
 	if err != nil {
 		return nil, err
@@ -82,49 +81,6 @@ func printContainerLogs(cli *client.Client, resp types.ContainerCreateResponse, 
 	defer Close(out)
 
 	return ioutil.ReadAll(out)
-}
-
-// post cluster help types
-type helpType int
-
-const (
-	Created   helpType = iota
-	Destroyed
-	Updated
-)
-
-func clusterHelpError(help helpType, clusterConfigFile string) {
-	fmt.Println("Some of the cluster state MAY be available:")
-	clusterHelp(help, clusterConfigFile)
-}
-
-func clusterHelp(help helpType, clusterConfigFile string) {
-	if _, err := os.Stat(path.Join(outputLocation, getFirstClusterName(), "admin.kubeconfig")); err == nil {
-		fmt.Println("To use kubectl: ")
-		fmt.Println(" kubectl --kubeconfig=" + path.Join(
-			outputLocation,
-			getFirstClusterName(), "admin.kubeconfig") + " [kubectl commands]")
-		fmt.Println(" or use 'kraken tool kubectl --config " + clusterConfigFile + " [kubectl commands]'")
-
-		if _, err := os.Stat(path.Join(outputLocation,
-			getFirstClusterName(), "admin.kubeconfig")); err == nil {
-			fmt.Println("To use helm: ")
-			fmt.Println(" export KUBECONFIG=" + path.Join(
-				outputLocation,
-				getFirstClusterName(), "admin.kubeconfig"))
-			fmt.Println(" helm [helm command] --home " + path.Join(
-				outputLocation,
-				getFirstClusterName(), ".helm"))
-			fmt.Println(" or use 'kraken tool helm --config " + clusterConfigFile + " [helm commands]'")
-		}
-	}
-
-	if _, err := os.Stat(path.Join(outputLocation, getFirstClusterName(), "ssh_config")); err == nil {
-		fmt.Println("To use ssh: ")
-		fmt.Println(" ssh <node pool name>-<number> -F " + path.Join(outputLocation, getFirstClusterName(), "ssh_config"))
-		// This is usage has not been implemented. See issue #49
-		//fmt.Println(" or use 'kraken tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
-	}
 }
 
 // Convert dashes to underscore (if any) in cluster name and append to helm_override_ to be able to pull correct env for helm override
@@ -160,7 +116,7 @@ func appendIfValueNotEmpty(envs []string, envKey string) []string {
 }
 
 func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
-	config_envs := []string{}
+	configEnvs := []string{}
 
 	// cluster configuration is always mounted
 	var hostConfig *container.HostConfig
@@ -172,7 +128,7 @@ func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 		}
 
 		deployment := reflect.ValueOf(clusterConfig.Sub("deployment"))
-		parseMounts(deployment, hostConfig, &config_envs)
+		parseMounts(deployment, hostConfig, &configEnvs)
 
 	} else {
 		hostConfig = &container.HostConfig{
@@ -181,10 +137,10 @@ func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 		}
 	}
 
-	return hostConfig, config_envs
+	return hostConfig, configEnvs
 }
 
-func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, config_envs *[]string) {
+func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, configEnvs *[]string) {
 	switch deployment.Kind() {
 	case reflect.Ptr:
 		deploymentValue := deployment.Elem()
@@ -194,35 +150,35 @@ func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, con
 			return
 		}
 
-		parseMounts(deploymentValue, hostConfig, config_envs)
+		parseMounts(deploymentValue, hostConfig, configEnvs)
 
 	case reflect.Interface:
 		deploymentValue := deployment.Elem()
-		parseMounts(deploymentValue, hostConfig, config_envs)
+		parseMounts(deploymentValue, hostConfig, configEnvs)
 
 	case reflect.Struct:
-		for i := 0; i < deployment.NumField(); i += 1 {
-			parseMounts(deployment.Field(i), hostConfig, config_envs)
+		for i := 0; i < deployment.NumField(); i++ {
+			parseMounts(deployment.Field(i), hostConfig, configEnvs)
 		}
 
 	case reflect.Slice:
-		for i := 0; i < deployment.Len(); i += 1 {
-			parseMounts(deployment.Index(i), hostConfig, config_envs)
+		for i := 0; i < deployment.Len(); i++ {
+			parseMounts(deployment.Index(i), hostConfig, configEnvs)
 		}
 
 	case reflect.Map:
 		for _, key := range deployment.MapKeys() {
 			originalValue := deployment.MapIndex(key)
-			parseMounts(originalValue, hostConfig, config_envs)
+			parseMounts(originalValue, hostConfig, configEnvs)
 		}
 	case reflect.String:
-		reflectedString := fmt.Sprintf("%s", deployment)
+		reflectedString := deployment.String()
 
-		// if the string was an environment variable we need to add it to the config_envs
+		// if the string was an environment variable we need to add it to the configEnvs
 		regex := regexp.MustCompile(`\$[A-Za-z0-9_]+`)
 		matches := regex.FindAllString(reflectedString, -1)
 		for _, value := range matches {
-			*config_envs = append(*config_envs, strings.Replace(value, "$", "", -1)+"="+os.ExpandEnv(value))
+			*configEnvs = append(*configEnvs, strings.Replace(value, "$", "", -1)+"="+os.ExpandEnv(value))
 		}
 
 		if _, err := os.Stat(os.ExpandEnv(reflectedString)); err == nil {
@@ -245,32 +201,32 @@ func getClient() (*client.Client, error) {
 	if dockerClient.isInheritedFromEnvironment() {
 		// Rely on Docker's own standard environment handling.
 		return client.NewEnvClient()
-	} else {
-		// Set up an optionally TLS-enabled client, based on non-environment flags.
-		// This replicates logic of Docker's `NewEnvClient`, but allows for our
-		// command-line argument overrides.
-		if dockerClient.isTLSActivated() {
+	}
 
-			tlsClientConfig, err := dockerClient.createTLSConfig()
-			if err != nil {
-				return nil, err
-			}
+	// Set up an optionally TLS-enabled client, based on non-environment flags.
+	// This replicates logic of Docker's `NewEnvClient`, but allows for our
+	// command-line argument overrides.
+	if dockerClient.isTLSActivated() {
 
-			httpClient = &http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: tlsClientConfig,
-				},
-			}
-
+		tlsClientConfig, err := dockerClient.createTLSConfig()
+		if err != nil {
+			return nil, err
 		}
 
-		headers := map[string]string{"User-Agent": fmt.Sprintf("engine-api-cli-%s", dockerClient.DockerAPIVersion)}
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsClientConfig,
+			},
+		}
 
-		return client.NewClient(dockerClient.DockerHost, dockerClient.DockerAPIVersion, httpClient, headers)
 	}
+
+	headers := map[string]string{"User-Agent": fmt.Sprintf("engine-api-cli-%s", dockerClient.DockerAPIVersion)}
+
+	return client.NewClient(dockerClient.DockerHost, dockerClient.DockerAPIVersion, httpClient, headers)
 }
 
-func getAuthConfig64(cli *client.Client, ctx context.Context) (string, error) {
+func getAuthConfig64(ctx context.Context, cli *client.Client) (string, error) {
 	authConfig := types.AuthConfig{}
 	if len(userName) > 0 && len(password) > 0 {
 		imageParts := strings.Split(containerImage, "/")
@@ -293,7 +249,7 @@ func getAuthConfig64(cli *client.Client, ctx context.Context) (string, error) {
 	return base64EncodeAuth(authConfig)
 }
 
-func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error {
+func pullImage(ctx context.Context, cli *client.Client, base64Auth string) error {
 
 	pullOpts := types.ImagePullOptions{
 		RegistryAuth:  base64Auth,
@@ -327,13 +283,13 @@ func pullImage(cli *client.Client, ctx context.Context, base64Auth string) error
 	return nil
 }
 
-func containerAction(cli *client.Client, ctx context.Context, command []string, krakenlibconfig string) (types.ContainerCreateResponse, int, func(), error) {
+func containerAction(ctx context.Context, cli *client.Client, command []string, krakenlibconfig string) (types.ContainerCreateResponse, int, func(), error) {
 	var containerResponse types.ContainerCreateResponse
 
-	hostConfig, config_envs := makeMounts(krakenlibconfig)
+	hostConfig, configEnvs := makeMounts(krakenlibconfig)
 	containerConfig := &container.Config{
 		Image:        containerImage,
-		Env:          append(containerEnvironment(), config_envs...),
+		Env:          append(containerEnvironment(), configEnvs...),
 		Cmd:          command,
 		AttachStdout: true,
 		Tty:          true,
@@ -353,8 +309,7 @@ func containerAction(cli *client.Client, ctx context.Context, command []string, 
 	}
 
 	if verbosity {
-		backgroundCtx := getContext()
-		streamLogs(cli, resp, backgroundCtx)
+		streamLogs(getContext(), cli, resp)
 	}
 
 	statusCode, err := cli.ContainerWait(ctx, resp.ID)
@@ -390,8 +345,8 @@ func containerRenameOrRemove(cli *client.Client, resp types.ContainerCreateRespo
 				fmt.Printf("Renamed %s to %s \n", oldContainerName, newContainerName)
 			}
 		} else {
-			removeOpts := types.ContainerRemoveOptions{	RemoveVolumes: false, RemoveLinks: false, Force: forceRemove}
-			err = cli.ContainerRemove(getContext(),	resp.ID, removeOpts)
+			removeOpts := types.ContainerRemoveOptions{RemoveVolumes: false, RemoveLinks: false, Force: forceRemove}
+			err = cli.ContainerRemove(getContext(), resp.ID, removeOpts)
 		}
 
 		if err != nil {
@@ -400,7 +355,7 @@ func containerRenameOrRemove(cli *client.Client, resp types.ContainerCreateRespo
 	}
 }
 
-func getContext() (ctx context.Context) {
+func getContext() context.Context {
 	return context.Background()
 }
 
@@ -426,9 +381,9 @@ func writeLog(logFilePath string, out []byte) error {
 
 			if err := ioutil.WriteFile(logFilePath, d, 0644); err != nil {
 				return err
-			} else {
-				os.Remove(logFilePath)
 			}
+
+			os.Remove(logFilePath)
 
 			fileHandle, err = os.Create(logFilePath)
 			if err != nil {
@@ -446,18 +401,4 @@ func writeLog(logFilePath string, out []byte) error {
 
 	_, err = fileHandle.Write(out)
 	return err
-}
-
-func getFirstClusterName() string {
-	// only supports first cluster name right now
-	if clusters := clusterConfig.Get("deployment.clusters"); clusters != nil {
-		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
-		if firstCluster["name"] == nil {
-			return "cluster-name-missing"
-		}
-		// should not use type assertion .(string) without verifying interface isnt nil
-		return os.ExpandEnv(firstCluster["name"].(string))
-	} else {
-		return "cluster-name-missing"
-	}
 }

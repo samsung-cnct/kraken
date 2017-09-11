@@ -44,7 +44,7 @@ var sshUpdateCmd = &cobra.Command{
 		onFailure := func(out []byte) {
 			fmt.Println("ERROR refreshing ssh inventory for " + getFirstClusterName())
 			fmt.Printf("%s", out)
-			clusterHelpError(Created, ClusterConfigPath)
+			clusterHelpError(HelpTypeCreated, ClusterConfigPath)
 		}
 
 		onSuccess := func(out []byte) {
@@ -52,7 +52,7 @@ var sshUpdateCmd = &cobra.Command{
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			clusterHelp(Created, ClusterConfigPath)
+			clusterHelp(HelpTypeCreated, ClusterConfigPath)
 		}
 
 		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)

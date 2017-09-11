@@ -22,9 +22,9 @@ import (
 
 // toolCmd represents the tool command
 var toolCmd = &cobra.Command{
-	Use:   "tool",
-	Short: "Use tools with Kraken cluster",
-	SilenceUsage: true,
+	Use:           "tool",
+	Short:         "Use tools with Kraken cluster",
+	SilenceUsage:  true,
 	SilenceErrors: true,
 	Long: `Use various third-party tools with a
 	Kraken cluster configured by specified yaml`,

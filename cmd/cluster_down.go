@@ -59,13 +59,15 @@ var downCmd = &cobra.Command{
 		onFailure := func(out []byte) {
 			fmt.Printf("ERROR bringing down %s \n", getFirstClusterName())
 			fmt.Printf("%s", out)
+			clusterHelpError(HelpTypeDestroyed, ClusterConfigPath)
 		}
 
 		onSuccess := func(out []byte) {
+			fmt.Println("Done.")
 			if logSuccess {
 				fmt.Printf("%s", out)
 			}
-			fmt.Println("Done.")
+			clusterHelp(HelpTypeDestroyed, ClusterConfigPath)
 		}
 
 		ExitCode, err = runKrakenLibCommand(spinnerPrefix, command, ClusterConfigPath, onFailure, onSuccess)
