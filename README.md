@@ -1,5 +1,5 @@
 # kraken
-This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/k2). kraken currently also supports deployments to GKE, but not by default.
+This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/k2). kraken currently also supports deployments to GKE (see Building a Configuration File below).
 
 ## Prerequisites
 Docker must be installed on the machine where you run kraken and your user must have permissions to run it.
