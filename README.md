@@ -1,5 +1,5 @@
 # kraken
-This document will help you get started deploying Kubernetes to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/k2). kraken currently also supports deployments to GKE, but not by default.
+This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/k2). kraken currently also supports deployments to GKE [(see documentation)](need URL).
 
 ## Prerequisites
 Docker must be installed on the machine where you run kraken and your user must have permissions to run it.
@@ -71,10 +71,10 @@ production quality.
 ### Optional configuration changes (more advanced)
 First-time users looking to set up a simple evaluation cluster can skip this section and go directly to [Creating Your First Cluster](#creating-your-first-cluster).  
 
-You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster.  
+You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster. For reference, here is the [full set of kraken configuration options](https://samsung-cnct.github.io/k2/). 
 
 *  **Deployment Region and Availability Zones**  
-In the default-generated configuration file, all clusters begin their lives in the AWS Region US East. You can move the default region and  modify the availability zones, if needed. For reference, the [Global AWS Infrastructure](https://aws.amazon.com/about-aws/global-infrastructure/) provides a complete list of regions and availability zones. These fields are named `definitions.providerConfigs.region`, and `definitions.providerConfigs.subnet.az` respectively. Note three total `.subnet.az` values are defined, so the cluster can be spread across multiple failure domains. Be sure to update all three to availability zones within your selected region.  
+In the default-generated configuration file, all clusters begin their lives in the AWS Region us-east-1. You can move the default region and  modify the availability zones, if needed. For reference, the [Global AWS Infrastructure](https://aws.amazon.com/about-aws/global-infrastructure/) provides a complete list of regions and availability zones. These fields are named `definitions.providerConfigs.region`, and `definitions.providerConfigs.subnet.az` respectively. Note three total `.subnet.az` values are defined, so the cluster can be spread across multiple failure domains. Be sure to update all three to availability zones within your selected region.  
 
 *  **Cluster Node Size and Count**  
 This setting defines the type and total number of cluster nodes on which you can schedule workloads. The default EC2 instance type is `c4.large`, and the default cluster includes 10 of these instances. These fields are named  `definitions.nodeConfigs.defaultAwsClusterNode.providerConfig.type` for the instance type and `deployment.clusters.nodePools.name: clusterNodes`, `.count: 10`, for the total number of worker nodes. When setting the total number of nodes, keep mind they will be spread across all of your cluster's availability zones.
@@ -128,7 +128,7 @@ complete, the cluster exists in its own VPC and is be accesible via the `tool` s
 are stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ## Working with Your Cluster (Using kraken)
-For all of its operations, kraken uses the kraken-lib image (github.com/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're
+For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're
 using the correct version of the relevant CLI for your cluster.
 
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/), a CLI for working with a Kubernetes cluster, is
@@ -191,7 +191,7 @@ KUBECONFIG=${HOME}/.kraken/<cluster name>/admin.kubeconfig HELM_HOME=${HOME}/.kr
 ```
 
 ## Updating your Cluster
-You can update your node pools, node pool counts and instance types with kraken (specifically, the Kubernetes version). To do so, please make desired changes in your configuration file, and then run Kraken's cluster update command, as described below, pointing to your configuration file.
+With kraken, you can update all aspects of your node pools including count, Kubernetes version, instance type and more. To do so, please make desired changes in your configuration file, and then run kraken's cluster update command, as described below, pointing to your configuration file.
 
 ### Running kraken update
 You can specify different versions of Kubernetes in each node pool. Note: this may affect the compatibility of your cluster's kraken-provided services. Specify which node pools you want to update with a comma-separated list of their names. This process takes approximately 10 minutes per node.
@@ -203,7 +203,7 @@ kraken cluster update ${HOME}/krakenlibconfigs/config.yaml <your,nodepools,here>
 ```
 
 ## Destroying the Running Cluster
-During development (not production), when you're done with your cluster or with a quickstart, we recommend cleaning up your resources by destroying the running cluster. From this guide, simply run:
+When you're done with your cluster or with a quickstart, we recommend cleaning up your resources by destroying the running cluster. From this guide, simply run:
 ```
 kraken cluster down ${HOME}/krakenConfigs/config.yaml
 ```
