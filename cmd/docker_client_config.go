@@ -4,13 +4,13 @@ import (
 	"os"
 	"strconv"
 
-	"path/filepath"
+	"crypto/tls"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/tlsconfig"
-	"crypto/tls"
+	"path/filepath"
 )
 
-
+// DockerAPIVersion defines the docker api version used.
 var DockerAPIVersion = client.DefaultVersion
 
 // DockerClientConfig provides a simple encapsulation of parameters to construct the Docker API client
@@ -23,7 +23,6 @@ type DockerClientConfig struct {
 	TLSCertificate   string
 	TLSKey           string
 }
-
 
 // GetDefaultHost produces either the environment-provided host, or a sensible default.
 func (conf *DockerClientConfig) GetDefaultHost() string {

@@ -21,18 +21,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// KrakenMajorMinorPatch refers to the version
 var KrakenMajorMinorPatch string
+
+// KrakenType refers to the release type
 var KrakenType = "alpha"
+
+// KrakenGitCommit refers to the Git Commit sha
 var KrakenGitCommit string
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Display cli version",
-	Long:  `Display cli version information`,
+	Use:           "version",
+	Short:         "Display cli version",
+	SilenceErrors: true,
+	SilenceUsage:  true,
+	Long:          `Display cli version information`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		semVer, err := semver.Make(KrakenMajorMinorPatch + "-" + KrakenType + "+git.sha." + KrakenGitCommit)
 		if err != nil {
+			ExitCode = -1
 			return err
 		}
 
