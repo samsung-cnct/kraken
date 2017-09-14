@@ -18,7 +18,7 @@ compile:
 	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
 									-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
 									-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)"
+									-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)" \
 	-osarch="linux/386" \
 	-osarch="linux/amd64" \
 	-osarch="darwin/amd64" \
