@@ -1,5 +1,5 @@
 # kraken
-This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/k2). kraken currently also supports deployments to GKE (see Building a Configuration File below).
+This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/kraken-lib). kraken currently also supports deployments to GKE (see Building a Configuration File below).
 
 ## Prerequisites
 Docker must be installed on the machine where you run kraken and your user must have permissions to run it.
@@ -124,11 +124,11 @@ Or you can specify the location of the config file:
 kraken cluster up ${HOME}/krakenlibconfigs/config.yaml
 ```
 This will take anywhere from 5 to 20 minutes, depending on AWS performance when you execute this command. When
-complete, the cluster exists in its own VPC and is be accesible via the `tool` subcommands. The output artifacts
+complete, the cluster exists in its own VPC and is be accessible via the `tool` subcommands. The output artifacts
 are stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ## Working with Your Cluster (Using kraken)
-For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're
+For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/kraken-lib) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're
 using the correct version of the relevant CLI for your cluster.
 
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/), a CLI for working with a Kubernetes cluster, is
@@ -295,10 +295,10 @@ deployment:
 ...
 ```
 
-If you have further questions or needs, please read through the rest of the documentaion and then open an issue.
+If you have further questions or needs, please read through the rest of the documentation and then open an issue.
 
 # Contributing Features, Bug Fixes and More
-We welcome all types of contributions from the community and and don't require a contributor license agreement. To simplify merging, we prefer pull requests based on a feature branch in your personal fork that's based off the current master of the kraken repo. For more details, please refer to our [kraken-lib Contributing](https://github.com/samsung-cnct/k2/blob/master/CONTRIBUTING.md) document.
+We welcome all types of contributions from the community and and don't require a contributor license agreement. To simplify merging, we prefer pull requests based on a feature branch in your personal fork that's based off the current master of the kraken repo. For more details, please refer to our [kraken-lib Contributing](https://github.com/samsung-cnct/kraken-lib/blob/master/CONTRIBUTING.md) document.
 
 ## To build
 This is a go project with vendored dependencies, so building is a snap.
@@ -329,15 +329,15 @@ We plan to automate this process in the future.
 
 * Install [GitHub-release](https://github.com/c4milo/github-release)
 * Create a GitHub personal access token with repo read/write permissions and export it as GITHUB_TOKEN
-* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed or set them as command-line parmaters to `make`
-* Run ```make release``` or with paramaters ```make release VERSION=v0.1```
+* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed or set them as command-line parameters to `make`
+* Run ```make release``` or with parameters ```make release VERSION=v0.1```
 
 # Additional Resources
 Here are some additional resources you might find useful:
 
 * #kraken Slack on [k8s.slack.com](https://k8s.slack.com/)
-* [kraken-lib issue tracker](https://github.com/samsung-cnct/k2/issues)
-* [kraken-tools](https://github.com/samsung-cnct/k2-tools)
+* [kraken-lib issue tracker](https://github.com/samsung-cnct/kraken-lib/issues)
+* [kraken-tools](https://github.com/samsung-cnct/kraken-tools)
 * [kraken codebase](https://github.com/samsung-cnct/kraken)
 
 # Maintainer
