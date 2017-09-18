@@ -9,7 +9,7 @@ You can install the official build on OS X via Brew by:
 
 ```
 brew tap 'samsung-cnct/homebrew-k2cli'
-brew install k2cli
+brew install kraken
 ```
 
 Otherwise, you can find the latest official build [here](https://github.com/samsung-cnct/k2cli/releases). Use the latest version, unless you have a specific reason for using a different one.
@@ -35,7 +35,7 @@ kraken generate --provider gke
 ```
 
 ### Required configuration changes
-For an AWS cluster, you need to set several fields before using the config file file you created, as listed below. 
+For an AWS cluster, you need to set several fields before using the config file file you created, as listed below.
 *  **Cluster name**  All kraken clusters should have a unique name so their assets can be easily identified by humans in the
 AWS console (no more than 32 characters). Set the cluster name in the `deployment.clusters.name` field. This dotted notation refers to the hierarchical structure of a YAML file where the cluster is a sub field of deployment. Find this line near the bottom of the file in the `deployment` section.
 
@@ -71,7 +71,7 @@ production quality.
 ### Optional configuration changes (more advanced)
 First-time users looking to set up a simple evaluation cluster can skip this section and go directly to [Creating Your First Cluster](#creating-your-first-cluster).  
 
-You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster. For reference, here is the [full set of kraken configuration options](https://samsung-cnct.github.io/k2/). 
+You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster. For reference, here is the [full set of kraken configuration options](https://samsung-cnct.github.io/k2/).
 
 *  **Deployment Region and Availability Zones**  
 In the default-generated configuration file, all clusters begin their lives in the AWS Region us-east-1. You can move the default region and  modify the availability zones, if needed. For reference, the [Global AWS Infrastructure](https://aws.amazon.com/about-aws/global-infrastructure/) provides a complete list of regions and availability zones. These fields are named `definitions.providerConfigs.region`, and `definitions.providerConfigs.subnet.az` respectively. Note three total `.subnet.az` values are defined, so the cluster can be spread across multiple failure domains. Be sure to update all three to availability zones within your selected region.  
@@ -114,7 +114,7 @@ YAML:
 
 
 ## Creating Your First Cluster
-Assuming you have a configuration built (as described above), you're ready to create your first cluster. Run the following command. 
+Assuming you have a configuration built (as described above), you're ready to create your first cluster. Run the following command.
 If you have used the default config location:
 ```
 kraken cluster up
@@ -298,7 +298,7 @@ deployment:
 If you have further questions or needs, please read through the rest of the documentaion and then open an issue.
 
 # Contributing Features, Bug Fixes and More
-We welcome all types of contributions from the community and and don't require a contributor license agreement. To simplify merging, we prefer pull requests based on a feature branch in your personal fork that's based off the current master of the kraken repo. For more details, please refer to our [kraken-lib Contributing](https://github.com/samsung-cnct/k2/blob/master/CONTRIBUTING.md) document. 
+We welcome all types of contributions from the community and and don't require a contributor license agreement. To simplify merging, we prefer pull requests based on a feature branch in your personal fork that's based off the current master of the kraken repo. For more details, please refer to our [kraken-lib Contributing](https://github.com/samsung-cnct/k2/blob/master/CONTRIBUTING.md) document.
 
 ## To build
 This is a go project with vendored dependencies, so building is a snap.
