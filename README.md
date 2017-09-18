@@ -12,7 +12,7 @@ brew tap 'samsung-cnct/homebrew-k2cli'
 brew install kraken
 ```
 
-Otherwise, you can find the latest official build [here](https://github.com/samsung-cnct/k2cli/releases). Use the latest version, unless you have a specific reason for using a different one.
+Otherwise, you can find the latest official build [here](https://github.com/samsung-cnct/kraken/releases). Use the latest version, unless you have a specific reason for using a different one.
 
 ## Building a Configuration File
 kraken-lib uses a YAML configuration file for all aspects of the Kubernetes cluster and the infrastructure
@@ -304,8 +304,8 @@ We welcome all types of contributions from the community and and don't require a
 This is a go project with vendored dependencies, so building is a snap.
 
 ```
-git clone https://github.com/<your github account>/k2cli.git
-cd k2cli
+git clone https://github.com/<your github account>/kraken.git
+cd kraken
 go build
 ```
 
@@ -338,7 +338,7 @@ Here are some additional resources you might find useful:
 * #kraken Slack on [k8s.slack.com](https://k8s.slack.com/)
 * [kraken-lib issue tracker](https://github.com/samsung-cnct/k2/issues)
 * [kraken-tools](https://github.com/samsung-cnct/k2-tools)
-* [kraken codebase](https://github.com/samsung-cnct/k2cli)
+* [kraken codebase](https://github.com/samsung-cnct/kraken)
 
 # Maintainer
 

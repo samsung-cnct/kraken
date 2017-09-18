@@ -20,22 +20,22 @@ podTemplate(label: 'kraken', containers: [
 
                 stage('Checkout') {
                     checkout scm
-                    kubesh "mkdir -p go/src/github.com/samsung-cnct/k2cli/ && cp -r `ls -A | grep -v \"go\"` main.go go/src/github.com/samsung-cnct/k2cli"
-                    kubesh "ls -r go/src/github.com/samsung-cnct/k2cli/*"
+                    kubesh "mkdir -p go/src/github.com/samsung-cnct/kraken/ && cp -r `ls -A | grep -v \"go\"` main.go go/src/github.com/samsung-cnct/kraken"
+                    kubesh "ls -r go/src/github.com/samsung-cnct/kraken/*"
                     git_uri = scm.getRepositories()[0].getURIs()[0].toString()
                     git_branch = scm.getBranches()[0].toString()
                 }
 
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
-                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && gosimple ."
-                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build KLIB_VER=${k2_image_tag}"
-                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && go vet"
-                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/cmd && go test -v"
+                        kubesh "cd go/src/github.com/samsung-cnct/kraken/ && gosimple ."
+                        kubesh "cd go/src/github.com/samsung-cnct/kraken/ && make deps && make build KLIB_VER=${k2_image_tag}"
+                        kubesh "cd go/src/github.com/samsung-cnct/kraken/ && go vet"
+                        kubesh "cd go/src/github.com/samsung-cnct/kraken/cmd && go test -v"
                     }
 
                     stage('Build') {
-                        kubesh 'cd go/src/github.com/samsung-cnct/k2cli/ && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o kraken'
+                        kubesh 'cd go/src/github.com/samsung-cnct/kraken/ && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o kraken'
                     }
                 }
             }
@@ -43,11 +43,11 @@ podTemplate(label: 'kraken', containers: [
             customContainer('kraken-tools') {
                 stage('Configure Integration Tests') {
                     // fetches credentials, builds aws and gke config files with appropriate replacements
-                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/fetch-credentials.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
-                    kubesh "go/src/github.com/samsung-cnct/k2cli/kraken generate --provider aws /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
-                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/update-generated-config.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kca${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                    kubesh "go/src/github.com/samsung-cnct/k2cli/kraken generate --provider gke /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml"
-                    kubesh "go/src/github.com/samsung-cnct/k2cli/build-scripts/update-generated-config.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml kcg${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "go/src/github.com/samsung-cnct/kraken/build-scripts/fetch-credentials.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/"
+                    kubesh "go/src/github.com/samsung-cnct/kraken/kraken generate --provider aws /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml"
+                    kubesh "go/src/github.com/samsung-cnct/kraken/build-scripts/update-generated-config.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml kca${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                    kubesh "go/src/github.com/samsung-cnct/kraken/kraken generate --provider gke /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml"
+                    kubesh "go/src/github.com/samsung-cnct/kraken/build-scripts/update-generated-config.sh /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml kcg${env.JOB_BASE_NAME}-${env.BUILD_ID} /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}"
 
                 }
 
@@ -55,10 +55,10 @@ podTemplate(label: 'kraken', containers: [
                     stage('Test: Cloud') {
                         parallel (
                             "aws": {
-                                kubesh "env helm_override_kca`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/kraken -vvv cluster up --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
+                                kubesh "env helm_override_kca`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/kraken/kraken -vvv cluster up --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/"
                             },
                             "gke": {
-                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/kraken -vvv cluster up --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
+                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/kraken/kraken -vvv cluster up --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/"
                             }
                         )
                     }
@@ -66,11 +66,11 @@ podTemplate(label: 'kraken', containers: [
                     stage('Cleanup') {
                         parallel (
                             "aws": {
-                                kubesh "env helm_override_kca`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/kraken -vvv cluster down --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
+                                kubesh "env helm_override_kca`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/kraken/kraken -vvv cluster down --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws/ || true"
                                 kubesh "rm -rf /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/aws"
                             },
                             "gke": {
-                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/k2cli/kraken -vvv cluster down --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
+                                kubesh "env helm_override_kcg`echo ${env.JOB_BASE_NAME}-${env.BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false' + " go/src/github.com/samsung-cnct/kraken/kraken -vvv cluster down --config /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/config.yaml --output /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke/ || true"
                                 kubesh "rm -rf /var/lib/docker/scratch/kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID}/gke"
                             }
                         )

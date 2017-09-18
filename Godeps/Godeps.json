@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/samsung-cnct/k2cli",
+	"ImportPath": "github.com/samsung-cnct/kraken",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
 	"Deps": [

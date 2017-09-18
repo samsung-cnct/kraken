@@ -8,17 +8,17 @@ godep=GOPATH=$(shell godep path):${GOPATH}
 
 
 build:
-	@godep go build -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
-		-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
-		-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT) \
-		-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)"
+	@godep go build -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+		-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+		-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
+		-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)"
 
 compile:
 	@rm -rf build/
-	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenlibTag=$(KLIB_VER)" \
+	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
+									-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)" \
 	-osarch="linux/386" \
 	-osarch="linux/amd64" \
 	-osarch="darwin/amd64" \
@@ -26,9 +26,9 @@ compile:
 	./...
 
 install:
-	@godep go install -ldflags "-X github.com/samsung-cnct/k2cli/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/k2cli/cmd.KrakenGitCommit=$(COMMIT)"
+	@godep go install -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)"
 
 deps:
 	go get github.com/mitchellh/gox
