@@ -15,8 +15,9 @@
 package main
 
 import (
-	"github.com/samsung-cnct/k2cli/cmd"
 	"os"
+
+	"github.com/samsung-cnct/kraken/cmd"
 )
 
 func main() {
