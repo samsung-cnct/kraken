@@ -26,9 +26,9 @@ podTemplate(label: 'kraken', containers: [
                     git_branch = scm.getBranches()[0].toString()
                 }
 
-                withEnv(["GOPATH=${WORKSPACE}/go/"]) {
+                withEnv(["GOROOT=/usr/local/go/","GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
-                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && gosimple ."
+                        kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && gosimple ./cmd/"
                         kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && make deps && make build KLIB_VER=${k2_image_tag}"
                         kubesh "cd go/src/github.com/samsung-cnct/k2cli/ && go vet"
                         kubesh "cd go/src/github.com/samsung-cnct/k2cli/cmd && go test -v"
@@ -80,7 +80,7 @@ podTemplate(label: 'kraken', containers: [
 
             if (git_branch.contains(publish_branch) && git_uri.contains(github_org)) {
                 customContainer('golang') {
-                    withEnv(["GOPATH=${WORKSPACE}/go/"]) {
+                    withEnv(["GOROOT=/usr/local/go/","GOPATH=${WORKSPACE}/go/"]) {
                         stage('Release') {
                             kubesh ". /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag} REL_BRANCH=${release_branch}"
                         }

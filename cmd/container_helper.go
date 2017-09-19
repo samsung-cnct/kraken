@@ -38,12 +38,15 @@ import (
 	"golang.org/x/net/context"
 )
 
+var additionalEnvVars []string
+
 // Close can throw an err, so to defer to it is risky,
 // review http://www.blevesearch.com/news/Deferred-Cleanup,-Checking-Errors,-and-Potential-Problems/
 func Close(c io.Closer) {
 	if err := c.Close(); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func base64EncodeAuth(auth types.AuthConfig) (string, error) {
@@ -95,6 +98,10 @@ func containerEnvironment() []string {
 		"DISPLAY_SKIPPED_HOSTS=0",
 		"KUBECONFIG=" + path.Join(outputLocation, containerName, "admin.kubeconfig"),
 		"HELM_HOME=" + path.Join(outputLocation, containerName, ".helm")}
+
+	if additionalEnvVars != nil {
+		envs = append(envs, additionalEnvVars...)
+	}
 
 	envs = appendIfValueNotEmpty(envs, "AWS_ACCESS_KEY_ID")
 	envs = appendIfValueNotEmpty(envs, "AWS_SECRET_ACCESS_KEY")
