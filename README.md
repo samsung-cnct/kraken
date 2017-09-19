@@ -199,7 +199,7 @@ You can specify different versions of Kubernetes in each node pool. Note: this m
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
 ```bash
-kraken cluster update ${HOME}/krakenlibconfigs/config.yaml <your,nodepools,here>
+kraken cluster update ${HOME}/krakenlibconfigs/config.yaml --update-nodepools <your,nodepools,here>
 ```
 
 ## Destroying the Running Cluster
