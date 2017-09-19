@@ -36,8 +36,7 @@ kraken generate --provider gke
 
 ### Required configuration changes
 For an AWS cluster, you need to set several fields before using the config file file you created, as listed below.
-*  **Cluster name**  All kraken clusters should have a unique name so their assets can be easily identified by humans in the
-AWS console (no more than 32 characters). Set the cluster name in the `deployment.clusters.name` field. This dotted notation refers to the hierarchical structure of a YAML file where the cluster is a sub field of deployment. Find this line near the bottom of the file in the `deployment` section.
+*  **Cluster name**  All kraken clusters should have a unique name so their assets can be easily identified by humans in the AWS console (no more than 32 characters). Set the cluster name in the `deployment.clusters.name` field. This dotted notation refers to the hierarchical structure of a YAML file where the cluster is a sub field of deployment. Find this line near the bottom of the file in the `deployment` section.
 
 The following fields are in the `definitions` section of the configuration file.
 In lieu of specifying all of the following, you can simply put your credentials in the AWS credentials file from where kraken will access them.
@@ -53,8 +52,7 @@ inside the container, (${HOME}/.aws/credentials).
 *  **AWS credentials profile**: used to select the credentials set from the credentials
 file above.
 
-When you've set the required fields, your configuration file is ready to go. The default file will create a production-ready
-cluster with the following configuration:
+When you've set the required fields, your configuration file is ready to go. The default file will create a production-ready cluster with the following configuration:
 
 Role | # | Type
 --- | ---  | ---
@@ -65,8 +63,7 @@ Cluster nodes | 10 | c4.large
 Special nodes | 2 | m4.large
 
 We have chosen this configuration based on our own and others' publicly available research. It creates an underpowered cluster
-in terms of cluster nodes, which is an easy setting to change (see below). The important point is to ensure the control plane is
-production quality.
+in terms of cluster nodes, which is an easy setting to change (see below). The important point is to ensure the control plane is production quality.
 
 ### Optional configuration changes (more advanced)
 First-time users looking to set up a simple evaluation cluster can skip this section and go directly to [Creating Your First Cluster](#creating-your-first-cluster).  
@@ -124,17 +121,16 @@ Or you can specify the location of the config file:
 kraken cluster up ${HOME}/krakenlibconfigs/config.yaml
 ```
 This will take anywhere from 5 to 20 minutes, depending on AWS performance when you execute this command. When
-complete, the cluster exists in its own VPC and is be accessible via the `tool` subcommands. The output artifacts
+complete, the cluster exists in its own VPC and is accessible via the `tool` subcommands. The output artifacts
 are stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ## Working with Your Cluster (Using kraken)
-For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/kraken-lib) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're
-using the correct version of the relevant CLI for your cluster.
+For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're using the correct version of the relevant CLI for your cluster.
 
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/), a CLI for working with a Kubernetes cluster, is
 used for deploying applications, checking system status and more. See the linked documentation for more details.
 
-`Jelm` (https://github.com/kubernetes/helm) is a CLI for packaging and deploying applications to Kubernetes. See the linked documentation for more details.
+`Helm` (https://github.com/kubernetes/helm) is a CLI for packaging and deploying applications to Kubernetes. See the linked documentation for more details.
 
 ### Example usage - kraken tool kubectl
 
@@ -219,8 +215,7 @@ When you're done with your cluster or with a quickstart, we recommend cleaning u
 kraken cluster down ${HOME}/krakenConfigs/config.yaml
 ```
 
-**Note:** If you have specified an '--output' directory during the creation command, be sure to specify it here or the cluster
-will still be running!
+**Note:** If you have specified an '--output' directory during the creation command, be sure to specify it here or the cluster will still be running!
 
 # Using Environment Variables in YAML Configuration
 
