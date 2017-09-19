@@ -23,7 +23,7 @@ _testmain.go
 *.test
 *.prof
 
-k2cli
+kraken
 build/**
 dist/**
 
