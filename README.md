@@ -195,12 +195,23 @@ With kraken, you can update all aspects of your node pools including count, Kube
 
 ### Running kraken update
 You can specify different versions of Kubernetes in each node pool. Note: this may affect the compatibility of your cluster's kraken-provided services. Specify which node pools you want to update with a comma-separated list of their names. This process takes approximately 10 minutes per node.
+You may also add or remove entire nodepools.
 
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
 ```bash
-kraken cluster update ${HOME}/krakenlibconfigs/config.yaml <your,nodepools,here>
+kraken cluster update ${HOME}/krakenlibconfigs/config.yaml --update-nodepools <your,nodepools,here>
 ```
+
+Similarly,
+```bash
+--add-nodepools
+```
+will add new nodepools specified in configuration file, and
+```bash
+--rm-nodepools
+```
+will remove nodepools removed from your configuration file.
 
 ## Destroying the Running Cluster
 When you're done with your cluster or with a quickstart, we recommend cleaning up your resources by destroying the running cluster. From this guide, simply run:
