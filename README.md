@@ -68,7 +68,7 @@ in terms of cluster nodes, which is an easy setting to change (see below). The i
 ### Optional configuration changes (more advanced)
 First-time users looking to set up a simple evaluation cluster can skip this section and go directly to [Creating Your First Cluster](#creating-your-first-cluster).  
 
-You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster. For reference, here is the [full set of kraken configuration options](https://samsung-cnct.github.io/k2/).
+You can modify many options to control the deployment of your Kubernetes cluster. Here we focus on a couple that may be of interest before starting your first cluster. For reference, here is the [full set of kraken configuration options](https://samsung-cnct.github.io/kraken-lib/).
 
 *  **Deployment Region and Availability Zones**  
 In the default-generated configuration file, all clusters begin their lives in the AWS Region us-east-1. You can move the default region and  modify the availability zones, if needed. For reference, the [Global AWS Infrastructure](https://aws.amazon.com/about-aws/global-infrastructure/) provides a complete list of regions and availability zones. These fields are named `definitions.providerConfigs.region`, and `definitions.providerConfigs.subnet.az` respectively. Note three total `.subnet.az` values are defined, so the cluster can be spread across multiple failure domains. Be sure to update all three to availability zones within your selected region.  
@@ -118,14 +118,14 @@ kraken cluster up
 ```
 Or you can specify the location of the config file:
 ```
-kraken cluster up ${HOME}/krakenlibconfigs/config.yaml
+kraken cluster up --config ${HOME}/krakenlibconfigs/config.yaml
 ```
 This will take anywhere from 5 to 20 minutes, depending on AWS performance when you execute this command. When
 complete, the cluster exists in its own VPC and is accessible via the `tool` subcommands. The output artifacts
 are stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ## Working with Your Cluster (Using kraken)
-For all of its operations, kraken uses the [kraken-lib image](quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're using the correct version of the relevant CLI for your cluster.
+For all of its operations, kraken uses the [kraken-lib image](https://quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're using the correct version of the relevant CLI for your cluster.
 
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/), a CLI for working with a Kubernetes cluster, is
 used for deploying applications, checking system status and more. See the linked documentation for more details.
