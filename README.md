@@ -333,10 +333,7 @@ We plan to automate this process in the future.
 
 ## Cutting a release
 
-* Install [GitHub-release](https://github.com/c4milo/github-release)
-* Create a GitHub personal access token with repo read/write permissions and export it as GITHUB_TOKEN
-* Adjust VERSION and TYPE variables in the [Makefile](Makefile) as needed or set them as command-line parameters to `make`
-* Run ```make release``` or with parameters ```make release VERSION=v0.1```
+Please speak to a member of the kraken team #kraken Slack if you need a release cut.
 
 # Additional Resources
 Here are some additional resources you might find useful:
