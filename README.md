@@ -333,7 +333,7 @@ We plan to automate this process in the future.
 
 ## Cutting a release
 
-Please speak to a member of the kraken team #kraken Slack if you need a release cut.
+Please speak to a member of the kraken team in #kraken Slack (link below) if you need a release cut.
 
 # Additional Resources
 Here are some additional resources you might find useful:
