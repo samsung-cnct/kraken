@@ -33,6 +33,7 @@ install:
 deps:
 	go get github.com/mitchellh/gox
 
+
 dist: compile
 	$(eval FILES := $(shell ls build))
 	@rm -rf dist && mkdir dist
@@ -48,5 +49,9 @@ release: dist
 	if [ -z "$$latest_tag" ]; then comparison=""; fi; \
 	changelog=$$(git log $$comparison --oneline --no-merges --reverse); \
 	github-release samsung-cnct/$(NAME) $(VERSION) $(REL_BRANCH) "**Changelog**<br/>$$changelog" 'dist/*'; \
+
+
+verify:
+	./bin/verify.sh; \
 
 .PHONY: build compile install deps dist release
