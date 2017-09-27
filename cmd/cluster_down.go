@@ -26,9 +26,9 @@ var downtagsList string
 
 // downCmd represents the down command
 var downCmd = &cobra.Command{
-	Use:           "down [path to Kraken config file]",
+	Use:           "down",
 	Short:         "destroy a Kraken cluster",
-	Long:          `Destroys a Kraken cluster described in the specified configuration yaml`,
+	Long:          "Destroys a Kraken cluster described in the specified configuration yaml",
 	SilenceErrors: true,
 	SilenceUsage:  false,
 	PreRunE:       preRunGetClusterConfig,
