@@ -201,16 +201,170 @@ func clusterHelp(help HelpType, clusterConfigFile string) {
 }
 
 func getFirstClusterName() string {
-	// only supports first cluster name right now
+	defaultVal := "cluster-name-missing"
 
 	if clusters := clusterConfig.Get("deployment.clusters"); clusters != nil {
+		// return the first cluster item in the slice, then cast into an object
 		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
-		if firstCluster["name"] == nil {
-			return "cluster-name-missing"
-		}
-		// should not use type assertion .(string) without verifying interface isnt nil
-		return os.ExpandEnv(firstCluster["name"].(string))
+		return getConfigValueOrDefault(firstCluster, "name", defaultVal)
 	}
 
-	return "cluster-name-missing"
+	return defaultVal
 }
+
+func getFirstClusterKubernetesVersion(provider string) (string, error) {
+	defaultValue := "Unknown version"
+	defaultError := "error: could not obtain kubernetes version, reason: %s"
+
+	switch provider {
+	case "aws":
+		clusters := clusterConfig.Get("deployment.clusters")
+		if clusters == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find any cluster entry")
+		}
+
+		clustersList := clusters.([]interface{})
+		if len(clustersList) == 0 {
+			return defaultValue, fmt.Errorf(defaultError, "cluster list is empty.")
+		}
+
+		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
+
+		nodePools := firstCluster["nodePools"]
+		if nodePools == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find nodePools entry")
+		}
+
+		nodePoolsList := nodePools.([]interface{})
+		if len(nodePoolsList) == 0 {
+			return defaultValue, fmt.Errorf(defaultError, "nodePool list is empty.")
+		}
+
+		var apiserverNode map[interface{}]interface{}
+
+		for _, nodeRaw := range nodePoolsList {
+			node := nodeRaw.(map[interface{}]interface{})
+
+			if node != nil && node["apiServerConfig"] != nil {
+				apiserverNode = node
+				break
+			}
+		}
+
+		if apiserverNode == nil  {
+			return defaultValue, fmt.Errorf(defaultError, "could not apiserver nodes")
+		}
+
+		kubeconfig := apiserverNode["kubeConfig"]
+		if kubeconfig == nil  {
+			return defaultValue, fmt.Errorf(defaultError, "could not find kubeconfig key")
+		}
+
+		kubeconfigObj := kubeconfig.(map[interface{}]interface{})
+		version := kubeconfigObj["version"]
+
+		if version == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find kubeconfig version key")
+		}
+
+		if verbosity {
+			fmt.Printf("found kubernetes version from config file, version is: %s", version.(string))
+		}
+
+		return version.(string), nil
+	case "gke":
+		clusters := clusterConfig.Get("deployment.clusters")
+		if clusters == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find any cluster entry")
+		}
+
+		clustersList := clusters.([]interface{})
+		if len(clustersList) == 0 {
+			return defaultValue, fmt.Errorf(defaultError, "cluster list is empty.")
+		}
+
+		firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
+
+		nodePools := firstCluster["nodePools"]
+		if nodePools == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find nodePools entry")
+		}
+
+		nodePoolsList := nodePools.([]interface{})
+		if len(nodePoolsList) == 0 {
+			return defaultValue, fmt.Errorf(defaultError, "nodePool list is empty.")
+		}
+
+		node := nodePoolsList[0].(map[interface{}]interface{})
+		if node == nil  {
+			return defaultValue, fmt.Errorf(defaultError, "could not retrive a valid node")
+		}
+
+		kubeconfig := node["kubeConfig"]
+		if kubeconfig == nil  {
+			return defaultValue, fmt.Errorf(defaultError, "could not find kubeconfig key")
+		}
+
+		kubeconfigObj := kubeconfig.(map[interface{}]interface{})
+		version := kubeconfigObj["version"]
+
+		if version == nil {
+			return defaultValue, fmt.Errorf(defaultError, "could not find kubeconfig version key")
+		}
+
+		if verbosity {
+			fmt.Printf("found kubernetes version from config file, version is: %s", version.(string))
+		}
+
+		return version.(string), nil
+	}
+
+	return defaultValue, fmt.Errorf(defaultError, "could not find kubernetes version")
+
+}
+
+func getProviderFromConfig() (string, error) {
+	defaultValue := "Unknown Provider"
+	defaultError := "error: could not obtain kubernetes version, reason: %s"
+
+	clusters := clusterConfig.Get("deployment.clusters")
+	if clusters == nil {
+		return defaultValue, fmt.Errorf(defaultError, "could not find any cluster entry")
+	}
+
+	clustersList := clusters.([]interface{})
+	if len(clustersList) == 0 {
+		return defaultValue, fmt.Errorf(defaultError, "cluster list is empty.")
+	}
+
+	firstCluster := clusters.([]interface{})[0].(map[interface{}]interface{})
+
+	providerConfig := firstCluster["providerConfig"]
+	if providerConfig == nil {
+		return defaultValue, fmt.Errorf(defaultError, "could not find a providerConfig key")
+	}
+
+	providerConfigObj := providerConfig.(map[interface{}]interface{})
+	provider := providerConfigObj["provider"]
+
+	if provider == nil {
+		return defaultValue, fmt.Errorf(defaultError, "could not find the provider key")
+	}
+
+	if verbosity {
+		fmt.Printf("found cluster provider from config file, provider is: %s", provider.(string))
+	}
+
+	return provider.(string), nil
+}
+
+
+func getConfigValueOrDefault(configObj map[interface{}]interface{}, key string, defaultVal string) string {
+	if configObj[key] == nil {
+		return defaultVal
+	}
+	// should not use type assertion .(string) without verifying interface isnt nil
+	return os.ExpandEnv(configObj[key].(string))
+}
+
+
