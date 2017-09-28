@@ -37,7 +37,7 @@ var upCmd = &cobra.Command{
 
 		// remove when deprecation is finalized
 		if upStagesList == "all" {
-			tagList =  upTagsList
+			tagList = upTagsList
 		} else {
 			tagList = upStagesList
 		}
