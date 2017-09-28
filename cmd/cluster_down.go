@@ -24,7 +24,6 @@ import (
 var downStagesList string
 var downtagsList string
 
-
 // downCmd represents the down command
 var downCmd = &cobra.Command{
 	Use:           "down [path to Kraken config file]",
@@ -40,7 +39,7 @@ var downCmd = &cobra.Command{
 
 		// remove when deprecation is finalized
 		if downStagesList == "all" {
-			tagList =  downtagsList
+			tagList = downtagsList
 		} else {
 			tagList = downStagesList
 		}

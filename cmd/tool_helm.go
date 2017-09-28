@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/docker/docker/client"
@@ -28,7 +29,8 @@ import (
 )
 
 const (
-	tmpFile string = "k8s_version.txt"
+	tmpFile      string = "k8s_version.txt"
+	versionRegex string = `(v\d+\.\d+\.\d+)`
 )
 
 // helmCmd represents the helm command
@@ -153,12 +155,33 @@ func getK8sVersion(cli *client.Client) (string, error) {
 	}
 	version := strings.TrimSuffix(scanner.Text(), "\n")
 
-	// we should catch this error more precisely.
-	if !strings.HasPrefix(version, "v") {
-		err = fmt.Errorf("Error: unexpected version: %s", version)
+	return removePatchVersion(version)
+}
+
+// removePatchVersion removes patch number from version string,
+func removePatchVersion(version string) (string, error) {
+	if verbosity {
+		fmt.Printf("The cluster's Kubernetes version is %s.\n", version)
 	}
 
-	return version, err
+	r, err := regexp.Compile(versionRegex)
+	if err != nil {
+		return "", err
+	}
+
+	err = fmt.Errorf("error: unexpected version: %s", version)
+
+	if !r.MatchString(version) {
+		return "", err
+	}
+
+	versionArray := strings.Split(version, ".")
+
+	if len(versionArray) != 3 {
+		return "", err
+	}
+
+	return strings.Join([]string{versionArray[0], versionArray[1]}, "."), nil
 }
 
 // Run helm if valid path or if user wants to run latest helm.
