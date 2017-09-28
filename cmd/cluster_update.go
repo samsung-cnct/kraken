@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -32,11 +31,9 @@ var updateCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		ClusterConfigPath = os.ExpandEnv("$HOME/.kraken/config.yaml")
-		if len(args) > 0 {
-			ClusterConfigPath = os.ExpandEnv(args[0])
-		}
+	PreRunE: preRunGetClusterConfig,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var err error
 
 		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
 			return fmt.Errorf("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
@@ -44,23 +41,6 @@ var updateCmd = &cobra.Command{
 				"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
 		}
 
-		_, err := os.Stat(ClusterConfigPath)
-		if os.IsNotExist(err) {
-			return fmt.Errorf("file %s does not exist", ClusterConfigPath)
-		}
-
-		if err != nil {
-			return err
-		}
-
-		if err := initClusterConfig(ClusterConfigPath); err != nil {
-			return err
-		}
-
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
 		spinnerPrefix := fmt.Sprintf("Updating cluster '%s' ", getFirstClusterName())
 
 		command := []string{
