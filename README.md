@@ -195,16 +195,16 @@ You may also add or remove entire nodepools.
 
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
-```bash
-kraken cluster update ${HOME}/krakenlibconfigs/config.yaml --update-nodepools <your,nodepools,here>
+```
+kraken cluster update --config ${HOME}/krakenlibconfigs/config.yaml --update-nodepools <your,nodepools,here>
 ```
 
 Similarly,
-```bash
+```
 --add-nodepools
 ```
 will add new nodepools specified in configuration file, and
-```bash
+```
 --rm-nodepools
 ```
 will remove nodepools removed from your configuration file.
