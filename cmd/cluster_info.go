@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,11 +25,17 @@ var infoCmd = &cobra.Command{
 	Use:           "info",
 	Short:         "Print out cluster state information",
 	SilenceErrors: true,
-	SilenceUsage:  true,
+	SilenceUsage:  false,
 	Long: `Output some basic information on the current
 	cluster state configured by the specified Krakenlib yaml`,
 	PreRunE: preRunGetClusterConfig,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+
+		// we do not support any additional arguments, we error out then if there are.
+		if len(args) > 0 {
+			return fmt.Errorf("Unexpected argument(s) passed %v", args)
+		}
+
 		clusterHelp(HelpTypeCreated, ClusterConfigPath)
 		ExitCode = 0
 	},

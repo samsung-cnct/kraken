@@ -6,10 +6,9 @@ COMMIT     := $(shell git rev-parse HEAD)
 REL_BRANCH := "$$(git rev-parse --abbrev-ref HEAD)"
 GOOS       ?= darwin
 GOARCH     ?= amd64
-
-LDFLAGS   := -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-             -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-             -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
+LDFLAGS    := -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+              -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+              -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
 
 build: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 build:
