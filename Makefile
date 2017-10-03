@@ -1,38 +1,50 @@
-NAME      := Kraken
+NAME      := kraken
 VERSION   := 1.0.8
 KLIB_VER  := latest
 TYPE      := stable
 COMMIT    := $(shell git rev-parse HEAD)
 REL_BRANCH := "$$(git rev-parse --abbrev-ref HEAD)"
-godep=GOPATH=$(shell godep path):${GOPATH}
-
+PROJECT_PATH := "/go/src/github.com/samsung-cnct/kraken/"
+GO_CONTAINER := "quay.io/samsung_cnct/kraken-gobuild"
+GO_VERSION := 1.8.3
+GO_DOCKER_SRC_VOLUME := ${GOPATH}/src:/go/src
+GO_DOCKER_BIN_VOLUME := ${GOPATH}/bin:/go/bin
+GOOS?=linux
 
 build:
-	@godep go build -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+	@docker run -v $(GO_DOCKER_SRC_VOLUME) -e GOOS=$(GOOS) $(GO_CONTAINER):$(GO_VERSION) sh -c \
+	'cd $(PROJECT_PATH) && \
+	 go build -ldflags "\
+	    -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
 		-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
 		-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
-		-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)"
+		-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)"'
 
 compile:
 	@rm -rf build/
-	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)" \
-	-osarch="linux/386" \
-	-osarch="linux/amd64" \
-	-osarch="darwin/amd64" \
-	-output "build/{{.Dir}}_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
-	./...
+	@docker run -v $(GO_DOCKER_SRC_VOLUME) $(GO_CONTAINER):$(GO_VERSION) sh -c \
+	'cd $(PROJECT_PATH) && \
+	 gox -ldflags "\
+            -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+            -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+            -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
+            -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)" \
+        -osarch="linux/386" \
+        -osarch="linux/amd64" \
+        -osarch="darwin/amd64" \
+        -output "build/{{.Dir}}_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
+	 ./...'
 
 install:
-	@godep go install -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)"
+	@docker run -v $(GO_DOCKER_SRC_VOLUME) -v $(GO_DOCKER_BIN_VOLUME) $(GO_CONTAINER):$(GO_VERSION) sh -c \
+	'cd $(PROJECT_PATH) && \
+	 go install -ldflags "\
+	    -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+        -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+        -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)"'
 
 deps:
 	go get github.com/mitchellh/gox
-
 
 dist: compile
 	$(eval FILES := $(shell ls build))
