@@ -223,83 +223,36 @@ kraken will automatically attempt to expand all ```$VARIABLE_NAME``` strings in 
 
 ## Environment Variable Expansion
 
-For example, given a variable such as ```export MY_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json```, the configuration:
+For example, given a variable such as ```export MY_PRIVATE_KEY_FILE=/Users/kraken/.ssh/id_rsa```, the configuration:
 
 ```
-deployment:
-  cluster: production-cluster
-  keypair:
-    -
-      name: key
-      publickeyFile:
-      privatekeyFile:
-      providerConfig:
-        username:
-        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
-        serviceAccountKeyFile: "$MY_SERVICE_ACCOUNT_KEYFILE"
-
+definitions:
+  ...
+  keyPairs:
+   - &defaultKeyPair
+      name: defaultKeyPair
+      kind: keyPair
+      publickeyFile: "$HOME/.ssh/id_rsa.pub"
+      privatekeyFile: "$MY_PRIVATE_KEY_FILE"
 ...
 ```
 
 will be expanded to:
 
 ```
-deployment:
-  cluster: production-cluster
-  keypair:
-    -
-      name: key
-      publickeyFile:
-      privatekeyFile:
-      providerConfig:
-        username:
-        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
-        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
+definitions:
+  ...
+  keyPairs:
+   - &defaultKeyPair
+      name: defaultKeyPair
+      kind: keyPair
+      publickeyFile: "$HOME/.ssh/id_rsa.pub"
+      privatekeyFile: "/Users/kraken/.ssh/id_rsa"
 
 ...
 ```
 
-and the KRAKENLIB Docker container will get a ```/Users/kraken/.ssh/keyfile.json:/Users/kraken/.ssh/keyfile.json``` mount and a ```KRAKENLIB_SERVICE_ACCOUNT_KEYFILE=/Users/kraken/.ssh/keyfile.json``` environment variable.
-
-## Automatic Binding of Environment Variables
-
-Environment variables with a `KRAKENLIB` prefix can also bind automatically to configuration values.
-
-For example, given that ```export KRAKENLIB_DEPLOYMENT_CLUSTER=production-cluster```, the configuration:
-
-```
-deployment:
-  cluster: changeme
-  keypair:
-    -
-      name: key
-      publickeyFile:
-      privatekeyFile:
-      providerConfig:
-        username:
-        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
-        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
-
-...
-```
-
-will be expanded to:
-
-```
-deployment:
-  cluster: production-cluster
-  keypair:
-    -
-      name: key
-      publickeyFile:
-      privatekeyFile:
-      providerConfig:
-        username:
-        serviceAccount: "serviceaccount@project.iam.gserviceaccount.com"
-        serviceAccountKeyFile: "/Users/kraken/.ssh/keyfile.json"
-
-...
-```
+and the KRAKENLIB Docker container will get a ```/Users/kraken/.ssh/id_rsa:/Users/kraken/.ssh/id_rsa``` mount and a ```KRAKENLIB_PRIVATE_KEY_FILE=/Users/kraken/.ssh/id_rsa``` environment variable.
 
 If you have further questions or needs, please read through the rest of the documentation and then open an issue.
 
