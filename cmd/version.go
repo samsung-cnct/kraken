@@ -44,6 +44,11 @@ var versionCmd = &cobra.Command{
 			return err
 		}
 
+		if verbosity {
+			fmt.Printf("Kraken Commit: %s \n", KrakenGitCommit)
+			fmt.Printf("Kraken-lib Tag: %s \n", KrakenlibTag)
+		}
+
 		fmt.Println(semVer.String())
 		ExitCode = 0
 		return nil

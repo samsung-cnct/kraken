@@ -1,38 +1,39 @@
-NAME      := Kraken
-VERSION   := 1.0.8
-KLIB_VER  := latest
-TYPE      := stable
-COMMIT    := $(shell git rev-parse HEAD)
+NAME       := kraken
+VERSION    := 1.0.8
+KLIB_VER   ?= latest
+TYPE       := stable
+COMMIT     := $(shell git rev-parse HEAD)
 REL_BRANCH := "$$(git rev-parse --abbrev-ref HEAD)"
-godep=GOPATH=$(shell godep path):${GOPATH}
+GOOS       ?= darwin
+GOARCH     ?= amd64
 
+LDFLAGS   := -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
+             -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
+             -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
 
+build: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 build:
-	@godep go build -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-		-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-		-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
-		-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)"
+	@env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '$(LDFLAGS)'
 
+compile: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 compile:
 	@rm -rf build/
-	@$(GODEP) gox -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)" \
-	-osarch="linux/386" \
-	-osarch="linux/amd64" \
-	-osarch="darwin/amd64" \
-	-output "build/{{.Dir}}_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
-	./...
+	@gox -ldflags '$(LDFLAGS)' \
+         -osarch="linux/386" \
+         -osarch="linux/amd64" \
+         -osarch="darwin/amd64" \
+         -output "build/{{.Dir}}_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
+	     ./...
+
+clean:
+	@rm -rf dist/
+	@rm -rf build/
 
 install:
-	@godep go install -ldflags "-X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-									-X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)"
+	@go install -ldflags '$(LDLFLAGS)'
 
 deps:
 	go get github.com/mitchellh/gox
-
 
 dist: compile
 	$(eval FILES := $(shell ls build))
@@ -49,7 +50,6 @@ release: dist
 	if [ -z "$$latest_tag" ]; then comparison=""; fi; \
 	changelog=$$(git log $$comparison --oneline --no-merges --reverse); \
 	github-release samsung-cnct/$(NAME) $(VERSION) $(REL_BRANCH) "**Changelog**<br/>$$changelog" 'dist/*'; \
-
 
 verify:
 	./bin/verify.sh; \

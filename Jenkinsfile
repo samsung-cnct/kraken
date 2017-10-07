@@ -6,15 +6,18 @@ release_version        = "${env.RELEASE_VERSION}"
 k2_image_tag           = "${env.K2_VERSION}" != "null" ? "${env.K2_VERSION}" : "latest"
 release_branch         = "${env.REL_BRANCH}"
 
-podTemplate(label: 'kraken', containers: [
-    containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'golang', image: 'quay.io/samsung_cnct/kraken-gobuild:1.8.3', ttyEnabled: true, command: 'cat', alwaysPullImage: true),
-    containerTemplate(name: 'kraken-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    ], volumes: [
-      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-      hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/'),
-      secretVolume(mountPath: '/home/jenkins/kraken-release-token/', secretName: 'kraken-publish-token')
-    ]) {
+podTemplate(label: 'kraken',
+    containers: [
+        containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
+        containerTemplate(name: 'golang', image: 'quay.io/samsung_cnct/kraken-gobuild:1.8.3', ttyEnabled: true, command: 'cat', alwaysPullImage: true),
+        containerTemplate(name: 'kraken-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
+    ],
+    volumes: [
+        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+        hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/var/lib/docker/scratch/'),
+        secretVolume(mountPath: '/home/jenkins/kraken-release-token/', secretName: 'kraken-publish-token')
+    ])
+    {
         node('kraken') {
             customContainer('golang') {
 
@@ -90,25 +93,25 @@ podTemplate(label: 'kraken', containers: [
         }
     }
 def kubesh(command) {
-  if (env.CONTAINER_NAME) {
-    if ((command instanceof String) || (command instanceof GString)) {
-      command = kubectl(command)
+    if (env.CONTAINER_NAME) {
+        if ((command instanceof String) || (command instanceof GString)) {
+            command = kubectl(command)
+        }
+
+        if (command instanceof LinkedHashMap) {
+            command["script"] = kubectl(command["script"])
+        }
     }
 
-    if (command instanceof LinkedHashMap) {
-      command["script"] = kubectl(command["script"])
-    }
-  }
-
-  sh(command)
+    sh(command)
 }
 
 def kubectl(command) {
-  "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && export GOPATH=${env.GOPATH} && ${command}'"
+    "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && export GOPATH=${env.GOPATH} && ${command}'"
 }
 
 def customContainer(String name, Closure body) {
-  withEnv(["CONTAINER_NAME=$name"]) {
-    body()
-  }
+    withEnv(["CONTAINER_NAME=$name"]) {
+        body()
+    }
 }
