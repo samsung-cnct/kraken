@@ -24,8 +24,8 @@ const (
 )
 
 func preRunGetClusterConfig(cmd *cobra.Command, args []string) error {
-	if !cmd.Flag("config").Changed {
-		fmt.Printf("config file path not given, using default config file location (%s)\n", ClusterConfigPath)
+	if ClusterConfigPath == "" {
+		return fmt.Errorf("please pass a valid kraken config file.")
 	}
 
 	_, err := os.Stat(ClusterConfigPath)

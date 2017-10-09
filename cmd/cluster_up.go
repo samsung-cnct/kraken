@@ -29,10 +29,19 @@ var upCmd = &cobra.Command{
 	Use:     "up [path to Kraken config file]",
 	Short:   "Creates a Kraken cluster",
 	Long:    `Creates a Kraken cluster described in the specified configuration yaml`,
+	SilenceErrors: true,
+	SilenceUsage:  false,
 	PreRunE: preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
-		spinnerPrefix := fmt.Sprintf("Bringing up cluster '%s' ", getFirstClusterName())
+		clusterName := getFirstClusterName()
+
+		// we do not support any additional arguments, we error out then if there are.
+		if len(args) > 0 {
+			return fmt.Errorf("Unexpected argument(s) passed %v", args)
+		}
+
+		spinnerPrefix := fmt.Sprintf("Bringing up cluster '%s' ", clusterName)
 		var tagList string
 
 		// remove when deprecation is finalized
@@ -54,7 +63,7 @@ var upCmd = &cobra.Command{
 		}
 
 		onFailure := func(out []byte) {
-			fmt.Printf("ERROR bringing up %s \n", getFirstClusterName())
+			fmt.Printf("ERROR bringing up %s \n", clusterName)
 			fmt.Printf("%s", out)
 			clusterHelpError(HelpTypeCreated, ClusterConfigPath)
 		}

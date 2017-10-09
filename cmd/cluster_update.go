@@ -28,20 +28,24 @@ var rmNodepools string
 var updateCmd = &cobra.Command{
 	Use:           "update [path to kraken config file]",
 	Short:         "update a Kraken cluster",
-	SilenceErrors: true,
-	SilenceUsage:  true,
 	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
+	SilenceErrors: true,
+	SilenceUsage:  false,
 	PreRunE: preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
+		clusterName := getFirstClusterName()
 
-		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
-			return fmt.Errorf("You must specify which nodepools you want to update. Please pass a comma-separated list of nodepools to update-nodepools, " +
-				"add-nodepools or rm-nodepools depending on what action you are taking against the nodepools.  For example: \n kraken cluster update " +
-				"--update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool")
+		// we do not support any additional arguments, we error out then if there are.
+		if len(args) > 0 {
+			return fmt.Errorf("Unexpected argument(s) passed %v", args)
 		}
 
-		spinnerPrefix := fmt.Sprintf("Updating cluster '%s' ", getFirstClusterName())
+		if updateNodepools == "" && addNodepools == "" && rmNodepools == "" {
+			return fmt.Errorf("Please pass a comma-separated list of nodepools to update.\n\nFor example:\nkraken cluster update --update-nodepools masterNodes,clusterNodes,otherNodes --rm-nodepools badNodepool --add-nodepools newNodepool")
+		}
+
+		spinnerPrefix := fmt.Sprintf("Updating cluster '%s' ", clusterName)
 
 		command := []string{
 			"ansible-playbook",
@@ -53,7 +57,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		onFailure := func(out []byte) {
-			fmt.Printf("ERROR updating cluster %s \n", getFirstClusterName())
+			fmt.Printf("ERROR updating cluster %s \n",clusterName)
 			fmt.Printf("%s", out)
 			clusterHelpError(HelpTypeUpdated, ClusterConfigPath)
 		}

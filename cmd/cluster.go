@@ -43,7 +43,7 @@ func init() {
 		"config",
 		"c",
 		os.ExpandEnv("$HOME/.kraken/config.yaml"),
-		"Path to the kraken cluster config")
+		"required path to the kraken cluster config")
 	clusterCmd.PersistentFlags().BoolVarP(
 		&configForced,
 		"force",
