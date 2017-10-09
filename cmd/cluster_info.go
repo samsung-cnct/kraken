@@ -38,6 +38,7 @@ var infoCmd = &cobra.Command{
 
 		clusterHelp(HelpTypeCreated, ClusterConfigPath)
 		ExitCode = 0
+		return nil
 	},
 }
 
