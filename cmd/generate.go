@@ -51,8 +51,11 @@ func preRunEFunc(cmd *cobra.Command, args []string) error {
 	} else {
 		generatePath = os.ExpandEnv("$HOME/.kraken/config.yaml")
 	}
+	
+	if verbosity{
+		fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
+	}
 
-	fmt.Printf("Attempting to generate configuration at: %s \n", generatePath)
 
 	if _, err := os.Stat(generatePath); !os.IsNotExist(err) {
 		return fmt.Errorf("Attempted to create %s, but the file already exists: rename, delete or move it, then run 'generate' subcommand again to generate a new default Kraken config file", generatePath)
