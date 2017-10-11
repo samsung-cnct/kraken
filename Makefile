@@ -15,7 +15,7 @@ build:
 	@env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags '$(LDFLAGS)'
 
 compile: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
-compile:
+compile: deps
 	@rm -rf build/
 	@gox -ldflags '$(LDFLAGS)' \
          -osarch="linux/386" \
@@ -32,7 +32,7 @@ install:
 	@go install -ldflags '$(LDLFLAGS)'
 
 deps:
-	go get github.com/mitchellh/gox
+	@go get github.com/mitchellh/gox
 
 dist: compile
 	$(eval FILES := $(shell ls build))
