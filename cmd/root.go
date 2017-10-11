@@ -45,7 +45,7 @@ var KrakenlibTag string
 var ClusterConfigPath string
 
 // progress spinner
-var terminalSpinner = spinner.New(spinner.CharSets[35], 200*time.Millisecond)
+var terminalSpinner = spinner.New(spinner.CharSets[7], 200*time.Millisecond)
 
 // init the Krakenlib config viper instance
 var clusterConfig = viper.New()
