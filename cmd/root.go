@@ -25,6 +25,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	VERSION_LATEST string = "latest"
+)
+
 var cfgFile string
 var containerImage string
 var outputLocation string
@@ -84,7 +88,7 @@ func init() {
 	RootCmd.SetHelpCommand(helpCmd)
 
 	if KrakenlibTag == "" {
-		KrakenlibTag = "latest"
+		KrakenlibTag = VERSION_LATEST
 	}
 
 	// Populate the global with a "vanilla" Docker configuration

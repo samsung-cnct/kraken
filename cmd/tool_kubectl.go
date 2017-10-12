@@ -30,8 +30,21 @@ var kubectlCmd = &cobra.Command{
 	PreRunE: preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
+		var command []string
 
-		command := []string{"/kraken/bin/computed_kubectl.sh", ClusterConfigPath}
+		// to avoid breaking change, can be removed later when no longer supporting v0.2 kraken-lib
+		if comp, err := compareReleases(krakenLibTagToSemver(KrakenlibTag), "0.2.0"); err != nil {
+			return err
+		} else if comp <= 0 {
+			command = []string{"/kraken/bin/computed_kubectl.sh", ClusterConfigPath}
+		} else {
+			command = []string{"/kraken/bin/computed_kubectl.sh", "--config", ClusterConfigPath}
+
+			if verbosity {
+				command = append(command, "--verbose")
+			}
+		}
+
 		for _, element := range args {
 			command = append(command, strings.Split(element, " ")...)
 		}

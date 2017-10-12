@@ -22,13 +22,12 @@ import (
 
 // infoCmd represents the info command
 var infoCmd = &cobra.Command{
-	Use:           "info",
-	Short:         "Print out cluster state information",
-	SilenceErrors: true,
-	SilenceUsage:  false,
-	Long: `Output some basic information on the current
-	cluster state configured by the specified Krakenlib yaml`,
-	PreRunE: preRunGetClusterConfig,
+	Use:   			"info",
+	Short: 			"Print out cluster state information",
+	Long: 			"Output some basic information on the current	cluster state configured by the specified Krakenlib yaml",
+	SilenceErrors: 	true,
+	SilenceUsage:  	false,
+	PreRunE:       	preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		// we do not support any additional arguments, we error out then if there are.

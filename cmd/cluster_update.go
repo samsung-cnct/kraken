@@ -26,12 +26,12 @@ var rmNodepools string
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
-	Use:           "update [path to kraken config file]",
+	Use:           "update",
 	Short:         "update a Kraken cluster",
-	Long:          `Updates a Kraken cluster described in the specified configuration yaml`,
+	Long:          "Updates a Kraken cluster described in the specified configuration yaml",
 	SilenceErrors: true,
 	SilenceUsage:  false,
-	PreRunE: preRunGetClusterConfig,
+	PreRunE:       preRunGetClusterConfig,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error
 		clusterName := getFirstClusterName()
@@ -57,7 +57,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		onFailure := func(out []byte) {
-			fmt.Printf("ERROR updating cluster %s \n",clusterName)
+			fmt.Printf("ERROR updating cluster %s \n", clusterName)
 			fmt.Printf("%s", out)
 			clusterHelpError(HelpTypeUpdated, ClusterConfigPath)
 		}
