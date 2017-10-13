@@ -32,7 +32,7 @@ podTemplate(label: 'kraken',
                 withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                     stage('Test: Unit') {
                         kubesh "cd go/src/github.com/samsung-cnct/kraken/ && gosimple ."
-                        kubesh "cd go/src/github.com/samsung-cnct/kraken/ && make deps && make build KLIB_VER=${k2_image_tag}"
+                        kubesh "cd go/src/github.com/samsung-cnct/kraken/ && make build KLIB_VER=${k2_image_tag}"
                         kubesh "cd go/src/github.com/samsung-cnct/kraken/ && go vet"
                         kubesh "cd go/src/github.com/samsung-cnct/kraken/cmd && go test -v"
                     }
