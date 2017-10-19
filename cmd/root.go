@@ -112,7 +112,7 @@ func init() {
 		&containerImage,
 		"image",
 		"i",
-		"quay.io/samsung_cnct/k2:"+KrakenlibTag,
+		"quay.io/samsung_cnct/kraken-lib:"+KrakenlibTag,
 		"Krakenlib container image")
 	RootCmd.PersistentFlags().StringVarP(
 		&outputLocation,

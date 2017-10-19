@@ -125,7 +125,7 @@ complete, the cluster exists in its own VPC and is accessible via the `tool` sub
 are stored in the default location: `${HOME}/.kraken/<cluster name>`.
 
 ## Working with Your Cluster (Using kraken)
-For all of its operations, kraken uses the [kraken-lib image](https://quay.io/samsung_cnct/k2) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're using the correct version of the relevant CLI for your cluster.
+For all of its operations, kraken uses the [kraken-lib image](https://quay.io/samsung_cnct/kraken-lib) that ships with the installed `kubectl` and `helm`. You can access these tools through the `kraken tool` subcommand. Using this subcommand helps ensure you're using the correct version of the relevant CLI for your cluster.
 
 `kubectl` (http://kubernetes.io/docs/user-guide/kubectl-overview/), a CLI for working with a Kubernetes cluster, is
 used for deploying applications, checking system status and more. See the linked documentation for more details.
