@@ -18,12 +18,15 @@ build:
 compile: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 compile: clean_dist linux_386 linux_amd64 darwin
 
+linux_386: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 linux_386:
 	@env GOOS=linux GOARCH=386 go build -ldflags '$(LDFLAGS)' -o build/$(NAME)_$(VERSION)_linux_386/$(NAME)
 
+linux_amd64: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 linux_amd64:
 	@env GOOS=linux GOARCH=amd64 go build -ldflags '$(LDFLAGS)' -o build/$(NAME)_$(VERSION)_linux_amd64/$(NAME)
 
+darwin: LDFLAGS += -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 darwin:
 	@env GOOS=darwin GOARCH=amd64 go build -ldflags '$(LDFLAGS)' -o build/$(NAME)_$(VERSION)_darwin_amd64/$(NAME)
 
@@ -57,4 +60,4 @@ release: dist
 verify:
 	./bin/verify.sh; \
 
-.PHONY: build compile install deps dist release
+.PHONY: build compile install deps dist release linux_386 linux_amd64 darwin
