@@ -171,13 +171,13 @@ func clusterHelp(help HelpType, clusterConfigFile string) {
 
 	switch help {
 	case HelpTypeCreated, HelpTypeUpdated, HelpTypeDestroyed:
-		fmt.Println("Some of the cluster state MAY be available:")
+		fmt.Println("\nSome of the cluster state MAY be available:")
 
 		// output that depends on admin.kubeconfig existing
 		kubeConfigPath := path.Join(outputLocation, clusterName, "admin.kubeconfig")
 		if _, err := os.Stat(kubeConfigPath); err == nil {
 			// kubectl
-			fmt.Println("To use kubectl: ")
+			fmt.Println("\nTo use kubectl: ")
 			fmt.Printf(" kubectl --kubeconfig=%s [kubectl commands]\n", kubeConfigPath)
 
 			if outputLocation == os.ExpandEnv("$HOME/.kraken") {
@@ -189,10 +189,15 @@ func clusterHelp(help HelpType, clusterConfigFile string) {
 			// helm
 			helmPath := path.Join(outputLocation, clusterName, ".helm")
 			if _, err := os.Stat(helmPath); err == nil {
-				fmt.Println("To use helm: ")
+				fmt.Println("\nTo use helm: ")
 				fmt.Printf(" export KUBECONFIG=%s\n", kubeConfigPath)
 				fmt.Printf(" helm [helm command] --home %s\n", helmPath)
-				fmt.Printf(" or use 'kraken tool helm --config %s [helm commands]'\n", clusterConfigFile)
+
+				if outputLocation == os.ExpandEnv("$HOME/.kraken") {
+					fmt.Printf(" or use 'kraken tool --config %s helm [helm commands]'\n", clusterConfigFile)
+				} else {
+					fmt.Printf(" or use 'kraken tool --config %s --output %s helm [helm commands]'\n", clusterConfigFile, outputLocation)
+				}
 			}
 		}
 
@@ -200,7 +205,7 @@ func clusterHelp(help HelpType, clusterConfigFile string) {
 		sshConfigPath := path.Join(outputLocation, clusterName, "ssh_config")
 		if _, err := os.Stat(sshConfigPath); err == nil {
 			// ssh tool
-			fmt.Println("To use ssh: ")
+			fmt.Println("\nTo use ssh: ")
 			fmt.Printf(" ssh <node pool name>-<number> -F %s\n", sshConfigPath)
 			// This is usage has not been implemented. See issue #49
 			//fmt.Println(" or use 'kraken tool --config ssh ssh " + clusterConfigFile + " [ssh commands]'")
