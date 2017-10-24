@@ -21,6 +21,8 @@ compile: deps
          -osarch="linux/386" \
          -osarch="linux/amd64" \
          -osarch="darwin/amd64" \
+		 -osarch="windows/386" \
+		 -osarch="windows/amd64" \
          -output "build/{{.Dir}}_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
 	     ./...
 

@@ -85,7 +85,7 @@ podTemplate(label: 'kraken',
                 customContainer('golang') {
                     withEnv(["GOPATH=${WORKSPACE}/go/"]) {
                         stage('Release') {
-                            kubesh ". /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag} REL_BRANCH=${release_branch}"
+                            kubesh "cd go/src/github.com/samsung-cnct/kraken/ && . /home/jenkins/kraken-release-token/token && make release VERSION=${release_version} KLIB_VER=${k2_image_tag} REL_BRANCH=${release_branch}"
                         }
                     }
                 }
