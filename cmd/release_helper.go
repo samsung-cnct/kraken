@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/coreos/go-semver/semver"
 )
 
