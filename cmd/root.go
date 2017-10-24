@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	VERSION_LATEST string = "latest"
+	latestVersion string = "latest"
 )
 
 var cfgFile string
@@ -88,7 +88,7 @@ func init() {
 	RootCmd.SetHelpCommand(helpCmd)
 
 	if KrakenlibTag == "" {
-		KrakenlibTag = VERSION_LATEST
+		KrakenlibTag = latestVersion
 	}
 
 	// Populate the global with a "vanilla" Docker configuration
