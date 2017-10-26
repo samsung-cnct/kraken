@@ -5,9 +5,10 @@ import (
 	"strconv"
 
 	"crypto/tls"
+	"path/filepath"
+
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/tlsconfig"
-	"path/filepath"
 )
 
 // DockerAPIVersion defines the docker api version used.

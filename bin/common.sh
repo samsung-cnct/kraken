@@ -31,11 +31,5 @@ packages() {
 }
 
 valid_go_files() {
-  find . -not \( \
-      \( \
-        -wholename './output' \
-        -o -wholename '*/vendor/*' \
-        -o -wholename '*/bindata.go' \
-      \) -prune \
-    \) -name '*.go'
+  git ls-files "**/*.go" "*.go" | grep -v -e "vendor" -e "cmd/bindata.go"
 }

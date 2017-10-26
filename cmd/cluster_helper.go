@@ -25,7 +25,7 @@ const (
 
 func preRunGetClusterConfig(cmd *cobra.Command, args []string) error {
 	if ClusterConfigPath == "" {
-		return fmt.Errorf("please pass a valid kraken config file.")
+		return fmt.Errorf("please pass a valid kraken config file")
 	}
 
 	_, err := os.Stat(ClusterConfigPath)

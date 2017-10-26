@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -15,15 +16,15 @@ func compareReleases(versionA string, versionB string) (int, error) {
 	versionA = strings.Replace(versionA, "v", "", -1)
 	versionB = strings.Replace(versionB, "v", "", -1)
 
-	if versionA == VERSION_LATEST && versionB == VERSION_LATEST {
+	if versionA == latestVersion && versionB == latestVersion {
 		return 0, nil
 	}
 
-	if versionA == VERSION_LATEST && versionB != VERSION_LATEST {
+	if versionA == latestVersion && versionB != latestVersion {
 		return 1, nil
 	}
 
-	if versionA != VERSION_LATEST && versionB == VERSION_LATEST {
+	if versionA != latestVersion && versionB == latestVersion {
 		return -1, nil
 	}
 
@@ -41,7 +42,7 @@ func compareReleases(versionA string, versionB string) (int, error) {
 }
 
 func krakenLibTagToSemver(tag string) string {
-	if tag == VERSION_LATEST {
+	if tag == latestVersion {
 		return tag
 	}
 

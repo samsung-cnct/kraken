@@ -18,31 +18,31 @@ func TestCompareReleases(t *testing.T) {
 	}
 
 	// latest tests
-	c, err = compareReleases(VERSION_LATEST, v2)
+	c, err = compareReleases(latestVersion, v2)
 	if err != nil {
-		t.Error("Expected no error in comparison of", VERSION_LATEST, "and", v2, "but found error: ", err)
+		t.Error("Expected no error in comparison of", latestVersion, "and", v2, "but found error: ", err)
 	}
 
 	if c != 1 {
-		t.Error("Expected", VERSION_LATEST, "to be greater than", v2)
+		t.Error("Expected", latestVersion, "to be greater than", v2)
 	}
 
-	c, err = compareReleases(v1, VERSION_LATEST)
+	c, err = compareReleases(v1, latestVersion)
 	if err != nil {
-		t.Error("Expected no error in comparison of", v1, "and", VERSION_LATEST, "but found error: ", err)
+		t.Error("Expected no error in comparison of", v1, "and", latestVersion, "but found error: ", err)
 	}
 
 	if c != -1 {
-		t.Error("Expected", v1, "to be less than", VERSION_LATEST, ", comparison value found to be", c)
+		t.Error("Expected", v1, "to be less than", latestVersion, ", comparison value found to be", c)
 	}
 
-	c, err = compareReleases(VERSION_LATEST, VERSION_LATEST)
+	c, err = compareReleases(latestVersion, latestVersion)
 	if err != nil {
-		t.Error("Expected no error in comparison of", VERSION_LATEST, "and", VERSION_LATEST, "but found error: ", err)
+		t.Error("Expected no error in comparison of", latestVersion, "and", latestVersion, "but found error: ", err)
 	}
 
 	if c != 0 {
-		t.Error("Expected", VERSION_LATEST, "to be equal to", VERSION_LATEST, ", comparison value found to be", c)
+		t.Error("Expected", latestVersion, "to be equal to", latestVersion, ", comparison value found to be", c)
 	}
 
 	// compare v1 vs v3
@@ -61,9 +61,9 @@ func TestKrakenLibTagToSemver(t *testing.T) {
 	v2 := "v1.3.4"
 
 	// test latest first
-	v1f := krakenLibTagToSemver(VERSION_LATEST)
+	v1f := krakenLibTagToSemver(latestVersion)
 	if v1f != "latest" {
-		t.Error("Expected result to be", VERSION_LATEST, "but found", v1f)
+		t.Error("Expected result to be", latestVersion, "but found", v1f)
 	}
 
 	v1f = krakenLibTagToSemver(v1)
