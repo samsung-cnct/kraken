@@ -35,5 +35,5 @@ fi
 source "${ROOT}/bin/common.sh"
 
 for gofile in $(valid_go_files); do
-  golint --set_exit_status "$gofile"
+  golint -set_exit_status "$gofile"
 done
