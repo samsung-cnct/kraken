@@ -31,5 +31,5 @@ packages() {
 }
 
 valid_go_files() {
-  git ls-files "**/*.go" | grep -v -e "vendor" -e "cmd/bindata.go"
+  git ls-files "**/*.go" "*.go" | grep -v -e "vendor" -e "cmd/bindata.go"
 }
