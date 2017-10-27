@@ -7,12 +7,6 @@
 			"path": "github.com/coreos/go-semver/semver",
 			"revision": "1817cd4bea52af76542157eeabd74b057d1a199e",
 			"revisionTime": "2017-06-13T09:22:38Z"
-		},
-		{
-			"checksumSHA1": "LAqhkCywKqkTvAu+MbIRnpeFnZA=",
-			"path": "github.com/jteeuwen/go-bindata",
-			"revision": "a0ff2567cfb70903282db057e799fd826784d41d",
-			"revisionTime": "2015-10-23T09:11:02Z"
 		}
 	],
 	"rootPath": "github.com/samsung-cnct/kraken"
