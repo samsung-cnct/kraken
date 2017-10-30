@@ -280,6 +280,7 @@ follow the steps below:
 
 * Run `go-bindata data/`
 * Move the generated `bindata.go` file to the /cmd directory
+* Change package from `main` to `cmd`
 * Commit the changes
 
 We plan to automate this process in the future.
