@@ -1,11 +1,9 @@
-// Copyright 2016 The Go Authors. All rights reserved.
+// Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build go1.7
-
 // Package ctxhttp provides helper functions for performing context-aware HTTP requests.
-package ctxhttp // import "golang.org/x/net/context/ctxhttp"
+package ctxhttp
 
 import (
 	"io"
@@ -16,18 +14,35 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Do sends an HTTP request with the provided http.Client and returns
-// an HTTP response.
-//
+// Do sends an HTTP request with the provided http.Client and returns an HTTP response.
 // If the client is nil, http.DefaultClient is used.
-//
-// The provided ctx must be non-nil. If it is canceled or times out,
-// ctx.Err() will be returned.
+// If the context is canceled or times out, ctx.Err() will be returned.
 func Do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	return client.Do(req.WithContext(ctx))
+
+	// Request cancelation changed in Go 1.5, see cancelreq.go and cancelreq_go14.go.
+	cancel := canceler(client, req)
+
+	type responseAndError struct {
+		resp *http.Response
+		err  error
+	}
+	result := make(chan responseAndError, 1)
+
+	go func() {
+		resp, err := client.Do(req)
+		result <- responseAndError{resp, err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		cancel()
+		return nil, ctx.Err()
+	case r := <-result:
+		return r.resp, r.err
+	}
 }
 
 // Get issues a GET request via the Do function.
