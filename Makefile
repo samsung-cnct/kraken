@@ -55,4 +55,9 @@ release: dist
 verify:
 	./bin/verify.sh; \
 
-.PHONY: build compile install deps dist release
+regenerate-bindata: ## Regnerate cmd/bindata.go after changes in ./data/
+	go-bindata data/
+	sed s/package\ main/package\ cmd/ < bindata.go > cmd/bindata.go
+	rm bindata.go
+
+.PHONY: build compile install deps dist release regenerate-bindata
