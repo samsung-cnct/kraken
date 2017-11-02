@@ -14,9 +14,12 @@ const (
 	defaultKrakenEtcdSnapshotFile string = "/tmp/snapshots/snapshot.db"
 	defaultEtcdSSL                string = "/etc/etcd/ssl"
 	envETCDCTL_API                string = "ETCDCTL_API"
-	envETCDCTL_CACERT             string = "ETCDCTL_CA_FILE"
-	envETCDCTL_CERT               string = "ETCDCTL_CERT_FILE"
-	envETCDCTL_KEY                string = "ETCDCTL_KEY_FILE"
+	envV2ETCDCTL_CACERT             string = "ETCDCTL_CA_FILE"
+	envV2ETCDCTL_CERT               string = "ETCDCTL_CERT_FILE"
+	envV2ETCDCTL_KEY                string = "ETCDCTL_KEY_FILE"
+	envV3ETCDCTL_CACERT             string = "ETCDCTL_CACERT"
+	envV3ETCDCTL_CERT               string = "ETCDCTL_CERT"
+	envV3ETCDCTL_KEY                string = "ETCDCTL_KEY"
 	envSSH_AUTH_SOCK              string = "SSH_AUTH_SOCK"
 	krakenSSH                     string = "/kraken/bin/ssh_command.sh"
 )
@@ -82,10 +85,19 @@ func etcdctlArgs(apiVersion int) ([]string, []string, []string) {
 		volumes = append(volumes, volumeMountFmt(path2.Dir(snapshotSaveFile), ""))
 	}
 
+
 	environmentVars = append(environmentVars, fmt.Sprintf("%s=%d", envETCDCTL_API, apiVersion))
-	environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envETCDCTL_CACERT, "/etc/etcd/ssl/client-ca.pem"))
-	environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envETCDCTL_CERT, "/etc/etcd/ssl/client.pem"))
-	environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envETCDCTL_KEY, "/etc/etcd/ssl/client-key.pem"))
+
+	switch apiVersion {
+	case 2:
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV2ETCDCTL_CACERT, "/etc/etcd/ssl/client-ca.pem"))
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV2ETCDCTL_CERT, "/etc/etcd/ssl/client.pem"))
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV2ETCDCTL_KEY, "/etc/etcd/ssl/client-key.pem"))
+	case 3:
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV3ETCDCTL_CACERT, "/etc/etcd/ssl/client-ca.pem"))
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV3ETCDCTL_CERT, "/etc/etcd/ssl/client.pem"))
+		environmentVars = append(environmentVars, fmt.Sprintf("%s=%s", envV3ETCDCTL_KEY, "/etc/etcd/ssl/client-key.pem"))
+	}
 
 	return environmentVars, volumes, flags
 }
