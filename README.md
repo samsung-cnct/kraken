@@ -292,7 +292,7 @@ Please speak to a member of the kraken team in #kraken Slack (link below) if you
 # Additional Resources
 Here are some additional resources you might find useful:
 
-* #kraken Slack on [k8s.slack.com](https://k8s.slack.com/)
+* #kraken Slack on [slack.k8s.io](http://slack.k8s.io/)
 * [kraken-lib issue tracker](https://github.com/samsung-cnct/kraken-lib/issues)
 * [kraken-tools](https://github.com/samsung-cnct/kraken-tools)
 * [kraken codebase](https://github.com/samsung-cnct/kraken)
