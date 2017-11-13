@@ -36,7 +36,7 @@ kraken generate --provider gke
 
 ### Required configuration changes
 For an AWS cluster, you need to set several fields before using the config file file you created, as listed below.
-*  **Cluster name**  All kraken clusters should have a unique name so their assets can be easily identified by humans in the AWS console (no more than 32 characters). Set the cluster name in the `deployment.clusters.name` field. This dotted notation refers to the hierarchical structure of a YAML file where the cluster is a sub field of deployment. Find this line near the bottom of the file in the `deployment` section.
+*  **Cluster name**  All kraken clusters should have a unique name so their assets can be easily identified by humans in the AWS console (no more than 32 characters). Set the cluster name in the `deployment.clusters.name` field. This dotted notation refers to the hierarchical structure of a YAML file where the cluster is a sub field of deployment. Find this line near the bottom of the file in the `deployment` section. GKE cluster names must use lower case letters.
 
 The following fields are in the `definitions` section of the configuration file.
 In lieu of specifying all of the following, you can simply put your credentials in the AWS credentials file from where kraken will access them.
