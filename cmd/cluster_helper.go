@@ -171,7 +171,9 @@ func clusterHelp(help HelpType, clusterConfigFile string) {
 
 	switch help {
 	case HelpTypeCreated, HelpTypeUpdated, HelpTypeDestroyed:
-		fmt.Println("\nSome of the cluster state MAY be available:")
+		if help != HelpTypeDestroyed {
+			fmt.Println("\nSome of the cluster state MAY be available:")
+		}
 
 		// output that depends on admin.kubeconfig existing
 		kubeConfigPath := path.Join(outputLocation, clusterName, "admin.kubeconfig")
