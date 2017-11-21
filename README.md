@@ -1,4 +1,7 @@
 # kraken
+
+[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken/badges/master/pipeline.svg)](https://git.cnct.io/common/samsung-cnct_kraken/commits/master)
+
 This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/kraken-lib). kraken currently also supports deployments to GKE (see Building a Configuration File below).
 
 ## Prerequisites

@@ -1,0 +1,113 @@
+---
+# This pipeline requires 5 variables to be set in the CI/CD Settings
+# hint for creating the base64 encoded content: `cat .ssh/id_rsa|base64|pbcopy`
+
+# SSH_KEY - base64 encoded ssh key (think ~/.ssh/id_rsa)
+# SSH_PUBLIC_KEY - base64 encoded ssh public key (think ~/.ssh/id_rsa.pub)
+# AWS_CREDENTIALS - base64 encoded credentials file (think ~/.aws/credentials)
+# AWS_CONFIG - base64 encoded config file (think ~/.aws/config)
+# GKE_CONFIG - base64 encoded json file (think ~/.config/gcloud/someconfig.json)
+
+image: golang:latest
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - vet
+  - prep
+  - test
+  - build
+
+.gosetup: &GOSETUP
+  - mkdir -p /go/src/github.com/samsung-cnct
+  - ln -s $CI_PROJECT_DIR /go/src/github.com/samsung-cnct/kraken
+  - cd /go/src/github.com/samsung-cnct/kraken
+  - go version
+  - go env
+  - make setup
+
+vet:lint:
+  stage: vet
+  before_script:
+    *GOSETUP
+  script:
+    - make vet
+
+vet:unit:
+  stage: vet
+  before_script:
+    *GOSETUP
+  script:
+    - make unit-test
+
+prep:
+  stage: prep
+  before_script:
+    *GOSETUP
+  script:
+    - make local_build
+  artifacts:
+    paths:
+      - kraken
+    expire_in: 1 hour
+
+test:aws:
+  stage: test
+  image: docker:latest
+  script:
+    - mkdir -p .ssh .aws
+    - echo "$SSH_KEY" | base64 -d >.ssh/id_rsa
+    - chmod 400 .ssh/id_rsa
+    - echo "$SSH_PUBLIC_KEY" | base64 -d >.ssh/id_rsa.pub
+    - echo "$AWS_CONFIG" | base64 -d >.aws/config
+    - echo "$AWS_CREDENTIALS" | base64 -d >.aws/credentials
+    - hack/accpt_test aws
+
+test:gke:
+  stage: test
+  image: docker:latest
+  script:
+    - mkdir -p .ssh .config/gcloud
+    - echo "$SSH_KEY" | base64 -d >.ssh/id_rsa
+    - chmod 400 .ssh/id_rsa
+    - echo "$SSH_PUBLIC_KEY" | base64 -d >.ssh/id_rsa.pub
+    - echo "$GKE_CONFIG" | base64 -d >.config/gcloud/patrickRobot.json
+    - hack/accpt_test gke
+
+build:linux:
+  stage: build
+  before_script:
+    *GOSETUP
+  script:
+    - make build target=linux
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 month
+
+build:darwin:
+  stage: build
+  before_script:
+    *GOSETUP
+  script:
+    - make build target=darwin
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 month
+
+build:windows:
+  stage: build
+  before_script:
+    *GOSETUP
+  script:
+    - make build target=windows
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 month
