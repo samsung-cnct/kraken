@@ -80,6 +80,7 @@ func runKrakenLibCommand(spinnerPrefix string, command []string, clusterConfigPa
 	}
 
 	ctx, cancel := getTimedContext()
+
 	defer cancel()
 
 	resp, statusCode, timeout, err := containerAction(ctx, cli, command, clusterConfigPath)
@@ -162,7 +163,6 @@ func clusterHelpError(help HelpType, clusterConfigFile string) {
 		fmt.Printf("ERROR updating cluster %s, using config file %s \n", getFirstClusterName(), clusterConfigFile)
 		clusterHelp(help, clusterConfigFile)
 	}
-
 }
 
 func clusterHelp(help HelpType, clusterConfigFile string) {

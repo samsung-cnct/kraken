@@ -38,12 +38,16 @@ import (
 	"golang.org/x/net/context"
 )
 
+var additionalEnvVars []string
+var additionalVolumes []string
+
 // Close can throw an err, so to defer to it is risky,
 // review http://www.blevesearch.com/news/Deferred-Cleanup,-Checking-Errors,-and-Potential-Problems/
 func Close(c io.Closer) {
 	if err := c.Close(); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func base64EncodeAuth(auth types.AuthConfig) (string, error) {
@@ -55,9 +59,6 @@ func base64EncodeAuth(auth types.AuthConfig) (string, error) {
 }
 
 func streamLogs(ctx context.Context, cli *client.Client, resp types.ContainerCreateResponse) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	containerLogOpts := types.ContainerLogsOptions{ShowStdout: true, Follow: true}
 	reader, err := cli.ContainerLogs(ctx, resp.ID, containerLogOpts)
 	if err != nil {
@@ -96,6 +97,10 @@ func containerEnvironment() []string {
 		"KUBECONFIG=" + path.Join(outputLocation, containerName, "admin.kubeconfig"),
 		"HELM_HOME=" + path.Join(outputLocation, containerName, ".helm")}
 
+	if additionalEnvVars != nil {
+		envs = append(envs, additionalEnvVars...)
+	}
+
 	envs = appendIfValueNotEmpty(envs, "AWS_ACCESS_KEY_ID")
 	envs = appendIfValueNotEmpty(envs, "AWS_SECRET_ACCESS_KEY")
 	envs = appendIfValueNotEmpty(envs, "AWS_DEFAULT_REGION")
@@ -117,27 +122,37 @@ func appendIfValueNotEmpty(envs []string, envKey string) []string {
 
 func makeMounts(clusterConfigPath string) (*container.HostConfig, []string) {
 	configEnvs := []string{}
+	binds := []string{}
+
+	if additionalVolumes != nil {
+		binds = append(binds, additionalVolumes...)
+	}
+
+	binds = append(binds, volumeMountFmt(outputLocation, ""))
 
 	// cluster configuration is always mounted
 	var hostConfig *container.HostConfig
 	if len(strings.TrimSpace(clusterConfigPath)) > 0 {
-		hostConfig = &container.HostConfig{
-			Binds: []string{
-				clusterConfigPath + ":" + clusterConfigPath,
-				outputLocation + ":" + outputLocation},
-		}
+		binds = append(binds, volumeMountFmt(clusterConfigPath, ""))
+		hostConfig = &container.HostConfig{Binds: binds}
 
 		deployment := reflect.ValueOf(clusterConfig.Sub("deployment"))
 		parseMounts(deployment, hostConfig, &configEnvs)
 
 	} else {
-		hostConfig = &container.HostConfig{
-			Binds: []string{
-				outputLocation + ":" + outputLocation},
-		}
+		hostConfig = &container.HostConfig{Binds: binds}
 	}
 
 	return hostConfig, configEnvs
+}
+
+func volumeMountFmt(toMount string, internalMount string) string {
+	if internalMount == "" {
+		return fmt.Sprintf("%s:%s", toMount, toMount)
+	}
+
+	return fmt.Sprintf("%s:%s", toMount, internalMount)
+
 }
 
 func parseMounts(deployment reflect.Value, hostConfig *container.HostConfig, configEnvs *[]string) {
@@ -287,6 +302,7 @@ func containerAction(ctx context.Context, cli *client.Client, command []string, 
 	var containerResponse types.ContainerCreateResponse
 
 	hostConfig, configEnvs := makeMounts(krakenlibconfig)
+
 	containerConfig := &container.Config{
 		Image:        containerImage,
 		Env:          append(containerEnvironment(), configEnvs...),
