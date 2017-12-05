@@ -7,6 +7,14 @@ This document will help you get started deploying a high-availability Kubernetes
 ## Prerequisites
 Docker must be installed on the machine where you run kraken and your user must have permissions to run it.
 
+**AWS Credentials:**
+If deploying to AWS, the AWS User profile you wish to deploy under must have a policy attached with full access granted to:
+* AmazonEC2FullAccess
+* IAMFullAccess
+* AmazonRoute53FullAccess
+
+The User must also have "Programmatic access enabled" which will create an access key ID and secret access key which is required for kraken default `config.yaml`.
+
 ## Installing/Fetching the Official Build
 You can install the official build on OS X via Brew by:
 
@@ -23,7 +31,8 @@ running it. To build a generic AWS configuration file with a large number of sen
 ```
 kraken generate
 ```
-This will create a file at `${HOME}/.kraken/config.yaml`  
+This will create a file at `${HOME}/.kraken/config.yaml`
+
 **Note:** If a config file already exists, the `generate` subcommand will fail with the message: `A kraken config file already exists at <your config location> - rename, delete or move it to generate a new default kraken config file`
 
 Or you can specify a path with:
@@ -32,7 +41,7 @@ kraken generate ${HOME}/krakenlibconfigs/
 ```
 This will create a file at `${HOME}/krakenlibconfigs/config.yaml`.
 
-For a GKE configuration file, run:
+**For a GKE configuration file, run:**
 ```
 kraken generate --provider gke
 ```
