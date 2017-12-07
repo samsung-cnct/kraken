@@ -31,6 +31,8 @@ vet: ## validate code and configuration
 	go fmt ./cmd/
 	golint -set_exit_status main.go
 	golint -set_exit_status ./cmd/
+	gosimple main.go
+	gosimple ./cmd/
 
 .PHONY: unit-test
 unit-test: ## run unit tests
