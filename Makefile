@@ -26,13 +26,13 @@ setup: ## get tools needed for vet, test, build, and other CI/CD tasks
 .PHONY: vet
 vet: ## validate code and configuration
 	go vet main.go
-	go vet ./cmd/
+	go vet cmd/
 	go fmt main.go
-	go fmt ./cmd/
+	go fmt cmd/
 	golint -set_exit_status main.go
-	golint -set_exit_status ./cmd/
+	golint -set_exit_status cmd/
 	gosimple main.go
-	gosimple ./cmd/
+	gosimple cmd/
 
 .PHONY: unit-test
 unit-test: ## run unit tests
@@ -50,9 +50,9 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 .PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
 	-rm -rf build dist && mkdir build && mkdir dist
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" go build -o "./build/$(NAME)-$(VERSION)-${target}-amd64" --ldflags '$(LDFLAGS)'; \
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" tar -czf "./dist/$(NAME)-$(VERSION)-${target}-amd64.tgz" "./build/$(NAME)-$(VERSION)-${target}-amd64"; \
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" shasum -a 512 "./build/$(NAME)-$(VERSION)-${target}-amd64" > "./dist/$(NAME)-$(VERSION)-${target}-amd64.sha512"; \
+	CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" go build -o "./build/$(NAME)-$(VERSION)-${target}-amd64" --ldflags '$(LDFLAGS)'; \
+	CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" tar -czf "./dist/$(NAME)-$(VERSION)-${target}-amd64.tgz" "./build/$(NAME)-$(VERSION)-${target}-amd64"; \
+	CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" shasum -a 512 "./build/$(NAME)-$(VERSION)-${target}-amd64" > "./dist/$(NAME)-$(VERSION)-${target}-amd64.sha512"; \
 
 .PHONY: local_build
 local_build: ## build for your machine
