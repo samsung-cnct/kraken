@@ -58,10 +58,6 @@ build: ## build the golang executable for the target archtectures
 local_build: ## build for your machine
 	CGO_ENABLED=0 go build .
 
-# .PHONY: release
-# release: ## prepare to release the kraken
-# 	command
-
 .PHONY: clean
 clean: ## Cleanup after make compile
 	-rm -rf build dist
