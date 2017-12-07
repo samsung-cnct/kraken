@@ -21,18 +21,22 @@ bootstrap: setup ## get tools needed for local project development work
 .PHONY: setup
 setup: ## get tools needed for vet, test, build, and other CI/CD tasks
 	go get github.com/golang/lint/golint
-	go get honnef.co/go/tools/cmd/gosimple
+	go get github.com/alecthomas/gometalinter
+	gometalinter --install
 
 .PHONY: vet
 vet: ## validate code and configuration
-	go vet main.go
-	go vet ./cmd/
-	go fmt main.go
-	go fmt ./cmd/
-	golint -set_exit_status main.go
-	golint -set_exit_status ./cmd/
-	gosimple main.go
-	gosimple ./cmd/
+	gometalinter --vendored-linters \
+		--disable-all \
+		--enable=vet \
+		--enable=gofmt \
+		--enable=golint \
+		--enable=gosimple \
+		--sort=path \
+		--aggregate \
+		--vendor \
+		--tests \
+		./...
 
 .PHONY: unit-test
 unit-test: ## run unit tests
@@ -74,4 +78,5 @@ release: build ## Create a GitHub release
 regenerate-bindata: ## Regnerate cmd/bindata.go after changes in ./data/
 	go-bindata data/
 	sed s/package\ main/package\ cmd/ < bindata.go > cmd/bindata.go
+	gofmt -s -w cmd/bindata.go
 	rm bindata.go
