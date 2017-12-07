@@ -5,7 +5,7 @@ help: ## Display make tasks
 
 NAME        := kraken
 VERSION     := 1.2.3
-KLIB_VER    ?= 0.11
+KLIB_VER    ?= latest
 TYPE        := stable
 COMMIT      := $(shell git rev-parse HEAD)
 REL_BRANCH  := "$$(git rev-parse --abbrev-ref HEAD)"
