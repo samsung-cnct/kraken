@@ -29,7 +29,6 @@ stages:
   - cd /go/src/github.com/samsung-cnct/kraken
   - go version
   - go env
-  - make setup
 
 vet:lint:
   stage: vet

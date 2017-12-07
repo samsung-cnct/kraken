@@ -18,14 +18,10 @@ LDFLAGS     := -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VER
 bootstrap: setup ## get tools needed for local project development work
 	go get github.com/jteeuwen/go-bindata/...
 
-.PHONY: setup
-setup: ## get tools needed for vet, test, build, and other CI/CD tasks
-	go get github.com/golang/lint/golint
-	go get github.com/alecthomas/gometalinter
-	gometalinter --install
-
 .PHONY: vet
 vet: ## validate code and configuration
+	go get github.com/alecthomas/gometalinter
+	gometalinter --install
 	gometalinter --vendored-linters \
 		--disable-all \
 		--enable=vet \
