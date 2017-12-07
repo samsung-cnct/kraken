@@ -41,11 +41,11 @@ unit-test: ## run unit tests
 .PHONY: accpt-test-aws
 accpt-test-aws: HOME = ${PWD}
 accpt-test-aws: ## run acceptance tests for AWS (set CI_JOB_ID for local testing)
-	hack/accpt_aws
+	hack/accpt_test aws
 
 .PHONY: accpt-test-gke
 accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing)
-	hack/accpt_gke
+	hack/accpt_test gke
 
 .PHONY: build
 build: ## build the golang executable for the target archtectures
