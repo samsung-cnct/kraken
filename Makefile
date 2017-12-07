@@ -47,7 +47,7 @@ accpt-test-aws: ## run acceptance tests for AWS (set CI_JOB_ID for local testing
 accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing)
 	hack/accpt_test gke
 
-.PHONY: build
+.PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
 	-rm -rf build dist && mkdir build && mkdir dist
 	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" go build -o "./build/$(NAME)-$(VERSION)-${target}-amd64" --ldflags '$(LDFLAGS)'; \
