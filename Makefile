@@ -5,14 +5,9 @@ help: ## Display make tasks
 
 NAME        := kraken
 VERSION     := 1.2.4
-KLIB_VER    ?= latest
 TYPE        := stable
+KLIB_VER    ?= latest
 COMMIT      := $(shell git rev-parse HEAD)
-REL_BRANCH  := "$$(git rev-parse --abbrev-ref HEAD)"
-LDFLAGS     := -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION) \
-			   -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE) \
-			   -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT) \
-			   -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
 
 .PHONY: bootstrap
 bootstrap: setup ## get tools needed for local project development work
@@ -49,11 +44,12 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 
 .PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
+	echo $TYPE
 	goreleaser --rm-dist --snapshot
 
 .PHONY: release
 release: ## release the kraken with a github release
-	goreleaser --rm-dist
+	VERSION=$(VERSION) TYPE=$(TYPE) $KLIB_VER=$(KLIB_VER) goreleaser --rm-dist
 
 .PHONY: local_build
 local_build: ## build for your machine
