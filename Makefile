@@ -4,7 +4,7 @@ help: ## Display make tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 NAME        := kraken
-VERSION     := 1.2.3
+VERSION     := 1.2.4
 KLIB_VER    ?= latest
 TYPE        := stable
 COMMIT      := $(shell git rev-parse HEAD)
@@ -49,10 +49,11 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 
 .PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
-	-rm -rf build dist && mkdir build && mkdir dist
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" go build -o "./build/$(NAME)-$(VERSION)-${target}-amd64" --ldflags '$(LDFLAGS)'; \
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" tar -czf "./dist/$(NAME)-$(VERSION)-${target}-amd64.tgz" "./build/$(NAME)-$(VERSION)-${target}-amd64"; \
-	env CGO_ENABLED=0 GOARCH="amd64" GOOS="${target}" shasum -a 512 "./build/$(NAME)-$(VERSION)-${target}-amd64" > "./dist/$(NAME)-$(VERSION)-${target}-amd64.sha512"; \
+	goreleaser --rm-dist --snapshot
+
+.PHONY: release
+release: ## release the kraken with a github release
+	goreleaser --rm-dist
 
 .PHONY: local_build
 local_build: ## build for your machine
@@ -61,14 +62,6 @@ local_build: ## build for your machine
 .PHONY: clean
 clean: ## Cleanup after make compile
 	-rm -rf build dist
-
-.PHONY: release
-release: build ## Create a GitHub release
-	@latest_tag=$$(git describe --tags `git rev-list --tags --max-count=1`); \
-	comparison="$$latest_tag..HEAD"; \
-	if [ -z "$$latest_tag" ]; then comparison=""; fi; \
-	changelog=$$(git log $$comparison --oneline --no-merges --reverse); \
-	github-release samsung-cnct/$(NAME) $(VERSION) $(REL_BRANCH) "**Changelog**<br/>$$changelog" 'dist/*'; \
 
 .PHONY: regenerate-bindata
 regenerate-bindata: ## Regnerate cmd/bindata.go after changes in ./data/

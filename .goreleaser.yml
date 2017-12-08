@@ -1,0 +1,39 @@
+---
+project_name: kraken
+
+release:
+  github:
+    owner: philoserf
+    name: kraken
+  name_template: '{{.Tag}}'
+
+builds:
+  - goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    main: .
+    ldflags: >-
+      -s -w
+      -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION)
+      -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE)
+      -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)
+      -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
+    binary: kraken
+
+archive:
+  format: tar.gz
+  format_overrides:
+    - goos: windows
+      format: zip
+  name_template: >-
+    {{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{
+    end }}
+  files:
+    - LICENSE*
+    - README*
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
