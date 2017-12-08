@@ -1,0 +1,8 @@
+#!/bin/sh
+
+export HOME="$PWD"
+./kraken generate --provider "$1"
+sed -i -e "s/us-east-1/us-east-2/g" "$PWD/.kraken/config.yaml"
+sed -i -e "s/- name:[[:space:]]*$/- name: ci-$(echo ${CI_COMMIT_SHA} | cut -c1-7)/" "$PWD/.kraken/config.yaml"
+./kraken -v cluster up
+./kraken -v cluster down
