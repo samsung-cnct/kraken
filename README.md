@@ -1,3 +1,5 @@
+![logo](logo.png)
+
 # kraken
 
 [![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken/badges/master/pipeline.svg)](https://git.cnct.io/common/samsung-cnct_kraken/commits/master)
