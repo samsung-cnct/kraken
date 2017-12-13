@@ -37,11 +37,7 @@ func preRunGetClusterConfig(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := initClusterConfig(ClusterConfigPath); err != nil {
-		return err
-	}
-
-	return nil
+	return initClusterConfig(ClusterConfigPath)
 }
 
 func pullKrakenContainerImage(containerImage string) (*client.Client, context.Context, error) {
