@@ -71,8 +71,8 @@ When you've set the required fields, your configuration file is ready to go. The
 
 Role | # | Type
 --- | ---  | ---
-Primary etcd cluster | 5 | t2.small
-Events etcd cluster | 5 | t2.small
+Primary etcd cluster | 5 | m4.large
+Events etcd cluster | 5 | m4.large
 Master nodes | 3 | m4.large
 Cluster nodes | 10 | c4.large
 Special nodes | 2 | m4.large
