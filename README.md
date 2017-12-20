@@ -22,7 +22,7 @@ The User must also have "Programmatic access enabled" which will create an acces
 You can install the official build on OS X via Brew by:
 
 ```
-brew tap 'samsung-cnct/homebrew-k2cli'
+brew tap 'samsung-cnct/homebrew-kraken'
 brew install kraken
 ```
 
