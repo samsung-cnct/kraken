@@ -15,7 +15,7 @@ bootstrap: setup ## get tools needed for local project development work
 
 goreleaser := ${GOPATH}/bin/goreleaser
 $(goreleaser):
-	go get -u github.com/goreleaser/goreleaser/..
+	go get -u github.com/goreleaser/goreleaser/...
 
 gometalinter := ${GOPATH}/bin/gometalinter
 $(gometalinter):
