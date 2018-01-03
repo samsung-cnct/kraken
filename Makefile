@@ -7,11 +7,11 @@ NAME        := kraken
 VERSION     := 1.2.4
 TYPE        := stable
 KLIB_VER    ?= latest
-COMMIT      := $(shell git rev-parse HEAD)
 
 .PHONY: bootstrap
 bootstrap: setup ## get tools needed for local project development work
 	go get github.com/jteeuwen/go-bindata/...
+	go get github.com/goreleaser/goreleaser/...
 
 .PHONY: vet
 vet: ## validate code and configuration

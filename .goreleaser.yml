@@ -3,7 +3,7 @@ project_name: kraken
 
 release:
   github:
-    owner: philoserf
+    owner: samsung-cnct
     name: kraken
   name_template: '{{.Tag}}'
 
