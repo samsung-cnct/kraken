@@ -13,9 +13,16 @@ export COMMIT      := $(shell git rev-parse HEAD)
 bootstrap: setup ## get tools needed for local project development work
 	go get github.com/jteeuwen/go-bindata/...
 
-.PHONY: vet
-vet: ## validate code and configuration
+goreleaser := ${GOPATH}/bin/goreleaser
+$(goreleaser):
+	go get -u github.com/goreleaser/goreleaser/..
+
+gometalinter := ${GOPATH}/bin/gometalinter
+$(gometalinter):
 	go get github.com/alecthomas/gometalinter
+
+.PHONY: vet
+vet: $(gometalinter) ## validate code and configuration
 	gometalinter --install
 	gometalinter --vendored-linters \
 		--disable-all \
@@ -43,14 +50,11 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 	hack/accpt_test gke
 
 .PHONY: build # Usage: target=linux make build
-build: ## build the golang executable for the target archtectures
-	echo ${TYPE}
-	go get github.com/goreleaser/goreleaser/...
+build: $(goreleaser) ## build the golang executable for the target archtectures
 	goreleaser --rm-dist --snapshot
 
 .PHONY: release
-release: ## release the kraken with a github release
-	go get github.com/goreleaser/goreleaser/...
+release: $(goreleaser) ## release the kraken with a github release
 	VERSION=$(VERSION) TYPE=$(TYPE) $KLIB_VER=$(KLIB_VER) goreleaser --rm-dist
 
 .PHONY: local_build
