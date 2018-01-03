@@ -7,6 +7,7 @@ NAME        := kraken
 VERSION     := 1.2.4
 TYPE        := stable
 KLIB_VER    ?= latest
+COMMIT      := $(shell git rev-parse HEAD)
 
 .PHONY: bootstrap
 bootstrap: setup ## get tools needed for local project development work

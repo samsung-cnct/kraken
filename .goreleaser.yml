@@ -17,10 +17,10 @@ builds:
     main: .
     ldflags: >-
       -s -w
-      -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch=$(VERSION)
-      -X github.com/samsung-cnct/kraken/cmd.KrakenType=$(TYPE)
-      -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit=$(COMMIT)
-      -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag=$(KLIB_VER)
+      -X github.com/samsung-cnct/kraken/cmd.KrakenMajorMinorPatch={{.Env.VERSION}}
+      -X github.com/samsung-cnct/kraken/cmd.KrakenType={{.Env.TYPE}}
+      -X github.com/samsung-cnct/kraken/cmd.KrakenGitCommit={{.Env.COMMIT}}
+      -X github.com/samsung-cnct/kraken/cmd.KrakenlibTag={{.Env.KLIB_VER}}
     binary: kraken
 
 archive:
