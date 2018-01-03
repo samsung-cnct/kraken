@@ -11,7 +11,6 @@ KLIB_VER    ?= latest
 .PHONY: bootstrap
 bootstrap: setup ## get tools needed for local project development work
 	go get github.com/jteeuwen/go-bindata/...
-	go get github.com/goreleaser/goreleaser/...
 
 .PHONY: vet
 vet: ## validate code and configuration
@@ -45,10 +44,12 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 .PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
 	echo $TYPE
+	go get github.com/goreleaser/goreleaser/...
 	goreleaser --rm-dist --snapshot
 
 .PHONY: release
 release: ## release the kraken with a github release
+	go get github.com/goreleaser/goreleaser/...
 	VERSION=$(VERSION) TYPE=$(TYPE) $KLIB_VER=$(KLIB_VER) goreleaser --rm-dist
 
 .PHONY: local_build
