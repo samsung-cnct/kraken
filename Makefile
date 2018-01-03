@@ -5,7 +5,7 @@ help: ## Display make tasks
 
 export NAME        := kraken
 export VERSION     ?= 1.2.4
-export TYPE        := stable
+export TYPE        ?= alpha
 export KLIB_VER    ?= latest
 export COMMIT      := $(shell git rev-parse HEAD)
 

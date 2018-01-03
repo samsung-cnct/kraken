@@ -94,5 +94,6 @@ release:
     - branches
   variables:
     VERSION: $CI_COMMIT_TAG
+    TYPE: stable
   script:
     - make release
