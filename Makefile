@@ -4,7 +4,7 @@ help: ## Display make tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 export NAME        := kraken
-export VERSION     := 1.2.4
+export VERSION     ?= 1.2.4
 export TYPE        := stable
 export KLIB_VER    ?= latest
 export COMMIT      := $(shell git rev-parse HEAD)
