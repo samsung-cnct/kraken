@@ -17,7 +17,6 @@ services:
 variables:
   DOCKER_HOST: tcp://localhost:2375
   DOCKER_DRIVER: overlay2
-  KLIB_VER: v0.12  #  need to upgrade this as appropriate for each release of kraken
 
 stages:
   - vet
@@ -95,5 +94,6 @@ release:
   variables:
     VERSION: $CI_COMMIT_TAG
     TYPE: stable
+    KLIB_VER: v0.12  #  need to upgrade this as appropriate for each release of kraken
   script:
     - make release
