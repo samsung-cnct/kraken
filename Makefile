@@ -43,7 +43,7 @@ accpt-test-gke: ## run acceptance tests for GKE (set CI_JOB_ID for local testing
 
 .PHONY: build # Usage: target=linux make build
 build: ## build the golang executable for the target archtectures
-	echo $TYPE
+	echo ${TYPE}
 	go get github.com/goreleaser/goreleaser/...
 	goreleaser --rm-dist --snapshot
 
