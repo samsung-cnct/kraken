@@ -1,5 +1,5 @@
 ---
-# This pipeline requires 5 variables to be set in the CI/CD Settings
+# This pipeline requires 6 variables to be set in the CI/CD Settings
 # hint for creating the base64 encoded content: `cat .ssh/id_rsa|base64|pbcopy`
 
 # SSH_KEY - base64 encoded ssh key (think ~/.ssh/id_rsa)
@@ -7,6 +7,7 @@
 # AWS_CREDENTIALS - base64 encoded credentials file (think ~/.aws/credentials)
 # AWS_CONFIG - base64 encoded config file (think ~/.aws/config)
 # GKE_CONFIG - base64 encoded json file (think ~/.config/gcloud/someconfig.json)
+# GITHUB_TOKEN - personal access token of a robot account in github for publishing releases
 
 image: golang:latest
 
@@ -22,6 +23,7 @@ stages:
   - prep
   - test
   - build
+  - release
 
 .gosetup: &GOSETUP
   - mkdir -p /go/src/github.com/samsung-cnct
@@ -77,3 +79,25 @@ test:gke:
     - echo "$SSH_PUBLIC_KEY" | base64 -d >.ssh/id_rsa.pub
     - echo "$GKE_CONFIG" | base64 -d >.config/gcloud/patrickRobot.json
     - hack/accpt_test gke
+
+build:
+  stage: build
+  before_script:
+    *GOSETUP
+  script:
+    - make build
+
+release:
+  stage: release
+  before_script:
+    *GOSETUP
+  only:
+    - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
+  except:
+    - branches
+  variables:
+    VERSION: $CI_COMMIT_TAG
+    TYPE: stable
+    KLIB_VER: v0.12  #  need to upgrade this as appropriate for each release of kraken
+  script:
+    - make release
