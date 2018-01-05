@@ -92,7 +92,7 @@ release:
   before_script:
     *GOSETUP
   only:
-    - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
+    - /[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
   except:
     - branches
   variables:
