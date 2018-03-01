@@ -2,8 +2,8 @@
 
 [![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken/badges/master/pipeline.svg)](https://git.cnct.io/common/samsung-cnct_kraken/commits/master)
 
-<a href="https://github.com/cncf/k8s-conformance/tree/master/v1.8/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.8/color/certified_kubernetes_1.8_color.png" width="80" align="right"></a>
-<a href="https://github.com/cncf/k8s-conformance/tree/master/v1.7/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.7/color/certified_kubernetes_1.7_color.png" width="80" align="right"></a>
+<a href="https://github.com/cncf/k8s-conformance/tree/master/v1.8/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.8/color/certified-kubernetes-1.8-color.png" width="80" align="right"></a>
+<a href="https://github.com/cncf/k8s-conformance/tree/master/v1.7/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.7/color/certified-kubernetes-1.7-color.png" width="80" align="right"></a>
 
 This document will help you get started deploying a high-availability Kubernetes cluster to AWS using kraken, a command-line interface for [kraken-lib](https://github.com/samsung-cnct/kraken-lib). kraken currently also supports deployments to GKE (see Building a Configuration File below).
 
