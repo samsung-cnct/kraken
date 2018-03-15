@@ -51,8 +51,7 @@ Following stages are available:
 'provider_only'   - stand up cloud infrastructure
 'ssh_only'        - generator for ssh configuration file
 'readiness_only'  - wait for cluster to be ready (for the configured definition of 'ready')
-'services_only'   - install configured helm charts
-`)
+'services_only'   - install configured helm charts`)
 		ExitCode = 0
 	},
 }
